@@ -174,7 +174,7 @@
     var rownum = data.item.rownum;
     var aac001 = data.item.aac001;
     var aac002 = data.item.aac002;
-    var aac040 = Math.floor(data.item.aac040);
+    var aac040 = Math.round(data.item.aac040);
     var aae110 = data.item.aae110;
     var aae210 = data.item.aae210;
     var aae310 = data.item.aae310;
@@ -191,6 +191,11 @@
     var yaa333_03 = 0; //新医疗基数
     var yaa333_05 = 0; //新生育基数
 
+    if(aac040<1800){
+      Base.alert("最低工资不能低于1800!");
+      Base.setGridCellData("sucGrid", rownum, data.cell, "");
+      return;
+    }
     // 单养老的
     if (((aae110 == '2') || (aae110 == '21') || (aae110 == '备案'))&&(((aae210 == null) || (aae210 == '')) && ((aae310 == null) || (aae310 == '')) && ((aae410 == null) || (aae410 == '')) && ((aae510 == null) || (aae510 == '')))) {
       if (aac040 > xx01) {

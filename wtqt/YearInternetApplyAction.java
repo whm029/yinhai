@@ -42,7 +42,7 @@ public class YearInternetApplyAction extends NetHallBaseAction {
   private YearInternetApplyService service = (YearInternetApplyService) super.getService("yearInternetApplyService");
   private BaseCommService baseCommService = (BaseCommService) super.getService("baseCommService");
 
-  private String colMetaStr = "aab001`单位助记码^yab029`养老个人编号^aac001`个人编号^aac002`社会保障号^aac003`姓名^yac507`原养老基数^yac508`原其他险种基数^aac040`新缴费工资^aae013`备注";
+  private String colMetaStr = "aab001`单位助记码^yab029`养老个人编号^aac001`个人编号^aac002`社会保障号^aac003`姓名^yac506`原缴费工资^aac040`新缴费工资^aae013`备注";
 
   private File theFile;
   private String theFileFileName;
@@ -115,8 +115,7 @@ public class YearInternetApplyAction extends NetHallBaseAction {
     String xml = service.getConfirmTip(XmlConverUtil.map2Xml(inMap));
     Map map = XmlConverUtil.xml2Map(xml);
     Integer countconfm = Integer.valueOf(map.get("countconfm")+"");
-
-
+    /* 写入承诺书数据 */
      if (countconfm==0&&"1".equals(dto.get("yae031"))){
       service.insertConfirmTip(XmlConverUtil.map2Xml(inMap));
        countconfm+=1;
@@ -178,7 +177,7 @@ public class YearInternetApplyAction extends NetHallBaseAction {
     String aae001 = (String) outMap.get("aae001");
     String msg = (String) outMap.get("msg");
     String disabledBtn = (String) outMap.get("disabledBtn");
-    setData("aae001", aae001);
+    setData("aae001", aae001);  // 年审年度是从AB02AAE042 和 IRAB08 来的
     if (ValidateUtil.isNotEmpty(msg)) {
       setMsg(msg);
     }
@@ -199,9 +198,6 @@ public class YearInternetApplyAction extends NetHallBaseAction {
     HashMap map = new HashMap();
     map.put("yae092", dto.getUserInfo().getUserId());
     map.put("aab001", dto.getAsString("aab001"));
-    /* 承诺书 */
-
-
     Map m = new HashMap();
     IMenu menu = WebUtil.getCurrentMenu(request);
     String url = menu.getUrl();
@@ -442,7 +438,7 @@ public class YearInternetApplyAction extends NetHallBaseAction {
       list = ExcelFileUtils
           .getExcelInputStream2ObjectList(
               fin,
-              "aab001,yab029,aac001,aac002,aac003,yac507,yac508,aac040",
+              "aab001,yab029,aac001,aac002,aac003,yac506,aac040",
               "com.yinhai.nethall.nethallcommon.domain.Irac01Domain",
               true);
     } else {
@@ -605,8 +601,7 @@ public class YearInternetApplyAction extends NetHallBaseAction {
 
       String fileName = aab001 + "单位员工年审核申报表.xls";
 
-      export(request, response, fileName, colMetaStr, worker,
-          Irac01Domain.class);
+      export(request, response, fileName, colMetaStr, worker, Irac01Domain.class);
     } else {
       setMsg("结果为空");
       return "success";
