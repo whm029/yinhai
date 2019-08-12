@@ -37,3 +37,25 @@ prm_daytype 人数超过2千的写2
  
 insert into xasi2.aa35 (YAB139, AAE001, AAE030, AAE031, YAE097)
 values ('$$$$', 2019, to_date('01-08-2019', 'dd-mm-yyyy'), to_date('31-12-2019', 'dd-mm-yyyy'), 201908);
+
+
+
+SELECT  
+       A.AAC040 AS AAC040,  -- 新缴费工资 -->
+        decode(sign(2019-2019),0,A.YAC004,1,A.YAC004,A.YAA333) AS YAA333_02,
+        decode(sign(2019-2019),0,A.YAC004,1,A.YAC004,A.YAA333) AS YAA333_04
+       FROM xasi2.ac01k8 A, XASI2.AC01A1 B ,XASI2.AC01 C
+      WHERE A.AAC001 = B.AAC001(+)
+        AND A.AAC001 = C.AAC001(+)
+        AND A.AAB001 = '854518'
+        AND A.AAE001 = '2019'
+        AND A.YAB019 = '1'
+      ORDER BY A.YAE110 DESC,
+               A.YAE310 DESC,
+               A.YAE210 DESC,
+               A.YAE410 DESC,
+               A.YAE510 DESC,
+               A.AAC003
+--     sign()  返回 0 1 -1 三个值          
+               
+             
