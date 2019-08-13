@@ -307,6 +307,8 @@ public class YearInternetApplyAction extends NetHallBaseAction {
       setMsg(msg, "error");
       return JSON;
     }
+    /* 查询单位当年1月基数是否降低了35%以上,如果是写入到Irad54 */
+
     /* 回显 */
     queryDetail();
     /* 是否为重点审核单位 */

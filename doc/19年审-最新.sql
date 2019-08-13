@@ -6,9 +6,9 @@ select * from xasi2.ac01k8 where aab001='854518' and aae001='2019' and  aac001='
 select * from wsjb.irad51 where aab001='854518' 
 select * from wsjb.yearapply_confirm  for update  --for update 
 
-select * from wsjb.tmp_ac42
+select * from wsjb.tmp_ac42 where aab001='854518' 
 
-select * from wsjb.irad54 for update  
+select * from irad54 where aab001='822094' and aae001='2015'
 
 
 

@@ -1,16 +1,6 @@
 package com.yinhai.nethall.company.yearApply.service.impl;
 
 
-import java.math.BigDecimal;
-import java.sql.Date;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.cxf.common.util.Base64Exception;
-import org.apache.cxf.common.util.Base64Utility;
-
 import com.yinhai.nethall.company.yearApply.service.YearInternetApplyService;
 import com.yinhai.nethall.nethallcommon.utils.XmlConverUtil;
 import com.yinhai.sysframework.dto.PrcDTO;
@@ -18,6 +8,14 @@ import com.yinhai.sysframework.exception.AppException;
 import com.yinhai.sysframework.persistence.PageBean;
 import com.yinhai.sysframework.service.WsBaseService;
 import com.yinhai.sysframework.util.ValidateUtil;
+import org.apache.cxf.common.util.Base64Exception;
+
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("unchecked")
 public class YearInternetApplyServiceImpl extends WsBaseService implements YearInternetApplyService {

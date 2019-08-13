@@ -1,6 +1,5 @@
 package com.yinhai.nethall.company.yearApply.service;
 
-import com.tangosol.net.management.annotation.Description;
 import com.yinhai.sysframework.exception.AppException;
 import com.yinhai.sysframework.service.WsService;
 
