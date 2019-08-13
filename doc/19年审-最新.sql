@@ -8,6 +8,9 @@ select * from wsjb.yearapply_confirm  for update  --for update
 
 select * from wsjb.tmp_ac42
 
+select * from wsjb.irad54 for update  
+
+
 
  select  
   decode(aae140,

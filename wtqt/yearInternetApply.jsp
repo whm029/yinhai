@@ -36,7 +36,9 @@
     <ta:button id="printBtn1" key="打印基数申报表" isShowIcon="true" onClick="fnPrint();" icon="icon-print"/>
     <ta:button id="printBtn2" key="打印基数申报汇总表" isShowIcon="true" onClick="fnPrint1();" icon="icon-print"/>
     <ta:button id="printBtn3" key="打印地税补差申报表" isShowIcon="true" onClick="fnprintBCDetail();" icon="icon-print"/>
+    <!--
     <ta:button id="printBtn4" key="打印自筹补差申报表" isShowIcon="true" onClick="fnprintBCDetail2();" icon="icon-print"/>
+    -->
     <ta:button id="printBtn5" key="导出补差明细excel" isShowIcon="true" onClick="fnexcBCDetail();" icon="icon-print"/>
 
   </ta:buttonLayout>

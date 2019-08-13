@@ -158,15 +158,6 @@ public class YearInternetApplyAction extends NetHallBaseAction {
     setData(XmlConverUtil.xml2Map(xml), false);
     map.put("yab139", dto.getUserInfo().getOrgId());
 
-    /* 2019年个体工商户,890009,890001先不做年审，待社平工资公布后再申报 */
-		/*String isGTGShXml = service.isGTGSh(XmlConverUtil.map2Xml(map));
-		Map isGTGShMap = XmlConverUtil.xml2Map(isGTGShXml);
-		if(!ValidateUtil.isEmpty(isGTGShMap.get("isGTGSh"))&&"1".equals(isGTGShMap.get("isGTGSh"))) {
-		  setMsg("个体工商户,890009,890001先不做年审，待社平工资公布后再申报。");
-		  setDisabled("queryBtn,exportBtn,importBtn,retainBtn,delBtn,viewBtn,applyBtn,cancelBtn,printBtn1,printBtn2,printBtn3,printBtn4,printBtn5");
-      return JSON;
-		}*/
-
     /* 年审效验 */
     String outXml = service.checkYearApply(XmlConverUtil.map2Xml(map));
     Map outMap = XmlConverUtil.xml2Map(outXml);
@@ -322,7 +313,9 @@ public class YearInternetApplyAction extends NetHallBaseAction {
     String year_0 = String.valueOf(Integer.valueOf(aae001) - 1);
     int j = service.getIrad54Count(XmlConverUtil.map2Xml(dto));
     if (j == 0) {
-      setMsg("已提交年审信息，请进行年审业务预约，并打印相关报表、携带相关资料，到社保中心审核! </br>社保中心审核通过前如发现有误，可自行撤销提交，修改正确后再次提交办理。" +
+      //setMsg("已提交年审信息，请进行年审业务预约，并打印相关报表、携带相关资料，到社保中心审核! </br>社保中心审核通过前如发现有误，可自行撤销提交，修改正确后再次提交办理。" +
+      //    "</br>年缴费基数申报审核通过后不能再次进行人员基数变更操作，人员缴费基数标准即不可变更，请各单位认真确认后提交审核！");
+      setMsg("已提交年审信息，请等待社保中心审核! </br>社保中心审核通过前如发现有误，可自行撤销提交，修改正确后再次提交办理。" +
           "</br>年缴费基数申报审核通过后不能再次进行人员基数变更操作，人员缴费基数标准即不可变更，请各单位认真确认后提交审核！");
     } else {
       setMsg("已提交年审信息，请进行年审业务预约，并打印相关报表、携带相关资料，到社保中心审核!</br>" +
@@ -333,8 +326,8 @@ public class YearInternetApplyAction extends NetHallBaseAction {
           "年缴费基数申报审核通过后不能再次进行人员基数变更操作，人员缴费基数标准即不可变更，请各单位认真确认后提交审核！");
 
     }
-    setDisabled("exportBtn,importBtn,retainBtn,applyBtn,printBtn3,printBtn4,printBtn5,delBtn");
-    setEnable("printBtn1,printBtn2,cancelBtn");
+    setDisabled("exportBtn,importBtn,retainBtn,applyBtn,printBtn1,printBtn2,printBtn3,printBtn4,printBtn5,delBtn");
+    setEnable("cancelBtn");
     return JSON;
   }
 

@@ -1442,7 +1442,7 @@
 				A.YAC508 AS YAC508_03, <!-- 原医疗基数 -->
 				A.YAC508 AS YAC508_05, <!-- 原生育基数 -->
 				A.AAC040 AS AAC040,  <!-- 新缴费工资 -->
-				DECODE (A.AAE110, null, 0, A.YAC004) AS YAC004,  <!-- 新养老基数 -->
+				DECODE (A.AAE110, null, '', A.YAC004) AS YAC004,  <!-- 新养老基数 -->
 				DECODE(SIGN(#aae001#-2019),0,A.YAC004,1,A.YAC004,A.YAA333) AS YAA333_02,  <!-- 新工伤基数 -->
 				DECODE(SIGN(#aae001#-2019),0,A.YAC004,1,A.YAC004,A.YAA333) AS YAA333_04,  <!-- 新失业基数 -->
 				A.YAA333 AS YAA333_03,  <!-- 新医疗基数 -->
