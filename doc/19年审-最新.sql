@@ -10,7 +10,8 @@ select * from wsjb.tmp_ac42 where aab001='854518'
 
 select * from irad54 where aab001='854518'-- for update 
 
-
+select * from  wsjb.irad51a1 
+ 
 
  select  
   decode(aae140,

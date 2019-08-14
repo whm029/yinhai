@@ -1613,6 +1613,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
        num_aae002_begin NUMBER(6);
        num_aae002_end NUMBER(6);
        maxiaa100 NUMBER(6);
+       v_tqjsyf xasi2.ac01k8.yae110%TYPE;
        
        cursor cur_aac001 is
           SELECT DISTINCT AAC001
@@ -1835,7 +1836,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
           FROM xasi2.ac01
          WHERE aac001 = rec_aac001.aac001;
 
-        FOR rec_aae310 IN cur_aae310 LOOP
+        FOR rec_aae310 IN cur_aae310 LOOP  --cur_aae310 增减变动游标
 
              IF rec_aae310.aae310 IN ('1','10') THEN
                v_yae310 := v_yae310||substr(rec_aae310.iaa100,5)||'月增/';
@@ -1886,7 +1887,9 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                v_aae310 := '21';
              END IF;
            END LOOP;
-
+       
+      --modify by whm 20190813 这里注释掉, 提前结算单独写一条 ac01k8 start
+      /*
       --检查是否为养老提前结算
       SELECT count(1)
         INTO n_count
@@ -1898,6 +1901,9 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
       IF n_count > 0 THEN
          v_yae110 := v_yae110||'养老提前结算/';
       END IF;
+      */
+      --modify by whm 20190813 这里注释掉, 提前结算单独写一条 ac01k8 end
+      
       --判断是否参医疗记录
         SELECT count(1)
           INTO n_count
@@ -2561,8 +2567,88 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                     '1',
                                     SYSDATE
                                     );
+                                    
+                                    
+            -- 提前结算的单独写一条 AC01K8                                    
+            SELECT count(1)
+              INTO n_count
+              FROM wsjb.irad51a1
+             WHERE aac001 = v_aac001
+               AND aab001 = prm_aab001
+               AND yae031 = '1'
+               and aae041 = prm_aae001||'01';
+            IF n_count > 0 THEN
+                 select max(decode(aae002, prm_aae001 || '01', '01月/')) ||
+                        max(decode(aae002, prm_aae001 || '02', '02月/')) ||
+                        max(decode(aae002, prm_aae001 || '03', '03月/')) ||
+                        max(decode(aae002, prm_aae001 || '04', '04月/')) ||
+                        max(decode(aae002, prm_aae001 || '05', '05月/')) ||
+                        max(decode(aae002, prm_aae001 || '06', '06月/')) 
+                    as tqjsyf into v_tqjsyf
+                   from wsjb.irad51a2
+                  where aac001 = v_aac001
+                    and aae002 >= prm_aae001 || '01';
+                    v_yae110 := '养老提前结算/'||v_tqjsyf;
+                   
+                     INSERT INTO xasi2.ac01k8 (
+                                            aac001,
+                                            aab001,
+                                            aac002,
+                                            aac003,
+                                            aac009,
+                                            yac506,
+                                            yac507,
+                                            yac508,
+                                            aae110,
+                                            aae210,
+                                            aae310,
+                                            aae410,
+                                            aae510,
+                                            aae311,
+                                            aae001,
+                                            yac503,
+                                            yac005,
+                                            yae092,
+                                            iaa002,
+                                            yae110,
+                                            yae310,
+                                            yae210,
+                                            yae410,
+                                            yae510,
+                                            yab019,
+                                            aae034
+                                            )VALUES(
+                                            v_aac001,
+                                            prm_aab001,
+                                            v_aac002,
+                                            v_aac003,
+                                            v_aac009,
+                                            n_yac506,
+                                            n_yac507,
+                                            n_yac508,
+                                            v_aae110,
+                                            v_aae210,
+                                            v_aae310,
+                                            v_aae410,
+                                            v_aae510,
+                                            v_aae311,
+                                            prm_aae001,
+                                            v_yac503,
+                                            n_yac005,
+                                            prm_yae092,
+                                            '0' ,
+                                            v_yae110,
+                                            v_yae310,
+                                            v_yae210,
+                                            v_yae410,
+                                            v_yae510,
+                                            '1',
+                                            SYSDATE
+                                            );
+            END IF;                        
       END LOOP;
 
+   --这是养老备案的 201811后已经没有这个业务了 
    FOR rec_aac001Ba in cur_aac001Ba LOOP
         v_yac503 := '0';
         n_count  :=0;
@@ -9689,7 +9775,7 @@ IS
   v_proportions_constant NUMBER(6);
   v_proportions_msg  irad54.aae013%type;
   
-  cursor ab02_cur is select aae140 from xasi2.ab02 where aab051 = '1'  and aab001 = prm_aab001 ;
+  cursor ab02_cur is select aae140 from xasi2.ab02 where  aae140 !='07' and aab051 = '1'  and aab001 = prm_aab001 ;
   
 BEGIN
   
