@@ -970,6 +970,18 @@ public class YearInternetApplyServiceImpl extends WsBaseService implements YearI
 
 
   @Override
+  public int getIrad54_1Count(String map2Xml) throws AppException {
+    Map map = XmlConverUtil.xml2Map(map2Xml);
+    Integer i = (Integer) dao.queryForObject("yearApply.getIrad54_1Count", map);
+    if (i == 0) {
+      return 0;
+    }
+    return 1;
+  }
+
+
+
+  @Override
   public String deleteClear(String map2Xml) throws AppException {
     Map map = XmlConverUtil.xml2Map(map2Xml);
     PrcDTO prcDto = new PrcDTO();

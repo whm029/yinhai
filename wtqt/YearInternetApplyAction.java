@@ -116,15 +116,15 @@ public class YearInternetApplyAction extends NetHallBaseAction {
     Map map = XmlConverUtil.xml2Map(xml);
     Integer countconfm = Integer.valueOf(map.get("countconfm")+"");
     /* 写入承诺书数据 */
-     if (countconfm==0&&"1".equals(dto.get("yae031"))){
+    if (countconfm==0&&"1".equals(dto.get("yae031"))){
       service.insertConfirmTip(XmlConverUtil.map2Xml(inMap));
-       countconfm+=1;
+      countconfm+=1;
     }
     /* 存在未确认的就提示 */
     if(countconfm==0){
       setData("warningTips", "承诺书"); //
     }
-  return JSON;
+    return JSON;
   }
 
 
@@ -314,6 +314,8 @@ public class YearInternetApplyAction extends NetHallBaseAction {
     /* 是否为重点审核单位 */
     String year_0 = String.valueOf(Integer.valueOf(aae001) - 1);
     int j = service.getIrad54Count(XmlConverUtil.map2Xml(dto));
+        j = service.getIrad54_1Count(XmlConverUtil.map2Xml(dto));
+
     if (j == 0) {
       //setMsg("已提交年审信息，请进行年审业务预约，并打印相关报表、携带相关资料，到社保中心审核! </br>社保中心审核通过前如发现有误，可自行撤销提交，修改正确后再次提交办理。" +
       //    "</br>年缴费基数申报审核通过后不能再次进行人员基数变更操作，人员缴费基数标准即不可变更，请各单位认真确认后提交审核！");
@@ -328,7 +330,7 @@ public class YearInternetApplyAction extends NetHallBaseAction {
           "年缴费基数申报审核通过后不能再次进行人员基数变更操作，人员缴费基数标准即不可变更，请各单位认真确认后提交审核！");
 
     }
-    setDisabled("exportBtn,importBtn,retainBtn,applyBtn,printBtn1,printBtn2,printBtn3,printBtn4,printBtn5,delBtn");
+    setDisabled("exportBtn,importBtn,retainBtn,applyBtn,printBtn3,printBtn4,printBtn5,delBtn");
     setEnable("cancelBtn");
     return JSON;
   }

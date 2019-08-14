@@ -201,6 +201,17 @@ public interface YearInternetApplyService extends WsService {
   public int getIrad54Count(String map2Xml) throws AppException;
 
   /**
+   * -------------------------------------<br>
+   *
+   * @title: getIrad54_1Count
+   * @description: 是否是基数降低超出比例单位
+   * @return: int
+   * @date: 2019/8/14 0:33
+   * @A19 -------------------------------------<br>
+   */
+  public int getIrad54_1Count(String map2Xml) throws AppException;
+
+  /**
    * 数据清除
    *
    * @param map2Xml
@@ -238,23 +249,25 @@ public interface YearInternetApplyService extends WsService {
    */
   public String getAc02List(String map2Xml) throws AppException;
 
-  /**-------------------------------------<br>
+  /**
+   * -------------------------------------<br>
+   *
    * @title: getConfirmTip
    * @description: 查询承诺书
    * @return: java.lang.String
    * @date: 2019/8/6 16:01
-   * @A19
-   * -------------------------------------<br>
+   * @A19 -------------------------------------<br>
    */
   public String getConfirmTip(String map2Xml) throws AppException;
 
-  /**-------------------------------------<br>
+  /**
+   * -------------------------------------<br>
+   *
    * @title: insertConfirmTip
    * @description: 写入承诺书
    * @return: java.lang.String
    * @date: 2019/8/6 17:54
-   * @A19
-   * -------------------------------------<br>
+   * @A19 -------------------------------------<br>
    */
   public String insertConfirmTip(String map2Xml) throws AppException;
 

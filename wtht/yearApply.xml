@@ -1,195 +1,195 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
-   <!--
-		年度基数申报
-	-->
+<!--
+     年度基数申报
+ -->
 <sqlMap namespace="yearApply">
 
 	<typeAlias alias="iraa07Domain" type="com.yinhai.nethall.company.subsidy.domain.Iraa07Domain" />
-	 <!-- 单位月基数总和(其他险种) -->
-    <select id="querySumJS_1" parameterClass="map" resultClass="dto">
-    	<isNotEqual property="aae140" compareValue="04">
-		    SELECT sum(p.aab121) as jszh,
-		    	   sum(p.xjsh) as xjszh,
-		    	   sum(p.jsc) as jszc
-		    FROM (SELECT COUNT(1) AS yae231,    
-				        sum(a.aae180) AS aab121,
-				        sum(b.yaa333) AS xjsh,
-				        SUM(b.yaa333-a.aae180) AS jsc,
-				        a.aae002 AS iaa100        
-				  FROM xasi2.AC08A1 A, xasi2.ac01k8 B
-				 WHERE A.AAB001 = B.AAB001(+)
-				   AND A.AAC001 = B.AAC001(+)
-				   AND a.aae140 = #aae140#
-				   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
-<![CDATA[          AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+	<!-- 单位月基数总和(其他险种) -->
+	<select id="querySumJS_1" parameterClass="map" resultClass="dto">
+		<isNotEqual property="aae140" compareValue="04">
+			SELECT sum(p.aab121) as jszh,
+			sum(p.xjsh) as xjszh,
+			sum(p.jsc) as jszc
+			FROM (SELECT COUNT(1) AS yae231,
+			sum(a.aae180) AS aab121,
+			sum(b.yaa333) AS xjsh,
+			SUM(b.yaa333-a.aae180) AS jsc,
+			a.aae002 AS iaa100
+			FROM xasi2.AC08A1 A, xasi2.ac01k8 B
+			WHERE A.AAB001 = B.AAB001(+)
+			AND A.AAC001 = B.AAC001(+)
+			AND a.aae140 = #aae140#
+			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			<![CDATA[          AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
 				   AND a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#)]]>
-				   AND aae143 = '01'
-				   AND a.akc021 = '11'
-				   AND B.YAB019 = '1'
-				   AND a.aab001 = #aab001#
-				   AND b.aae001 = #aae001#
-				    GROUP BY a.aae002
-				UNION   
-				 SELECT COUNT(1) AS yae231,    
-				        sum(a.aae180) AS aab121,
-				        sum(b.yaa333) AS xjsh,
-				        SUM(b.yaa333-a.aae180) AS jsc,
-				        a.aae002 AS iaa100        
-				  FROM xasi2.AC08 A, xasi2.ac01k8 B
-				 WHERE A.AAB001 = B.AAB001(+)
-				   AND A.AAC001 = B.AAC001(+)
-				   AND a.aae140 = #aae140#
-				   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
-<![CDATA[          AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			AND aae143 = '01'
+			AND a.akc021 = '11'
+			AND B.YAB019 = '1'
+			AND a.aab001 = #aab001#
+			AND b.aae001 = #aae001#
+			GROUP BY a.aae002
+			UNION
+			SELECT COUNT(1) AS yae231,
+			sum(a.aae180) AS aab121,
+			sum(b.yaa333) AS xjsh,
+			SUM(b.yaa333-a.aae180) AS jsc,
+			a.aae002 AS iaa100
+			FROM xasi2.AC08 A, xasi2.ac01k8 B
+			WHERE A.AAB001 = B.AAB001(+)
+			AND A.AAC001 = B.AAC001(+)
+			AND a.aae140 = #aae140#
+			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			<![CDATA[          AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
 				   AND a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#)]]>
-				   AND aae143 = '01'
-				   AND a.akc021 = '11'
-				   AND B.YAB019 = '1'
-				   AND a.aab001 = #aab001#
-				   AND b.aae001 = #aae001#
-				   GROUP BY a.aae002) p
+			AND aae143 = '01'
+			AND a.akc021 = '11'
+			AND B.YAB019 = '1'
+			AND a.aab001 = #aab001#
+			AND b.aae001 = #aae001#
+			GROUP BY a.aae002) p
 		</isNotEqual>
 		<isEqual property="aae140" compareValue="04">
 			SELECT sum(p.aab121) as jszh,
-		    	   sum(p.xjsh) as xjszh,
-		    	   sum(p.jsc) as jszc
-		    FROM (SELECT COUNT(1) AS yae231,    
-				        sum(a.aae180) AS aab121,
-				        sum(b.yaa444) AS xjsh,
-				        SUM(b.yaa444-a.aae180) AS jsc,
-				        a.aae002 AS iaa100        
-				  FROM xasi2.AC08A1 A, xasi2.ac01k8 B
-				 WHERE A.AAB001 = B.AAB001(+)
-				   AND A.AAC001 = B.AAC001(+)
-				   AND a.aae140 = #aae140#
-				   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
-		<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			sum(p.xjsh) as xjszh,
+			sum(p.jsc) as jszc
+			FROM (SELECT COUNT(1) AS yae231,
+			sum(a.aae180) AS aab121,
+			sum(b.yaa444) AS xjsh,
+			SUM(b.yaa444-a.aae180) AS jsc,
+			a.aae002 AS iaa100
+			FROM xasi2.AC08A1 A, xasi2.ac01k8 B
+			WHERE A.AAB001 = B.AAB001(+)
+			AND A.AAC001 = B.AAC001(+)
+			AND a.aae140 = #aae140#
+			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
 				   and a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#)]]>
-				   AND aae143 = '01'
-				   AND a.akc021 = '11'
-				   AND B.YAB019 = '1'
-				   AND a.aab001 = #aab001#
-				   AND b.aae001 = #aae001#
-				    GROUP BY a.aae002
-				UNION   
-				 SELECT COUNT(1) AS yae231,    
-				        sum(a.aae180) AS aab121,
-				        sum(b.yaa444) AS xjsh,
-				        SUM(b.yaa444-a.aae180) AS jsc,
-				        a.aae002 AS iaa100        
-				  FROM xasi2.AC08 A, xasi2.ac01k8 B
-				 WHERE A.AAB001 = B.AAB001(+)
-				   AND A.AAC001 = B.AAC001(+)
-				   AND a.aae140 = #aae140#
-				   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
-		<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			AND aae143 = '01'
+			AND a.akc021 = '11'
+			AND B.YAB019 = '1'
+			AND a.aab001 = #aab001#
+			AND b.aae001 = #aae001#
+			GROUP BY a.aae002
+			UNION
+			SELECT COUNT(1) AS yae231,
+			sum(a.aae180) AS aab121,
+			sum(b.yaa444) AS xjsh,
+			SUM(b.yaa444-a.aae180) AS jsc,
+			a.aae002 AS iaa100
+			FROM xasi2.AC08 A, xasi2.ac01k8 B
+			WHERE A.AAB001 = B.AAB001(+)
+			AND A.AAC001 = B.AAC001(+)
+			AND a.aae140 = #aae140#
+			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
 				   AND a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#)]]>
-				   AND aae143 = '01'
-				   AND a.akc021 = '11'
-				   AND B.YAB019 = '1'
-				   AND a.aab001 = #aab001#
-				   AND b.aae001 = #aae001#
-				   GROUP BY a.aae002) p
-		</isEqual>			 
-    </select>
-	 <!-- 单位每月人员缴费基数(其他险种) -->
-    <select id="getAc08" parameterClass="map" resultClass="dto">    
-    	<isNotEqual property="aae140" compareValue="04">
-    		 SELECT a.aab001 AS aab001,
-			        c.aac001 AS aac001,
-			        c.aac002 AS aac002,
-			        c.aac003 AS aac003,       
-			        a.aae180 AS YAC507,
-			        b.yaa333 AS yac004,
-			        (b.yaa333-a.aae180) AS jsc,
-			        a.aae002 AS iaa100 ,
-			        CASE WHEN a.aac008='2' AND a.akc021 = '21'THEN '已退休' ELSE '' END AS aae013       
-			  FROM xasi2.AC08A1 A, xasi2.ac01k8 B, XASI2.AC01 C
-			 WHERE A.AAB001 = B.AAB001(+)
-			   AND A.AAC001 = B.AAC001(+)
-			   AND a.aac001 = c.aac001(+)
-			   AND a.aae140 = #aae140#
-			   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
-	<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			AND aae143 = '01'
+			AND a.akc021 = '11'
+			AND B.YAB019 = '1'
+			AND a.aab001 = #aab001#
+			AND b.aae001 = #aae001#
+			GROUP BY a.aae002) p
+		</isEqual>
+	</select>
+	<!-- 单位每月人员缴费基数(其他险种) -->
+	<select id="getAc08" parameterClass="map" resultClass="dto">
+		<isNotEqual property="aae140" compareValue="04">
+			SELECT a.aab001 AS aab001,
+			c.aac001 AS aac001,
+			c.aac002 AS aac002,
+			c.aac003 AS aac003,
+			a.aae180 AS YAC507,
+			b.yaa333 AS yac004,
+			(b.yaa333-a.aae180) AS jsc,
+			a.aae002 AS iaa100 ,
+			CASE WHEN a.aac008='2' AND a.akc021 = '21'THEN '已退休' ELSE '' END AS aae013
+			FROM xasi2.AC08A1 A, xasi2.ac01k8 B, XASI2.AC01 C
+			WHERE A.AAB001 = B.AAB001(+)
+			AND A.AAC001 = B.AAC001(+)
+			AND a.aac001 = c.aac001(+)
+			AND a.aae140 = #aae140#
+			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
 			   AND a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#)]]>
-			   AND aae143 = '01'
-			   AND B.YAB019 = '1'
-			   AND a.aab001 = #aab001#
-			   AND b.aae001 = #aae001#
-			UNION   
-			   SELECT a.aab001 AS aab001,
-			        c.aac001 AS aac001,
-			        c.aac002 AS aac002,
-			        c.aac003 AS aac003,        
-			        a.aae180 AS YAC508,
-			        b.yaa333 AS yaa333,
-			        (b.yaa333-a.aae180) AS jsc,
-			        a.aae002 AS iaa100 ,
-			       CASE WHEN a.aac008='2' AND a.akc021 = '21'THEN '已退休' ELSE '' END AS aae013       
-			  FROM xasi2.AC08 A, xasi2.ac01k8 B, XASI2.AC01 C
-			 WHERE A.AAB001 = B.AAB001(+)
-			   AND A.AAC001 = B.AAC001(+)
-			   AND a.aac001 = c.aac001(+)
-			   AND a.aae140 = #aae140#
-			   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
-    <![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			AND aae143 = '01'
+			AND B.YAB019 = '1'
+			AND a.aab001 = #aab001#
+			AND b.aae001 = #aae001#
+			UNION
+			SELECT a.aab001 AS aab001,
+			c.aac001 AS aac001,
+			c.aac002 AS aac002,
+			c.aac003 AS aac003,
+			a.aae180 AS YAC508,
+			b.yaa333 AS yaa333,
+			(b.yaa333-a.aae180) AS jsc,
+			a.aae002 AS iaa100 ,
+			CASE WHEN a.aac008='2' AND a.akc021 = '21'THEN '已退休' ELSE '' END AS aae013
+			FROM xasi2.AC08 A, xasi2.ac01k8 B, XASI2.AC01 C
+			WHERE A.AAB001 = B.AAB001(+)
+			AND A.AAC001 = B.AAC001(+)
+			AND a.aac001 = c.aac001(+)
+			AND a.aae140 = #aae140#
+			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
                AND a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#)]]>
-			   AND aae143 = '01'
-			   AND B.YAB019 = '1'
-			   AND a.aab001 = #aab001#
-			   AND b.aae001 = #aae001#
-			   ORDER BY iaa100
+			AND aae143 = '01'
+			AND B.YAB019 = '1'
+			AND a.aab001 = #aab001#
+			AND b.aae001 = #aae001#
+			ORDER BY iaa100
 		</isNotEqual>
 		<isEqual property="aae140" compareValue="04">
 			SELECT a.aab001 AS aab001,
-			        c.aac001 AS aac001,
-			        c.aac002 AS aac002,
-			        c.aac003 AS aac003,       
-			        a.aae180 AS YAC507,
-			        b.yaa444 AS yac004,
-			        (b.yaa444-a.aae180) AS jsc,
-			        a.aae002 AS iaa100 ,
-			        CASE WHEN a.aac008='2' AND a.akc021 = '21'THEN '已退休' ELSE '' END AS aae013       
-			  FROM xasi2.AC08A1 A, xasi2.ac01k8 B, XASI2.AC01 C
-			 WHERE A.AAB001 = B.AAB001(+)
-			   AND A.AAC001 = B.AAC001(+)
-			   AND a.aac001 = c.aac001(+)
-			   AND a.aae140 = #aae140#
-			   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
-	<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			c.aac001 AS aac001,
+			c.aac002 AS aac002,
+			c.aac003 AS aac003,
+			a.aae180 AS YAC507,
+			b.yaa444 AS yac004,
+			(b.yaa444-a.aae180) AS jsc,
+			a.aae002 AS iaa100 ,
+			CASE WHEN a.aac008='2' AND a.akc021 = '21'THEN '已退休' ELSE '' END AS aae013
+			FROM xasi2.AC08A1 A, xasi2.ac01k8 B, XASI2.AC01 C
+			WHERE A.AAB001 = B.AAB001(+)
+			AND A.AAC001 = B.AAC001(+)
+			AND a.aac001 = c.aac001(+)
+			AND a.aae140 = #aae140#
+			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
 			   AND a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#)]]>
-			   AND aae143 = '01'
-			   AND B.YAB019 = '1'
-			   AND a.aab001 = #aab001#
-			   AND b.aae001 = #aae001#
-			UNION   
-			   SELECT a.aab001 AS aab001,
-			        c.aac001 AS aac001,
-			        c.aac002 AS aac002,
-			        c.aac003 AS aac003,        
-			        a.aae180 AS YAC508,
-			        b.yaa444 AS yaa333,
-			        (b.yaa444-a.aae180) AS jsc,
-			        a.aae002 AS iaa100 ,
-			       CASE WHEN a.aac008='2' AND a.akc021 = '21'THEN '已退休' ELSE '' END AS aae013       
-			  FROM xasi2.AC08 A, xasi2.ac01k8 B, XASI2.AC01 C
-			 WHERE A.AAB001 = B.AAB001(+)
-			   AND A.AAC001 = B.AAC001(+)
-			   AND a.aac001 = c.aac001(+)
-			   AND a.aae140 = #aae140#
-			   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
-    <![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			AND aae143 = '01'
+			AND B.YAB019 = '1'
+			AND a.aab001 = #aab001#
+			AND b.aae001 = #aae001#
+			UNION
+			SELECT a.aab001 AS aab001,
+			c.aac001 AS aac001,
+			c.aac002 AS aac002,
+			c.aac003 AS aac003,
+			a.aae180 AS YAC508,
+			b.yaa444 AS yaa333,
+			(b.yaa444-a.aae180) AS jsc,
+			a.aae002 AS iaa100 ,
+			CASE WHEN a.aac008='2' AND a.akc021 = '21'THEN '已退休' ELSE '' END AS aae013
+			FROM xasi2.AC08 A, xasi2.ac01k8 B, XASI2.AC01 C
+			WHERE A.AAB001 = B.AAB001(+)
+			AND A.AAC001 = B.AAC001(+)
+			AND a.aac001 = c.aac001(+)
+			AND a.aae140 = #aae140#
+			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
     		   AND a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#)]]>
-			   AND aae143 = '01'
-			   AND B.YAB019 = '1'
-			   AND a.aab001 = #aab001#
-			   AND b.aae001 = #aae001#
-			   ORDER BY iaa100
+			AND aae143 = '01'
+			AND B.YAB019 = '1'
+			AND a.aab001 = #aab001#
+			AND b.aae001 = #aae001#
+			ORDER BY iaa100
 		</isEqual>
-    </select>
-    <!-- 单位每个月缴费汇总(机关养老险种) -->
-    <select id="queryUnitJS_2" parameterClass="map" resultClass="dto"> 	
+	</select>
+	<!-- 单位每个月缴费汇总(机关养老险种) -->
+	<select id="queryUnitJS_2" parameterClass="map" resultClass="dto">
     	 SELECT COUNT(1) AS yae231,    
 		        sum(a.aae180) AS aab121,
 		        sum(b.yac004) AS xjsh,
@@ -229,8 +229,8 @@
 		   GROUP BY a.aae002
 		   ORDER BY iaa100			
     </select>
-	 <!-- 单位月基数总和(养老) -->
-    <select id="querySumJS" parameterClass="map" resultClass="dto">
+	<!-- 单位月基数总和(养老) -->
+	<select id="querySumJS" parameterClass="map" resultClass="dto">
 		    SELECT sum(p.aab121) as jszh,
 		    	   sum(p.xjsh) as xjszh,
 		    	   sum(p.jsc) as jszc
@@ -252,8 +252,8 @@
 			   GROUP BY a.aae002) p
 			 
     </select>
-	 <!-- 单位月基数总和(备案) -->
-    <select id="querySumJSBa" parameterClass="map" resultClass="dto">
+	<!-- 单位月基数总和(备案) -->
+	<select id="querySumJSBa" parameterClass="map" resultClass="dto">
 		    SELECT       sum(yae231) as bars,
              sum(p.xjsh) as xjszh,
              sum(p.jsc) as bajsce
@@ -276,8 +276,8 @@
          GROUP BY a.aae002) p
 			 
     </select>
-	 <!-- 单位月基数总和(单养老备案) -->
-    <select id="querySumJSDBa" parameterClass="map" resultClass="dto">
+	<!-- 单位月基数总和(单养老备案) -->
+	<select id="querySumJSDBa" parameterClass="map" resultClass="dto">
 		    SELECT       sum(yae231) as bars,
              sum(p.xjsh) as xjszh,
              sum(p.jsc) as bajsce
@@ -300,8 +300,8 @@
          GROUP BY a.aae002) p
 			 
     </select>
-	   <!-- 单位每月人员缴费基数(养老) -->
-    <select id="getIrac01" parameterClass="map" resultClass="dto">
+	<!-- 单位每月人员缴费基数(养老) -->
+	<select id="getIrac01" parameterClass="map" resultClass="dto">
 
 		     SELECT D.YAB029 AS AAB001,
                     C.YAB029 AS AAC001,
@@ -336,8 +336,8 @@
 			   AND b.aae001 = #aae001#
 			 ORDER BY A.AAE002			 
     </select>
-	   <!-- 单位每月人员缴费基数(单养老) -->
-    <select id="getIrac01ForBa" parameterClass="map" resultClass="dto">
+	<!-- 单位每月人员缴费基数(单养老) -->
+	<select id="getIrac01ForBa" parameterClass="map" resultClass="dto">
 		     SELECT D.YAB029 AS AAB001,
                     C.YAB029 AS AAC001,
 			        A.AAB001 AS AAB001,
@@ -408,7 +408,7 @@
          AND b.aae001 = #aae001#
        	 			 
     </select>
-    <select id="queryIrac01c1" parameterClass="map" resultClass="dto">
+	<select id="queryIrac01c1" parameterClass="map" resultClass="dto">
                SELECT C.YAB029 AS AAB001,
 		             A.AAC001 AS AAC001,
 		             A.AAC002 AS AAC002,
@@ -428,231 +428,231 @@
 						   AND A.AAE110 IS NOT NULL
 				 ORDER BY A.YAE110 DESC, A.AAC003
     </select>
-	 <!-- 单位所有人员交过费的人员 -->
-    <select id="queryab05a1" parameterClass="map" resultClass="dto">
-    	<isEqual property="aae140" compareValue="01">
-	        SELECT C.YAB029 AS AAB001,
-			       B.YAB029 AS AAC001,
-			       A.AAC002 AS AAC002,
-			       A.AAC003 AS AAC003,
-			       xasi2.pkg_comm.fun_getAaa103('AAC009',D.AAC009) AS AAC009,
-			       A.YAC507 AS YAC507,
-			       A.YAC004 AS YAC004,
-			       A.YAE110 AS AAE013
-			  FROM xasi2.ac01k8 A, XASI2.AC01A1 B, XASI2.AB01A2 C,XASI2.ac01 D
-			 WHERE A.AAB001 = C.YAB021
-			   AND A.AAC001 = B.AAC001(+)
-			   AND A.AAC001 = D.AAC001
-			   AND A.AAB001 = #aab001#
-			   AND A.AAE001 = #aae001#
-			   AND A.YAB019 = '1'
-			   AND A.AAE110 IS NOT NULL
-			   AND NOT EXISTS(SELECT 1 
-                      		 FROM wsjb.irac01c1 E
-                      		WHERE yae031='1' 
-                      		  AND E.aac001 = a.aac001
-                      		  AND E.aab001 = a.aab001)  
-			 ORDER BY A.YAE110 DESC, A.AAC003
-    	</isEqual>
-    	<isEqual property="aae140" compareValue="03">
-    		 SELECT A.AAB001 AS aab001,
-			        A.AAC001 AS aac001,
-			        A.AAC002 AS aac002,
-			        A.AAC003 AS aac003,
-			        xasi2.pkg_comm.fun_getAaa103('AAC009',B.AAC009) AS AAC009,
-			        A.YAC508 AS yac507,
-			        A.YAA333 AS yac004,
-			        A.yae310 AS aae013
-			  FROM xasi2.ac01k8 A,XASI2.AC01 B
-			 WHERE A.AAC001 = B.AAC001
-			   AND A.aab001 = #aab001#
-			   AND A.aae001 = #aae001#
-			   AND A.YAB019 = '1'
-			   AND A.aae310 is not null
-			   ORDER BY A.YAE310 DESC,A.aac003
-    	</isEqual>  
-    	<isEqual property="aae140" compareValue="05">
-    		 SELECT A.AAB001 AS aab001,
-			        A.AAC001 AS aac001,
-			        A.AAC002 AS aac002,
-			        A.AAC003 AS aac003,
-			       xasi2.pkg_comm.fun_getAaa103('AAC009',B.AAC009) AS AAC009,
-			        A.YAC508 AS yac507,
-			        A.YAA333 AS yac004,
-			        A.yae510 AS aae013
-			  FROM xasi2.ac01k8 A,XASI2.AC01 B
-			 WHERE A.AAC001 = B.AAC001
-			   AND A.aab001 = #aab001#
-			   AND A.aae001 = #aae001#
-			   AND A.YAB019 = '1'
-			   AND A.aae510 is not null
-			   ORDER BY A.YAE510 DESC,A.aac003
-    	</isEqual>
-    	<isEqual property="aae140" compareValue="02">
-    		 SELECT A.AAB001 AS aab001,
-			        A.AAC001 AS aac001,
-			        A.AAC002 AS aac002,
-			        A.AAC003 AS aac003,
-			        xasi2.pkg_comm.fun_getAaa103('AAC009',B.AAC009) AS AAC009,
-			        A.YAC508 AS yac507,
-			        A.YAA333 AS yac004,
-			        A.yae210 AS aae013
-			  FROM xasi2.ac01k8 A,XASI2.AC01 B
-			 WHERE A.AAC001 = B.AAC001
-			   AND A.aab001 = #aab001#
-			   AND A.aae001 = #aae001#
-			   AND A.YAB019 = '1'
-			   AND A.aae210 is not null
-			   ORDER BY A.YAE210 DESC,A.aac003
-    	</isEqual>
-    	<isEqual property="aae140" compareValue="04">
-    		 SELECT A.AAB001 AS aab001,
-			        A.AAC001 AS aac001,
-			        A.AAC002 AS aac002,
-			        A.AAC003 AS aac003,
-			        xasi2.pkg_comm.fun_getAaa103('AAC009',B.AAC009) AS AAC009,
-			        A.YAC005 AS yac507,
-			        A.YAA444 AS yac004,
-			        A.yae410 AS aae013
-			  FROM xasi2.ac01k8 A,XASI2.AC01 B
-			 WHERE A.AAC001 = B.AAC001
-			   AND A.aab001 = #aab001#
-			   AND A.aae001 = #aae001#
-			   AND A.YAB019 = '1'
-			   AND A.aae410 is not null
-			   ORDER BY A.YAE410 DESC,A.aac003
-    	</isEqual>
-    	<isEqual property="aae140" compareValue="06">
-    		 SELECT A.AAB001 AS aab001,
-			        A.AAC001 AS aac001,
-			        A.AAC002 AS aac002,
-			        A.AAC003 AS aac003,
-			        xasi2.pkg_comm.fun_getAaa103('AAC009',B.AAC009) AS AAC009,
-			        A.YAC508 AS yac507,
-			        A.YAA333 AS yac004,
-			        A.yae110 AS aae013
-			  FROM xasi2.ac01k8 A,XASI2.AC01 B
-			 WHERE A.AAC001 = B.AAC001
-			   AND A.aab001 = #aab001#
-			   AND A.aae001 = #aae001#
-			   AND A.YAB019 = '2'
-			   AND A.aae110 is not null
-			   ORDER BY A.YAE110 DESC,A.aac003			   
-    	</isEqual>
-    </select>
+	<!-- 单位所有人员交过费的人员 -->
+	<select id="queryab05a1" parameterClass="map" resultClass="dto">
+		<isEqual property="aae140" compareValue="01">
+			SELECT C.YAB029 AS AAB001,
+			B.YAB029 AS AAC001,
+			A.AAC002 AS AAC002,
+			A.AAC003 AS AAC003,
+			xasi2.pkg_comm.fun_getAaa103('AAC009',D.AAC009) AS AAC009,
+			A.YAC507 AS YAC507,
+			A.YAC004 AS YAC004,
+			A.YAE110 AS AAE013
+			FROM xasi2.ac01k8 A, XASI2.AC01A1 B, XASI2.AB01A2 C,XASI2.ac01 D
+			WHERE A.AAB001 = C.YAB021
+			AND A.AAC001 = B.AAC001(+)
+			AND A.AAC001 = D.AAC001
+			AND A.AAB001 = #aab001#
+			AND A.AAE001 = #aae001#
+			AND A.YAB019 = '1'
+			AND A.AAE110 IS NOT NULL
+			AND NOT EXISTS(SELECT 1
+			FROM wsjb.irac01c1 E
+			WHERE yae031='1'
+			AND E.aac001 = a.aac001
+			AND E.aab001 = a.aab001)
+			ORDER BY A.YAE110 DESC, A.AAC003
+		</isEqual>
+		<isEqual property="aae140" compareValue="03">
+			SELECT A.AAB001 AS aab001,
+			A.AAC001 AS aac001,
+			A.AAC002 AS aac002,
+			A.AAC003 AS aac003,
+			xasi2.pkg_comm.fun_getAaa103('AAC009',B.AAC009) AS AAC009,
+			A.YAC508 AS yac507,
+			A.YAA333 AS yac004,
+			A.yae310 AS aae013
+			FROM xasi2.ac01k8 A,XASI2.AC01 B
+			WHERE A.AAC001 = B.AAC001
+			AND A.aab001 = #aab001#
+			AND A.aae001 = #aae001#
+			AND A.YAB019 = '1'
+			AND A.aae310 is not null
+			ORDER BY A.YAE310 DESC,A.aac003
+		</isEqual>
+		<isEqual property="aae140" compareValue="05">
+			SELECT A.AAB001 AS aab001,
+			A.AAC001 AS aac001,
+			A.AAC002 AS aac002,
+			A.AAC003 AS aac003,
+			xasi2.pkg_comm.fun_getAaa103('AAC009',B.AAC009) AS AAC009,
+			A.YAC508 AS yac507,
+			A.YAA333 AS yac004,
+			A.yae510 AS aae013
+			FROM xasi2.ac01k8 A,XASI2.AC01 B
+			WHERE A.AAC001 = B.AAC001
+			AND A.aab001 = #aab001#
+			AND A.aae001 = #aae001#
+			AND A.YAB019 = '1'
+			AND A.aae510 is not null
+			ORDER BY A.YAE510 DESC,A.aac003
+		</isEqual>
+		<isEqual property="aae140" compareValue="02">
+			SELECT A.AAB001 AS aab001,
+			A.AAC001 AS aac001,
+			A.AAC002 AS aac002,
+			A.AAC003 AS aac003,
+			xasi2.pkg_comm.fun_getAaa103('AAC009',B.AAC009) AS AAC009,
+			A.YAC508 AS yac507,
+			A.YAA333 AS yac004,
+			A.yae210 AS aae013
+			FROM xasi2.ac01k8 A,XASI2.AC01 B
+			WHERE A.AAC001 = B.AAC001
+			AND A.aab001 = #aab001#
+			AND A.aae001 = #aae001#
+			AND A.YAB019 = '1'
+			AND A.aae210 is not null
+			ORDER BY A.YAE210 DESC,A.aac003
+		</isEqual>
+		<isEqual property="aae140" compareValue="04">
+			SELECT A.AAB001 AS aab001,
+			A.AAC001 AS aac001,
+			A.AAC002 AS aac002,
+			A.AAC003 AS aac003,
+			xasi2.pkg_comm.fun_getAaa103('AAC009',B.AAC009) AS AAC009,
+			A.YAC005 AS yac507,
+			A.YAA444 AS yac004,
+			A.yae410 AS aae013
+			FROM xasi2.ac01k8 A,XASI2.AC01 B
+			WHERE A.AAC001 = B.AAC001
+			AND A.aab001 = #aab001#
+			AND A.aae001 = #aae001#
+			AND A.YAB019 = '1'
+			AND A.aae410 is not null
+			ORDER BY A.YAE410 DESC,A.aac003
+		</isEqual>
+		<isEqual property="aae140" compareValue="06">
+			SELECT A.AAB001 AS aab001,
+			A.AAC001 AS aac001,
+			A.AAC002 AS aac002,
+			A.AAC003 AS aac003,
+			xasi2.pkg_comm.fun_getAaa103('AAC009',B.AAC009) AS AAC009,
+			A.YAC508 AS yac507,
+			A.YAA333 AS yac004,
+			A.yae110 AS aae013
+			FROM xasi2.ac01k8 A,XASI2.AC01 B
+			WHERE A.AAC001 = B.AAC001
+			AND A.aab001 = #aab001#
+			AND A.aae001 = #aae001#
+			AND A.YAB019 = '2'
+			AND A.aae110 is not null
+			ORDER BY A.YAE110 DESC,A.aac003
+		</isEqual>
+	</select>
 	<!-- 根据做帐期号查询单位的补差信息 -->
 	<select id="getInsPayInfo" parameterClass="map" resultClass="dto">
 		SELECT P.AAE140,
-              MAX(P.YAB538) AS YAB538,
-              SUM(P.AAB121) AS AAB121,
-              SUM(P.AAB120) AS AAB120,
-              SUM(P.AAB156) AS AAB156,
-              (SELECT COUNT(1)
-                 FROM wsjb.TMP_AC42 A
-                WHERE A.AAB001 = #aab001#
-                  AND A.AAE001 = #aae001#
-                  AND A.AAE140 = P.AAE140
-                  AND (A.YAC401 + A.YAC402 + A.YAC403 + A.YAC404 + A.YAC405 +
-                       A.YAC406 + A.YAC407 + A.YAC408 + A.YAC409 + A.YAC410 +
-			           <![CDATA[ A.YAC411 + A.YAC412) <> 0) AS YAE231, ]]>
-              SUM(P.PAY_U) AS PAY_U,
-              SUM(P.PAY_P) AS PAY_P,
-              SUM(P.PAY_A) AS PAY_A,
-              MAX(P.AAE076) AS AAE076
-         FROM (SELECT A.AAE140,
-                      A.YAB538,
-                      NVL(A.AAB121, 0.0) AS AAB121,
-                      NVL(A.AAB120, 0.0) AS AAB120,
-                      NVL(A.AAB156, 0.0) AS AAB156,
-                      NVL(A.YAE231, 0) AS YAE231,
-                      (NVL(A.AAB151, 0.0) + NVL(A.AAB152, 0.0)) AS PAY_U,
-                      (NVL(A.AAB150, 0.0) + NVL(A.YAB031, 0.0)) AS PAY_P,
-                      (NVL(A.AAB151, 0.0) + NVL(A.AAB152, 0.0) +
-                      NVL(A.AAB150, 0.0) + NVL(A.YAB031, 0.0)) AS PAY_A,
-                      A.AAE076
-                 FROM XASI2.AB08 A
-                WHERE AAB001 = #aab001#
-                  AND (A.YAB538 = '1' OR A.AAE140 != '03')
-                  <isNotEmpty prepend="AND" property="yae010">
-				   a.yae010 = '1'
-				  </isNotEmpty>
-                  AND A.YAE517 = 'H12'
-  	    <![CDATA[ AND A.YAB222 <> '100000000001' ]]> 
-                  AND A.AAE003 = #aae003#
-                 <isEqual property="aae001" compareValue="2018">
-	    <![CDATA[ AND( A.AAE036 < to_date('2018-06-30 00:00:00','yyyy-mm-dd hh24:mi:ss') ]]>
-	    <![CDATA[ or A.AAE036 > to_date('2018-07-04 00:00:00','yyyy-mm-dd hh24:mi:ss')) ]]>
-		     	 </isEqual>
-               UNION
-               SELECT A.AAE140,
-                      A.YAB538,
-                      NVL(A.AAB121, 0.0) AS AAB121,
-                      NVL(A.AAB120, 0.0) AS AAB120,
-                      NVL(A.AAB156, 0.0) AS AAB156,
-                      NVL(A.YAE231, 0) AS YAE231,
-                      (NVL(A.AAB151, 0.0) + NVL(A.AAB152, 0.0)) AS PAY_U,
-                      (NVL(A.AAB150, 0.0) + NVL(A.YAB031, 0.0)) AS PAY_P,
-                      (NVL(A.AAB151, 0.0) + NVL(A.AAB152, 0.0) +
-                      NVL(A.AAB150, 0.0) + NVL(A.YAB031, 0.0)) AS PAY_A,
-                      A.AAE076 AS AAE076
-                 FROM XASI2.AB08A8 A
-                WHERE AAB001 = #aab001#
-                  AND (A.YAB538 = '1' OR A.AAE140 != '03')
-                  <isNotEmpty prepend="AND" property="yae010">
-				   a.yae010 = '1'
-				  </isNotEmpty>
-                  AND A.YAE517 in ('H17','H12')
-  	    <![CDATA[ AND A.YAB222 <> '100000000001' ]]>
- 				<isEqual property="aae001" compareValue="2018">
-		<![CDATA[ AND (A.yae550 < to_date('2018-06-30 00:00:00','yyyy-mm-dd hh24:mi:ss') ]]>
-		<![CDATA[ or A.yae550 > to_date('2018-07-04 00:00:00','yyyy-mm-dd hh24:mi:ss')) ]]>
-		     	  </isEqual>
-                  AND A.AAE003 = #aae003# 
-                  ) P
-      	<![CDATA[ WHERE P.AAE140 <> '06']]>
-        <isNotEmpty prepend="AND" property="aae140">
-       		<![CDATA[ aae140 IN ($aae140$) ]]>
-        </isNotEmpty>
-                  GROUP BY P.AAE140
+		MAX(P.YAB538) AS YAB538,
+		SUM(P.AAB121) AS AAB121,
+		SUM(P.AAB120) AS AAB120,
+		SUM(P.AAB156) AS AAB156,
+		(SELECT COUNT(1)
+		FROM wsjb.TMP_AC42 A
+		WHERE A.AAB001 = #aab001#
+		AND A.AAE001 = #aae001#
+		AND A.AAE140 = P.AAE140
+		AND (A.YAC401 + A.YAC402 + A.YAC403 + A.YAC404 + A.YAC405 +
+		A.YAC406 + A.YAC407 + A.YAC408 + A.YAC409 + A.YAC410 +
+		<![CDATA[ A.YAC411 + A.YAC412) <> 0) AS YAE231, ]]>
+		SUM(P.PAY_U) AS PAY_U,
+		SUM(P.PAY_P) AS PAY_P,
+		SUM(P.PAY_A) AS PAY_A,
+		MAX(P.AAE076) AS AAE076
+		FROM (SELECT A.AAE140,
+		A.YAB538,
+		NVL(A.AAB121, 0.0) AS AAB121,
+		NVL(A.AAB120, 0.0) AS AAB120,
+		NVL(A.AAB156, 0.0) AS AAB156,
+		NVL(A.YAE231, 0) AS YAE231,
+		(NVL(A.AAB151, 0.0) + NVL(A.AAB152, 0.0)) AS PAY_U,
+		(NVL(A.AAB150, 0.0) + NVL(A.YAB031, 0.0)) AS PAY_P,
+		(NVL(A.AAB151, 0.0) + NVL(A.AAB152, 0.0) +
+		NVL(A.AAB150, 0.0) + NVL(A.YAB031, 0.0)) AS PAY_A,
+		A.AAE076
+		FROM XASI2.AB08 A
+		WHERE AAB001 = #aab001#
+		AND (A.YAB538 = '1' OR A.AAE140 != '03')
+		<isNotEmpty prepend="AND" property="yae010">
+			a.yae010 = '1'
+		</isNotEmpty>
+		AND A.YAE517 = 'H12'
+		<![CDATA[ AND A.YAB222 <> '100000000001' ]]>
+		AND A.AAE003 = #aae003#
+		<isEqual property="aae001" compareValue="2018">
+			<![CDATA[ AND( A.AAE036 < to_date('2018-06-30 00:00:00','yyyy-mm-dd hh24:mi:ss') ]]>
+			<![CDATA[ or A.AAE036 > to_date('2018-07-04 00:00:00','yyyy-mm-dd hh24:mi:ss')) ]]>
+		</isEqual>
+		UNION
+		SELECT A.AAE140,
+		A.YAB538,
+		NVL(A.AAB121, 0.0) AS AAB121,
+		NVL(A.AAB120, 0.0) AS AAB120,
+		NVL(A.AAB156, 0.0) AS AAB156,
+		NVL(A.YAE231, 0) AS YAE231,
+		(NVL(A.AAB151, 0.0) + NVL(A.AAB152, 0.0)) AS PAY_U,
+		(NVL(A.AAB150, 0.0) + NVL(A.YAB031, 0.0)) AS PAY_P,
+		(NVL(A.AAB151, 0.0) + NVL(A.AAB152, 0.0) +
+		NVL(A.AAB150, 0.0) + NVL(A.YAB031, 0.0)) AS PAY_A,
+		A.AAE076 AS AAE076
+		FROM XASI2.AB08A8 A
+		WHERE AAB001 = #aab001#
+		AND (A.YAB538 = '1' OR A.AAE140 != '03')
+		<isNotEmpty prepend="AND" property="yae010">
+			a.yae010 = '1'
+		</isNotEmpty>
+		AND A.YAE517 in ('H17','H12')
+		<![CDATA[ AND A.YAB222 <> '100000000001' ]]>
+		<isEqual property="aae001" compareValue="2018">
+			<![CDATA[ AND (A.yae550 < to_date('2018-06-30 00:00:00','yyyy-mm-dd hh24:mi:ss') ]]>
+			<![CDATA[ or A.yae550 > to_date('2018-07-04 00:00:00','yyyy-mm-dd hh24:mi:ss')) ]]>
+		</isEqual>
+		AND A.AAE003 = #aae003#
+		) P
+		<![CDATA[ WHERE P.AAE140 <> '06']]>
+		<isNotEmpty prepend="AND" property="aae140">
+			<![CDATA[ aae140 IN ($aae140$) ]]>
+		</isNotEmpty>
+		GROUP BY P.AAE140
 	</select>
-	
+
 	<!-- 养老补差 -->
 	<select id="getYLInsInfo" parameterClass="map" resultClass="dto">
-		  SELECT A.AAE140,
-         (SELECT COUNT(1)
-            FROM wsjb.TMP_AC42 B
-           WHERE B.AAB001 = #aab001#
-             AND B.AAE001 = #aae001#
-             AND B.AAE140 = A.AAE140
-             AND (B.YAC401 + B.YAC402 + B.YAC403 + B.YAC404 + B.YAC405 +
-                 B.YAC406 + B.YAC407 + B.YAC408 + B.YAC409 + B.YAC410 +
-	   <![CDATA[ B.YAC411 + B.YAC412) <> 0) AS YAE231,]]>
-		         SUM(A.AAB120) AS AAB120,
-		         SUM(A.AAB121) AS AAB121,
-		         MAX(A.AAE076) AS AAE076,
-		         MAX(A.YAB538) AS YAB538,
-		         SUM(A.AAB150) AS PAY_P,
-		         SUM(A.AAB152) AS PAY_U,
-		         SUM((A.AAB150 + A.AAB152)) AS PAY_A,
-		         SUM(A.AAB156) AS AAB156
-		    FROM wsjb.IRAB08 A
-		   WHERE 1=1
-		     <isNotEmpty prepend="AND" property="aae140">
-       	     	<![CDATA[ aae140 IN ($aae140$) ]]>
-           	 </isNotEmpty>
-		   	 <isNotEmpty prepend="AND" property="yae010">
-			 	a.yae010 = '1'
-			 </isNotEmpty>
-		     AND A.AAB001 = #aab001#
-		     AND A.AAE003 = #aae003#
-		     AND A.YAE517 IN ('H12', 'H17')
-		     <isEqual property="aae001" compareValue="2018">
-   <![CDATA[ AND (A.AAE036 < to_date('2018-06-30 00:00:00','yyyy-mm-dd hh24:mi:ss') ]]>
-   <![CDATA[ or A.AAE036 > to_date('2018-07-04 00:00:00','yyyy-mm-dd hh24:mi:ss')) ]]>
-		     </isEqual>
-		     GROUP BY A.AAE140
+		SELECT A.AAE140,
+		(SELECT COUNT(1)
+		FROM wsjb.TMP_AC42 B
+		WHERE B.AAB001 = #aab001#
+		AND B.AAE001 = #aae001#
+		AND B.AAE140 = A.AAE140
+		AND (B.YAC401 + B.YAC402 + B.YAC403 + B.YAC404 + B.YAC405 +
+		B.YAC406 + B.YAC407 + B.YAC408 + B.YAC409 + B.YAC410 +
+		<![CDATA[ B.YAC411 + B.YAC412) <> 0) AS YAE231,]]>
+		SUM(A.AAB120) AS AAB120,
+		SUM(A.AAB121) AS AAB121,
+		MAX(A.AAE076) AS AAE076,
+		MAX(A.YAB538) AS YAB538,
+		SUM(A.AAB150) AS PAY_P,
+		SUM(A.AAB152) AS PAY_U,
+		SUM((A.AAB150 + A.AAB152)) AS PAY_A,
+		SUM(A.AAB156) AS AAB156
+		FROM wsjb.IRAB08 A
+		WHERE 1=1
+		<isNotEmpty prepend="AND" property="aae140">
+			<![CDATA[ aae140 IN ($aae140$) ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="yae010">
+			a.yae010 = '1'
+		</isNotEmpty>
+		AND A.AAB001 = #aab001#
+		AND A.AAE003 = #aae003#
+		AND A.YAE517 IN ('H12', 'H17')
+		<isEqual property="aae001" compareValue="2018">
+			<![CDATA[ AND (A.AAE036 < to_date('2018-06-30 00:00:00','yyyy-mm-dd hh24:mi:ss') ]]>
+			<![CDATA[ or A.AAE036 > to_date('2018-07-04 00:00:00','yyyy-mm-dd hh24:mi:ss')) ]]>
+		</isEqual>
+		GROUP BY A.AAE140
 	</select>
-	
+
 	<!-- 查询一批数据的查询 -->
 	<select id="getAla080" parameterClass="map" resultClass="dto" >
 		select TO_CHAR((SUM(AAB152) / SUM(AAB121)) * 100, '0.99') || '%' AS ALA080
@@ -674,7 +674,7 @@
 			   AND AAB001 = #aab001# )
 	</select>
 	<!-- 获取年审月度 -->
-   <select id="getNSYD" parameterClass="map"  resultClass="java.lang.String">
+	<select id="getNSYD" parameterClass="map"  resultClass="java.lang.String">
 		 SELECT TO_CHAR(AAE003) as aae003
          FROM wsjb.IRAD51
         WHERE AAB001 = #aab001#
@@ -683,7 +683,7 @@
           AND IAA006 = '1'
           AND IAA011 = 'A05'
    </select>
-   <select id="irac01c1Ba" parameterClass="map"  resultClass="java.util.HashMap">
+	<select id="irac01c1Ba" parameterClass="map"  resultClass="java.util.HashMap">
 		    SELECT yae231_ba,
 			       aab121_ba,
 			       aab121_ba AS aab120_ba
@@ -703,7 +703,7 @@
 				   AND B.AAE140 = '01')
    </select>
 	<!--参保人数  -->
-    <select id="getCbrs" parameterClass="map" resultClass="java.lang.String">
+	<select id="getCbrs" parameterClass="map" resultClass="java.lang.String">
     	SELECT TO_CHAR(MAX(P.YAE231)) AS YAE231 
     	FROM 
     	(SELECT aae140,sum(YAE231) AS YAE231
@@ -726,8 +726,8 @@
 		   AND YAE517 = 'H01'
 		   AND AAE003 = #aae001#||'01') P
     </select>
-     <!--参保人数（单养老）  -->
-    <select id="getCbrs_1" parameterClass="map" resultClass="java.lang.String">
+	<!--参保人数（单养老）  -->
+	<select id="getCbrs_1" parameterClass="map" resultClass="java.lang.String">
     	SELECT TO_CHAR(MAX(P.YAE231)) AS YAE231
     	FROM
     	(SELECT aae140,YAE231, AAB121
@@ -737,13 +737,13 @@
 		   AND AAE003 = #aae001#||'01') P
     </select>
 	<!-- 补差开始月度 -->
-    <select id="getaa02a3" parameterClass="map" resultClass="java.util.HashMap">
+	<select id="getaa02a3" parameterClass="map" resultClass="java.util.HashMap">
     	SELECT substr(to_char(aae041),5) as aae041,
     	       substr(to_char(aae042),5) as aae042,
     	       aae140
     	  FROM xasi2.aa02a3 WHERE AAE001 = #aae001#
     </select>
-    <select id="getaa02a3_new" parameterClass="map" resultClass="java.util.HashMap">
+	<select id="getaa02a3_new" parameterClass="map" resultClass="java.util.HashMap">
     	SELECT substr(to_char(aae041),5) as aae041,
     	       substr((case when a.aae140 = '01' then 
     	       (select max(aae003) from wsjb.irab08 where aab001 = #aab001# and aae140 = a.aae140 and yae517 = 'H01') 
@@ -754,11 +754,11 @@
     	  FROM xasi2.aa02a3 a WHERE AAE001 = #aae001#
     </select>
 	<!-- 农民工失业基数补差查询 -->
-     <select id="getSYBC_01" parameterClass="map" resultClass="dto">
+	<select id="getSYBC_01" parameterClass="map" resultClass="dto">
      	select wsjb.FUN_GETNMGJSC(#aab001#,#aae001#) AS SYBC from dual
      </select>
 	<!-- 补差总和 -->
-    <select id="getJSZC" parameterClass="map" resultClass="dto">
+	<select id="getJSZC" parameterClass="map" resultClass="dto">
 	    SELECT P.AAE140 AS AAE140,
 	       (P.YAC401 + P.YAC402 + P.YAC403 + P.YAC404 + P.YAC405 + P.YAC406 +
 	       P.YAC407 + P.YAC408 + P.YAC409 + P.YAC410 + P.YAC411 + P.YAC412) AS JSBC
@@ -782,88 +782,88 @@
 		         GROUP BY AAE140) P
     </select>
 	<!-- 单位每个月缴费汇总(其他险种) -->
-    <select id="queryUnitJS_1" parameterClass="map" resultClass="dto"> 	
-    	<isNotEqual property="aae140" compareValue="04">
-    	 SELECT COUNT(1) AS yae231,    
-		        sum(a.aae180) AS aab121,
-		        sum(b.yaa333) AS xjsh,
-		        SUM(b.yaa333-a.aae180) AS jsc,
-		        to_char(a.aae002) AS iaa100        
-		  FROM xasi2.AC08A1 A, xasi2.ac01k8 B
-		 WHERE A.AAB001 = B.AAB001(+)
-		   AND A.AAC001 = B.AAC001(+)
-		   AND a.aae140 = #aae140#
-		   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
-<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+	<select id="queryUnitJS_1" parameterClass="map" resultClass="dto">
+		<isNotEqual property="aae140" compareValue="04">
+			SELECT COUNT(1) AS yae231,
+			sum(a.aae180) AS aab121,
+			sum(b.yaa333) AS xjsh,
+			SUM(b.yaa333-a.aae180) AS jsc,
+			to_char(a.aae002) AS iaa100
+			FROM xasi2.AC08A1 A, xasi2.ac01k8 B
+			WHERE A.AAB001 = B.AAB001(+)
+			AND A.AAC001 = B.AAC001(+)
+			AND a.aae140 = #aae140#
+			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
            and a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#)]]>
-		   AND a.aae143 = '01'
-		   AND a.akc021 = '11'
-		   AND B.YAB019 = '1'
-		   AND a.aab001 = #aab001#
-		   AND b.aae001 = #aae001#
-		    GROUP BY a.aae002
-		UNION   
-		 SELECT COUNT(1) AS yae231,    
-		        sum(a.aae180) AS aab121,
-		        sum(b.yaa333) AS xjsh,
-		        SUM(b.yaa333-a.aae180) AS jsc,
-		        to_char(a.aae002) AS iaa100        
-		  FROM xasi2.AC08 A, xasi2.ac01k8 B
-		 WHERE A.AAB001 = B.AAB001(+)
-		   AND A.AAC001 = B.AAC001(+)
-		   AND a.aae140 = #aae140#
-		   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
-<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			AND a.aae143 = '01'
+			AND a.akc021 = '11'
+			AND B.YAB019 = '1'
+			AND a.aab001 = #aab001#
+			AND b.aae001 = #aae001#
+			GROUP BY a.aae002
+			UNION
+			SELECT COUNT(1) AS yae231,
+			sum(a.aae180) AS aab121,
+			sum(b.yaa333) AS xjsh,
+			SUM(b.yaa333-a.aae180) AS jsc,
+			to_char(a.aae002) AS iaa100
+			FROM xasi2.AC08 A, xasi2.ac01k8 B
+			WHERE A.AAB001 = B.AAB001(+)
+			AND A.AAC001 = B.AAC001(+)
+			AND a.aae140 = #aae140#
+			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
            and a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#)]]>
-		   AND a.aae143 = '01'
-		   AND a.akc021 = '11'
-		   AND B.YAB019 = '1'
-		   AND a.aab001 = #aab001#
-		   AND b.aae001 = #aae001#
-		   GROUP BY a.aae002
-		   ORDER BY iaa100
+			AND a.aae143 = '01'
+			AND a.akc021 = '11'
+			AND B.YAB019 = '1'
+			AND a.aab001 = #aab001#
+			AND b.aae001 = #aae001#
+			GROUP BY a.aae002
+			ORDER BY iaa100
 		</isNotEqual>
 		<isEqual property="aae140" compareValue="04">
-    	 SELECT COUNT(1) AS yae231,    
-		        sum(a.aae180) AS aab121,
-		        sum(b.yaa444) AS xjsh,
-		        SUM(b.yaa444-a.aae180) AS jsc,
-		        to_char(a.aae002) AS iaa100        
-		  FROM xasi2.AC08A1 A, xasi2.ac01k8 B
-		 WHERE A.AAB001 = B.AAB001(+)
-		   AND A.AAC001 = B.AAC001(+)
-		   AND a.aae140 = #aae140#
-		   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
-<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			SELECT COUNT(1) AS yae231,
+			sum(a.aae180) AS aab121,
+			sum(b.yaa444) AS xjsh,
+			SUM(b.yaa444-a.aae180) AS jsc,
+			to_char(a.aae002) AS iaa100
+			FROM xasi2.AC08A1 A, xasi2.ac01k8 B
+			WHERE A.AAB001 = B.AAB001(+)
+			AND A.AAC001 = B.AAC001(+)
+			AND a.aae140 = #aae140#
+			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
            and a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#)]]>
-		   AND a.aae143 = '01'
-		   AND B.YAB019 = '1'
-		   AND a.aab001 = #aab001#
-		   AND b.aae001 = #aae001#
-		    GROUP BY a.aae002
-		UNION   
-		 SELECT COUNT(1) AS yae231,    
-		        sum(a.aae180) AS aab121,
-		        sum(b.yaa444) AS xjsh,
-		        SUM(b.yaa444-a.aae180) AS jsc,
-		        to_char(a.aae002) AS iaa100        
-		  FROM xasi2.AC08 A, xasi2.ac01k8 B
-		 WHERE A.AAB001 = B.AAB001(+)
-		   AND A.AAC001 = B.AAC001(+)
-		   AND a.aae140 = #aae140#
-		   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
-<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			AND a.aae143 = '01'
+			AND B.YAB019 = '1'
+			AND a.aab001 = #aab001#
+			AND b.aae001 = #aae001#
+			GROUP BY a.aae002
+			UNION
+			SELECT COUNT(1) AS yae231,
+			sum(a.aae180) AS aab121,
+			sum(b.yaa444) AS xjsh,
+			SUM(b.yaa444-a.aae180) AS jsc,
+			to_char(a.aae002) AS iaa100
+			FROM xasi2.AC08 A, xasi2.ac01k8 B
+			WHERE A.AAB001 = B.AAB001(+)
+			AND A.AAC001 = B.AAC001(+)
+			AND a.aae140 = #aae140#
+			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
 		   and a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#)]]>
-		   AND a.aae143 = '01'
-		   AND B.YAB019 = '1'
-		   AND a.aab001 = #aab001#
-		   AND b.aae001 = #aae001#
-		   GROUP BY a.aae002
-		   ORDER BY iaa100
+			AND a.aae143 = '01'
+			AND B.YAB019 = '1'
+			AND a.aab001 = #aab001#
+			AND b.aae001 = #aae001#
+			GROUP BY a.aae002
+			ORDER BY iaa100
 		</isEqual>
-    </select>
+	</select>
 	<!-- 单位每个月缴费汇总(养老) -->
-    <select id="queryUnitJS" parameterClass="map" resultClass="dto">
+	<select id="queryUnitJS" parameterClass="map" resultClass="dto">
 		    SELECT COUNT(1) AS yae231,
 			       SUM(A.AAE180) AS aab121,
 			       SUM(B.YAC004) AS xjsh,
@@ -882,8 +882,8 @@
 			   GROUP BY a.aae002
 			 ORDER BY a.aae002 
     </select>
-	 <!-- 单位相关信息 -->
-    <select id="queryUnitInfo_2" parameterClass="map" resultClass="dto">
+	<!-- 单位相关信息 -->
+	<select id="queryUnitInfo_2" parameterClass="map" resultClass="dto">
     	 SELECT A.AAB001 AS AAB001,
                 A.AAB004 AS AAB004,
                 A.AAB019 AS AAB019,
@@ -899,53 +899,53 @@
             AND A.IAB001 = A.AAB001
             AND a.iaa002 = '2'
     </select>
-	 <!-- 获取最大做账期的申报情况 -->
-    <select id="getAb08_1" parameterClass="map" resultClass="dto">
-    	<isEqual property="yab019" compareValue="1">
-	    	SELECT aab001,aae140,YAE231, AAB121
-			  FROM XASI2.AB08
-			 WHERE AAB001 = #aab001#
-			   AND YAE517 = 'H01'
-			   AND YAB538 = '1'
-  	<![CDATA[  AND AAE140 <> '06'
+	<!-- 获取最大做账期的申报情况 -->
+	<select id="getAb08_1" parameterClass="map" resultClass="dto">
+		<isEqual property="yab019" compareValue="1">
+			SELECT aab001,aae140,YAE231, AAB121
+			FROM XASI2.AB08
+			WHERE AAB001 = #aab001#
+			AND YAE517 = 'H01'
+			AND YAB538 = '1'
+			<![CDATA[  AND AAE140 <> '06'
 	           AND AAE140 <> '07' 
 			   AND AAE003 = #aae003# ]]>
 			UNION
 			SELECT aab001,aae140,YAE231, AAB121
-			  FROM XASI2.AB08A8
-			 WHERE AAB001 = #aab001#
-			   AND YAE517 = 'H01'
-			   AND YAB538 = '1'
-	<![CDATA[  AND AAE140 <> '06'
+			FROM XASI2.AB08A8
+			WHERE AAB001 = #aab001#
+			AND YAE517 = 'H01'
+			AND YAB538 = '1'
+			<![CDATA[  AND AAE140 <> '06'
 	           AND AAE140 <> '07' 
 			   AND AAE003 = #aae003# ]]>
 			UNION
 			SELECT aab001,aae140,YAE231, AAB121
-			  FROM wsjb.IRAB08
-			 WHERE AAB001 = #aab001#
-			   AND YAE517 = 'H01'
-			   AND AAE003 = #aae003#
-   		</isEqual>
-   		<isEqual property="yab019" compareValue="2">
-   			SELECT aab001,aae140,YAE231, AAB121
-			  FROM XASI2.AB08
-			 WHERE AAB001 = #aab001#
-			   AND YAE517 = 'H01'
-			   AND YAB538 = '1'
-	           AND AAE140 = '06'
-			   AND AAE003 = (SELECT MAX(yae097) FROM XASI2.AB02 WHERE AAB001 = #aab001# AND aab051 = '1' AND AAE140 = '06')
+			FROM wsjb.IRAB08
+			WHERE AAB001 = #aab001#
+			AND YAE517 = 'H01'
+			AND AAE003 = #aae003#
+		</isEqual>
+		<isEqual property="yab019" compareValue="2">
+			SELECT aab001,aae140,YAE231, AAB121
+			FROM XASI2.AB08
+			WHERE AAB001 = #aab001#
+			AND YAE517 = 'H01'
+			AND YAB538 = '1'
+			AND AAE140 = '06'
+			AND AAE003 = (SELECT MAX(yae097) FROM XASI2.AB02 WHERE AAB001 = #aab001# AND aab051 = '1' AND AAE140 = '06')
 			UNION
 			SELECT aab001,aae140,YAE231, AAB121
-			  FROM XASI2.AB08A8
-			 WHERE AAB001 = #aab001#
-			   AND YAE517 = 'H01'
-			   AND YAB538 = '1'
-	           AND AAE140 = '06' 
-			   AND AAE003 = (SELECT MAX(yae097) FROM XASI2.AB02 WHERE AAB001 = #aab001# AND aab051 = '1' AND AAE140 = '06')
-   		</isEqual>
-    </select>
-    <!-- 获取最大做账期的申报情况 -->
-    <select id="getIrab08" parameterClass="map" resultClass="dto">
+			FROM XASI2.AB08A8
+			WHERE AAB001 = #aab001#
+			AND YAE517 = 'H01'
+			AND YAB538 = '1'
+			AND AAE140 = '06'
+			AND AAE003 = (SELECT MAX(yae097) FROM XASI2.AB02 WHERE AAB001 = #aab001# AND aab051 = '1' AND AAE140 = '06')
+		</isEqual>
+	</select>
+	<!-- 获取最大做账期的申报情况 -->
+	<select id="getIrab08" parameterClass="map" resultClass="dto">
         SELECT aae140,YAE231, AAB121
 		  FROM wsjb.IRAB08
 		 WHERE AAB001 = #aab001#
@@ -1156,7 +1156,7 @@
 				 ORDER BY X.AAE110 ASC, X.AAC003) A
 		    
     </select>
-    <select id="getEmpJS_2" parameterClass="map" resultClass="dto">
+	<select id="getEmpJS_2" parameterClass="map" resultClass="dto">
     	select rownum as sn,x.* from
     	(SELECT b.AAC003 AS AAC003,
 		       b.AAC002 AS AAC002,
@@ -1196,14 +1196,14 @@
 		  ORDER BY a.YAE110 DESC , a.YAE310 DESC ,a.YAE210 DESC,a.YAE410 DESC,a.YAE510 DESC,a.aac003) x
 		    
     </select>
-	
+
 	<select id="ab02Count" parameterClass="map" resultClass="java.util.HashMap">
   		SELECT to_char(COUNT(1)) as ab02count FROM XASI2.AB02 WHERE aab001 = #aab001# AND aab051 = '1'
     </select>
-    <select id="irad51a1Count" parameterClass="map" resultClass="java.lang.Integer">
+	<select id="irad51a1Count" parameterClass="map" resultClass="java.lang.Integer">
   		SELECT COUNT(1) as n FROM wsjb.irad51a1 WHERE aab001 = #aab001# AND substr(aae041,1,4) = #aae001# and yae031 ='1'
     </select>
-    <select id="tmp_ac42Ba" parameterClass="map" resultClass="java.util.HashMap">
+	<select id="tmp_ac42Ba" parameterClass="map" resultClass="java.util.HashMap">
   		SELECT NVL(SUM(YAC401) + SUM(YAC402) + SUM(YAC403) + SUM(YAC404) +
            SUM(YAC405) + SUM(YAC406) + SUM(YAC407) + SUM(YAC408) +
            SUM(YAC409) + SUM(YAC410) + SUM(YAC411) + SUM(YAC412),
@@ -1219,8 +1219,8 @@
 			           AND B.AAC001 = A.AAC001
 			           AND B.AAE110 IN ('备案'))
     </select>
-<!-- 插入临时表数据 -->
-    <insert id="insertAc40" parameterClass="java.util.Map">
+	<!-- 插入临时表数据 -->
+	<insert id="insertAc40" parameterClass="java.util.Map">
     	INSERT INTO wsjb.tmp_ac40(
     						 aaz002,
     						 aab001,
@@ -1263,237 +1263,237 @@
 		           A.AAC003
 	</select>
 	<!-- 批量修改基数-->
-	<parameterMap id="prc_UpdateAb05a1Map"  class="java.util.Map"> 
-	    <parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
-        <parameter property="prm_aaz002" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
-        <parameter property="prm_yae092" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
-        <parameter property="prm_aae001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
-        <parameter property="prm_iaa011" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
-        <parameter property="prm_yab019" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
-        <parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" /> 
-        <parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  /> 
-    </parameterMap>
-    <procedure id="yearApply_prc_UpdateAb05a1" parameterMap="prc_UpdateAb05a1Map">{call wsjb.pkg_YearApply.prc_UpdateAb05a1(?,?,?,?,?,?,?,?)} </procedure>
+	<parameterMap id="prc_UpdateAb05a1Map"  class="java.util.Map">
+		<parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="prm_aaz002" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="prm_yae092" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+		<parameter property="prm_aae001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+		<parameter property="prm_iaa011" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+		<parameter property="prm_yab019" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+		<parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" />
+		<parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  />
+	</parameterMap>
+	<procedure id="yearApply_prc_UpdateAb05a1" parameterMap="prc_UpdateAb05a1Map">{call wsjb.pkg_YearApply.prc_UpdateAb05a1(?,?,?,?,?,?,?,?)} </procedure>
 	<select id="getSEQ_AAZ002" resultClass="java.lang.String">
 		SELECT wsjb.seq_aaz002.nextval FROM dual
 	</select>
 	<!-- 单位补差信息 -->
 	<select id="getTMP_ac42_ab01" parameterClass="map" resultClass="java.util.HashMap">
 		<isEqual property="yab019" compareValue="1">
-		   select MAX(aab001) as aab001,
-		           aae140 as aae140,
-		       (sum(yac401) + sum(yac402) + sum(yac403) + sum(yac404) + sum(yac405) + sum(yac406) +
-           sum(yac407) + sum(yac408) + sum(yac409) + sum(yac410) + sum(yac411) + sum(yac412)) AS JSZC,
-		           sum(yac401) AS yac401,
-		           sum(yac402) AS yac402,
-		           sum(yac403) AS yac403,
-		           sum(yac404) AS yac404,
-		           sum(yac405) AS yac405,
-		           sum(yac406) AS yac406,
-		           sum(yac407) AS yac407,
-		           sum(yac408) AS yac408,
-		           sum(yac409) AS yac409,
-		           sum(yac410) AS yac410,
-		           sum(yac411) AS yac411,
-		           sum(yac412) AS yac412
-		     from wsjb.tmp_ac42 
-		    where aab001 = #aab001# 
-		      and aae001 = #aae001#
-     <![CDATA[and aae140 <> '06']]> 
-		    GROUP BY aae140 
-		    ORDER BY aae140 
+			select MAX(aab001) as aab001,
+			aae140 as aae140,
+			(sum(yac401) + sum(yac402) + sum(yac403) + sum(yac404) + sum(yac405) + sum(yac406) +
+			sum(yac407) + sum(yac408) + sum(yac409) + sum(yac410) + sum(yac411) + sum(yac412)) AS JSZC,
+			sum(yac401) AS yac401,
+			sum(yac402) AS yac402,
+			sum(yac403) AS yac403,
+			sum(yac404) AS yac404,
+			sum(yac405) AS yac405,
+			sum(yac406) AS yac406,
+			sum(yac407) AS yac407,
+			sum(yac408) AS yac408,
+			sum(yac409) AS yac409,
+			sum(yac410) AS yac410,
+			sum(yac411) AS yac411,
+			sum(yac412) AS yac412
+			from wsjb.tmp_ac42
+			where aab001 = #aab001#
+			and aae001 = #aae001#
+			<![CDATA[and aae140 <> '06']]>
+			GROUP BY aae140
+			ORDER BY aae140
 		</isEqual>
 		<isEqual property="yab019" compareValue="2">
 			select MAX(aab001) as aab001,
-		           aae140 as aae140,
-		       (sum(yac401) + sum(yac402) + sum(yac403) + sum(yac404) + sum(yac405) + sum(yac406) +
-           sum(yac407) + sum(yac408) + sum(yac409) + sum(yac410) + sum(yac411) + sum(yac412)) AS JSZC,
-		           sum(yac401) AS yac401,
-		           sum(yac402) AS yac402,
-		           sum(yac403) AS yac403,
-		           sum(yac404) AS yac404,
-		           sum(yac405) AS yac405,
-		           sum(yac406) AS yac406,
-		           sum(yac407) AS yac407,
-		           sum(yac408) AS yac408,
-		           sum(yac409) AS yac409,
-		           sum(yac410) AS yac410,
-		           sum(yac411) AS yac411,
-		           sum(yac412) AS yac412
-		     from wsjb.tmp_ac42 
-		    where aab001 = #aab001# 
-		      and aae001 = #aae001#
-              and aae140 = '06'
-		    GROUP BY aae140 
-		    ORDER BY aae140 
+			aae140 as aae140,
+			(sum(yac401) + sum(yac402) + sum(yac403) + sum(yac404) + sum(yac405) + sum(yac406) +
+			sum(yac407) + sum(yac408) + sum(yac409) + sum(yac410) + sum(yac411) + sum(yac412)) AS JSZC,
+			sum(yac401) AS yac401,
+			sum(yac402) AS yac402,
+			sum(yac403) AS yac403,
+			sum(yac404) AS yac404,
+			sum(yac405) AS yac405,
+			sum(yac406) AS yac406,
+			sum(yac407) AS yac407,
+			sum(yac408) AS yac408,
+			sum(yac409) AS yac409,
+			sum(yac410) AS yac410,
+			sum(yac411) AS yac411,
+			sum(yac412) AS yac412
+			from wsjb.tmp_ac42
+			where aab001 = #aab001#
+			and aae001 = #aae001#
+			and aae140 = '06'
+			GROUP BY aae140
+			ORDER BY aae140
 		</isEqual>
 	</select>
 	<!-- 个人补差信息 -->
 	<select id="getTMP_ac42" parameterClass="map" resultClass="java.util.HashMap">
 		<isEqual property="yab019" compareValue="1">
-		select (A.YAC401 + A.YAC402 + A.YAC403 + A.YAC404 + A.YAC405 + A.YAC406 +
-                A.YAC407 + A.YAC408 + A.YAC409 + A.YAC410 + A.YAC411 + A.YAC412) AS JSZC,
-		       a.aab001,
-		       a.aac001,
-		       a.aae140,
-		       a.yac401,
-		       a.yac402,
-		       a.yac403,
-		       a.yac404,
-		       a.yac405,
-		       a.yac406,
-		       a.yac407,
-		       a.yac408,
-		       a.yac409,
-		       a.yac410,
-		       a.yac411,
-		       a.yac412,
-		       a.aae013,
-		       b.aac002,
-               b.aac003 
-		from wsjb.tmp_ac42 a,xasi2.ac01k8 b  
-		where a.aac001 = b.aac001
-		and a.aae001 = b.aae001
-		and a.aab001 = b.aab001
-		and a.aab001 = #aab001# 
-		and a.aac001 = #aac001#
-		and a.aae001 = #aae001#
-<![CDATA[and a.aae140 <> '06']]>
-		ORDER BY A.aae140 
+			select (A.YAC401 + A.YAC402 + A.YAC403 + A.YAC404 + A.YAC405 + A.YAC406 +
+			A.YAC407 + A.YAC408 + A.YAC409 + A.YAC410 + A.YAC411 + A.YAC412) AS JSZC,
+			a.aab001,
+			a.aac001,
+			a.aae140,
+			a.yac401,
+			a.yac402,
+			a.yac403,
+			a.yac404,
+			a.yac405,
+			a.yac406,
+			a.yac407,
+			a.yac408,
+			a.yac409,
+			a.yac410,
+			a.yac411,
+			a.yac412,
+			a.aae013,
+			b.aac002,
+			b.aac003
+			from wsjb.tmp_ac42 a,xasi2.ac01k8 b
+			where a.aac001 = b.aac001
+			and a.aae001 = b.aae001
+			and a.aab001 = b.aab001
+			and a.aab001 = #aab001#
+			and a.aac001 = #aac001#
+			and a.aae001 = #aae001#
+			<![CDATA[and a.aae140 <> '06']]>
+			ORDER BY A.aae140
 		</isEqual>
 		<isEqual property="yab019" compareValue="2">
-		select (A.YAC401 + A.YAC402 + A.YAC403 + A.YAC404 + A.YAC405 + A.YAC406 +
-                A.YAC407 + A.YAC408 + A.YAC409 + A.YAC410 + A.YAC411 + A.YAC412) AS JSZC,
-		       a.aab001,
-		       a.aac001,
-		       a.aae140,
-		       a.yac401,
-		       a.yac402,
-		       a.yac403,
-		       a.yac404,
-		       a.yac405,
-		       a.yac406,
-		       a.yac407,
-		       a.yac408,
-		       a.yac409,
-		       a.yac410,
-		       a.yac411,
-		       a.yac412,
-		       a.aae013,
-		       b.aac002,
-               b.aac003 
-		from wsjb.tmp_ac42 a,XASI2.AC01 b  
-		where a.aac001 = b.aac001
-		and a.aab001 = #aab001# 
-		and a.aac001 = #aac001#
-		and a.aae001 = #aae001#
-<![CDATA[and a.aae140 = '06']]>
-		ORDER BY A.aae140 
+			select (A.YAC401 + A.YAC402 + A.YAC403 + A.YAC404 + A.YAC405 + A.YAC406 +
+			A.YAC407 + A.YAC408 + A.YAC409 + A.YAC410 + A.YAC411 + A.YAC412) AS JSZC,
+			a.aab001,
+			a.aac001,
+			a.aae140,
+			a.yac401,
+			a.yac402,
+			a.yac403,
+			a.yac404,
+			a.yac405,
+			a.yac406,
+			a.yac407,
+			a.yac408,
+			a.yac409,
+			a.yac410,
+			a.yac411,
+			a.yac412,
+			a.aae013,
+			b.aac002,
+			b.aac003
+			from wsjb.tmp_ac42 a,XASI2.AC01 b
+			where a.aac001 = b.aac001
+			and a.aab001 = #aab001#
+			and a.aac001 = #aac001#
+			and a.aae001 = #aae001#
+			<![CDATA[and a.aae140 = '06']]>
+			ORDER BY A.aae140
 		</isEqual>
 	</select>
 	<!-- 年审申报补差-->
-	<parameterMap id="prc_YearSalaryAdjustPadedMap"  class="java.util.Map"> 
-	    <parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
-	    <parameter property="prm_aac001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
-	    <parameter property="prm_aac040" jdbcType="NUMBER" javaType="java.math.BigDecimal" mode="IN"/>
-	    <parameter property="prm_aae001" jdbcType="NUMBER" javaType="java.lang.Integer" mode="IN" />
-	    <parameter property="prm_aae011" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
-        <parameter property="prm_yab139" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
-        <parameter property="prm_yab019" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
-        <parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" /> 
-        <parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  /> 
-    </parameterMap>
-    <procedure id="yearApply_prc_YearSalaryAdjustPaded" parameterMap="prc_YearSalaryAdjustPadedMap">{call wsjb.pkg_YearApply.prc_YearSalaryAdjustPaded(?,?,?,?,?,?,?,?,?)} </procedure>
+	<parameterMap id="prc_YearSalaryAdjustPadedMap"  class="java.util.Map">
+		<parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="prm_aac001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="prm_aac040" jdbcType="NUMBER" javaType="java.math.BigDecimal" mode="IN"/>
+		<parameter property="prm_aae001" jdbcType="NUMBER" javaType="java.lang.Integer" mode="IN" />
+		<parameter property="prm_aae011" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="prm_yab139" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+		<parameter property="prm_yab019" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+		<parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" />
+		<parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  />
+	</parameterMap>
+	<procedure id="yearApply_prc_YearSalaryAdjustPaded" parameterMap="prc_YearSalaryAdjustPadedMap">{call wsjb.pkg_YearApply.prc_YearSalaryAdjustPaded(?,?,?,?,?,?,?,?,?)} </procedure>
 	<!-- 撤销年审申报-->
-	<parameterMap id="prc_RByearInternetApplyMap"  class="java.util.Map"> 
-	    <parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
-        <parameter property="prm_yae092" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
-        <parameter property="prm_aae001" jdbcType="NUMBER" javaType="java.lang.Integer" mode="IN"  />
-        <parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" /> 
-        <parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  /> 
-    </parameterMap>
-    <procedure id="yearApply_prc_RByearInternetApply" parameterMap="prc_RByearInternetApplyMap">{call wsjb.pkg_YearApply.prc_RBYearInternetApply(?,?,?,?,?)} </procedure>
+	<parameterMap id="prc_RByearInternetApplyMap"  class="java.util.Map">
+		<parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="prm_yae092" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+		<parameter property="prm_aae001" jdbcType="NUMBER" javaType="java.lang.Integer" mode="IN"  />
+		<parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" />
+		<parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  />
+	</parameterMap>
+	<procedure id="yearApply_prc_RByearInternetApply" parameterMap="prc_RByearInternetApplyMap">{call wsjb.pkg_YearApply.prc_RBYearInternetApply(?,?,?,?,?)} </procedure>
 	<!-- 是否已经做过补差操作 -->
-   <select id="getBCCount" parameterClass="map"  resultClass="java.lang.Integer">
+	<select id="getBCCount" parameterClass="map"  resultClass="java.lang.Integer">
    SELECT count(1) as i FROM wsjb.irad51 WHERE aab001 = #aab001# and aae001 = #aae001# AND iaa006 = '1' and iaa011 = 'A05'
    </select>
 
 	<!-- 年审申报-->
-	<parameterMap id="prc_yearInternetApplyMap"  class="java.util.Map"> 
-	    <parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
-        <parameter property="prm_yae092" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
-        <parameter property="prm_aae001" jdbcType="NUMBER" javaType="java.lang.Integer" mode="IN"  />
-        <parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" /> 
-        <parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  /> 
-    </parameterMap>
-    <procedure id="yearApply_prc_yearInternetApply" parameterMap="prc_yearInternetApplyMap">{call wsjb.pkg_YearApply.prc_YearInternetApply(?,?,?,?,?)} </procedure>
-	
+	<parameterMap id="prc_yearInternetApplyMap"  class="java.util.Map">
+		<parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="prm_yae092" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+		<parameter property="prm_aae001" jdbcType="NUMBER" javaType="java.lang.Integer" mode="IN"  />
+		<parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" />
+		<parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  />
+	</parameterMap>
+	<procedure id="yearApply_prc_yearInternetApply" parameterMap="prc_yearInternetApplyMap">{call wsjb.pkg_YearApply.prc_YearInternetApply(?,?,?,?,?)} </procedure>
+
 	<select id="getAb05a1" parameterClass="map" resultClass="java.util.HashMap">
-		 SELECT B.YAB029 AS YAB029,
-				A.AAC001 AS AAC001,
-				A.AAB001 AS AAB001,
-				A.AAC002 AS AAC002,
-				A.AAC003 AS AAC003,
-				A.AAC009 AS AAC009,
-				A.YAC506 AS YAC506, <!-- 原缴费工资 -->
-				A.YAC507 AS YAC507, <!-- 原养老基数 -->
-				A.YAC508 AS YAC508_02, <!-- 原工伤基数 -->
-				A.YAC508 AS YAC508_04, <!-- 原失业基数 -->
-				A.YAC508 AS YAC508_03, <!-- 原医疗基数 -->
-				A.YAC508 AS YAC508_05, <!-- 原生育基数 -->
-				A.AAC040 AS AAC040,  <!-- 新缴费工资 -->
-				DECODE (A.AAE110, null, '', A.YAC004) AS YAC004,  <!-- 新养老基数 -->
-				DECODE(SIGN(#aae001#-2019),0,A.YAC004,1,A.YAC004,A.YAA333) AS YAA333_02,  <!-- 新工伤基数 -->
-				DECODE(SIGN(#aae001#-2019),0,A.YAC004,1,A.YAC004,A.YAA333) AS YAA333_04,  <!-- 新失业基数 -->
-				A.YAA333 AS YAA333_03,  <!-- 新医疗基数 -->
-				A.YAA333 AS YAA333_05,  <!-- 新生育基数 -->
-				A.AAE110 AS AAE110,
-				A.AAE210 AS AAE210,
-				A.AAE310 AS AAE310,
-				A.AAE410 AS AAE410,
-				A.AAE510 AS AAE510,
-				A.AAE311 AS AAE311,
-				A.AAE001 AS AAE001,
-				A.YAC503 AS YAC503,
-				A.YAC005 AS YAC005,
-				A.YAE092 AS YAE092,
-				A.AAE035 AS AAE035,
-				A.AAE011 AS AAE011,
-				A.AAE036 AS AAE036,
-				A.IAA002 AS IAA002,
-				A.YAE099 AS YAE099,
-				A.YAE110 AS YAE110,
-				A.YAE310 AS YAE310,
-				A.YAE210 AS YAE210,
-				A.YAE410 AS YAE410,
-				A.YAE510 AS YAE510,
-				A.YAE001 AS YAE001,
-				A.YAB019 AS YAB019
-		   FROM xasi2.ac01k8 A, XASI2.AC01A1 B ,XASI2.AC01 C
-		  WHERE A.AAC001 = B.AAC001(+)
-		    AND A.AAC001 = C.AAC001(+)
-		    AND A.AAB001 = #aab001#
-		    AND A.AAE001 = #aae001#
-		    AND A.YAB019 = '1'
-		  ORDER BY A.YAE110 DESC,
-		           A.YAE310 DESC,
-		           A.YAE210 DESC,
-		           A.YAE410 DESC,
-		           A.YAE510 DESC,
-		           A.AAC003
-   	</select>
+		SELECT B.YAB029 AS YAB029,
+		A.AAC001 AS AAC001,
+		A.AAB001 AS AAB001,
+		A.AAC002 AS AAC002,
+		A.AAC003 AS AAC003,
+		A.AAC009 AS AAC009,
+		A.YAC506 AS YAC506, <!-- 原缴费工资 -->
+		A.YAC507 AS YAC507, <!-- 原养老基数 -->
+		A.YAC508 AS YAC508_02, <!-- 原工伤基数 -->
+		A.YAC508 AS YAC508_04, <!-- 原失业基数 -->
+		A.YAC508 AS YAC508_03, <!-- 原医疗基数 -->
+		A.YAC508 AS YAC508_05, <!-- 原生育基数 -->
+		A.AAC040 AS AAC040,  <!-- 新缴费工资 -->
+		DECODE (A.AAE110, null, '', A.YAC004) AS YAC004,  <!-- 新养老基数 -->
+		DECODE(SIGN(#aae001#-2019),0,A.YAC004,1,A.YAC004,A.YAA333) AS YAA333_02,  <!-- 新工伤基数 -->
+		DECODE(SIGN(#aae001#-2019),0,A.YAC004,1,A.YAC004,A.YAA333) AS YAA333_04,  <!-- 新失业基数 -->
+		A.YAA333 AS YAA333_03,  <!-- 新医疗基数 -->
+		A.YAA333 AS YAA333_05,  <!-- 新生育基数 -->
+		A.AAE110 AS AAE110,
+		A.AAE210 AS AAE210,
+		A.AAE310 AS AAE310,
+		A.AAE410 AS AAE410,
+		A.AAE510 AS AAE510,
+		A.AAE311 AS AAE311,
+		A.AAE001 AS AAE001,
+		A.YAC503 AS YAC503,
+		A.YAC005 AS YAC005,
+		A.YAE092 AS YAE092,
+		A.AAE035 AS AAE035,
+		A.AAE011 AS AAE011,
+		A.AAE036 AS AAE036,
+		A.IAA002 AS IAA002,
+		A.YAE099 AS YAE099,
+		A.YAE110 AS YAE110,
+		A.YAE310 AS YAE310,
+		A.YAE210 AS YAE210,
+		A.YAE410 AS YAE410,
+		A.YAE510 AS YAE510,
+		A.YAE001 AS YAE001,
+		A.YAB019 AS YAB019
+		FROM xasi2.ac01k8 A, XASI2.AC01A1 B ,XASI2.AC01 C
+		WHERE A.AAC001 = B.AAC001(+)
+		AND A.AAC001 = C.AAC001(+)
+		AND A.AAB001 = #aab001#
+		AND A.AAE001 = #aae001#
+		AND A.YAB019 = '1'
+		ORDER BY A.YAE110 DESC,
+		A.YAE310 DESC,
+		A.YAE210 DESC,
+		A.YAE410 DESC,
+		A.YAE510 DESC,
+		A.AAC003
+	</select>
 
 	<!-- 更新基数 -->
 	<update id="updateAb05a1" parameterClass="map">
-		update xasi2.ac01k8 
-		   set aac040 = #aac040#, <!-- 新缴费工资 -->
-		       yac004 = #yac004#, <!-- 新省社平基数 -->
-		       yaa333 = #yaa333#, <!-- 新市社平基数 -->
-		       yaa444 = wsjb.pkg_common.fun_p_getcontributionbase(null,#aab001#,TRUNC(#aac040#,0),'0','04','1','1','999912',#yab003#) <!-- 新工伤缴费基数 -->
-		 where aab001 = #aab001#
-		   and aac001 = #aac001#
-		   and aae001 = #aae001#
-		   AND YAB019 = '1'		   
+		update xasi2.ac01k8
+		set aac040 = #aac040#, <!-- 新缴费工资 -->
+		yac004 = #yac004#, <!-- 新省社平基数 -->
+		yaa333 = #yaa333#, <!-- 新市社平基数 -->
+		yaa444 = wsjb.pkg_common.fun_p_getcontributionbase(null,#aab001#,TRUNC(#aac040#,0),'0','04','1','1','999912',#yab003#) <!-- 新工伤缴费基数 -->
+		where aab001 = #aab001#
+		and aac001 = #aac001#
+		and aae001 = #aae001#
+		AND YAB019 = '1'
 	</update>
 
 	<!-- 更新基数(2019)-->
@@ -1508,21 +1508,21 @@
 	<procedure id="yearApply_prc_UpdateAc01k8" parameterMap="prc_UpdateAc01k8Map">{call wsjb.pkg_YearApply.prc_UpdateAc01k8(?,?,?,?,?,?)} </procedure>
 
 	<!-- 做账期号 -->
-    <select id="getAae003_1" parameterClass="map" resultClass="java.lang.String">
+	<select id="getAae003_1" parameterClass="map" resultClass="java.lang.String">
     	SELECT to_char(MAX(aae003)) as yae097 FROM wsjb.irab08 WHERE AAB001 = #aab001# AND YAE517 = 'H01'
     </select>
-    <!-- 做账期号 -->
-    <select id="getAae003" parameterClass="map" resultClass="java.lang.String">
+	<!-- 做账期号 -->
+	<select id="getAae003" parameterClass="map" resultClass="java.lang.String">
     	SELECT to_char(MAX(yae097)) as yae097 FROM XASI2.AB02 WHERE AAB001 = #aab001# AND aab051 = '1'
     </select>
-    <!-- 年审做账期号 -->
-    <select id="getAae002" parameterClass="map" resultClass="java.util.HashMap">
+	<!-- 年审做账期号 -->
+	<select id="getAae002" parameterClass="map" resultClass="java.util.HashMap">
 		SELECT to_char(YAE097) as yae097,
        TO_CHAR(ADD_MONTHS(TO_DATE(TO_CHAR(YAE097), 'yyyyMM'), 1), 'yyyyMM') AS AAE002
 		  FROM xasi2.AA35
 		 WHERE AAE001 = #aae001#
     </select>
-<!-- 获取养老缴费基数低线 -->
+	<!-- 获取养老缴费基数低线 -->
 	<select id="getxx01" parameterClass="map" resultClass="java.lang.String">
   		select
 		to_char(wsjb.pkg_common.fun_p_getcontributionbase(null,#aab001#,1,'0','01','1','1',#aae002#,#yab139#)) as yac005
@@ -1546,23 +1546,23 @@
 		to_char(wsjb.pkg_common.fun_p_getcontributionbase(null,#aab001#,200000,'0','03','1','1',#aae002#,#yab139#)) as yac005
 		from dual
 	</select>
-	
+
 	<select id="queryIrad51" parameterClass="map" resultClass="java.util.HashMap">
    		SELECT * FROM wsjb.irad51 
    		WHERE aab001 = #aab001# 
    		and aae001 = #aae001# 
    		and iaa011 = 'A05' 
    	<![CDATA[	and iaa002<>'3' ]]>
-   	</select>
-   	<select id="queryIrad51_2" parameterClass="map" resultClass="java.util.HashMap">
+	</select>
+	<select id="queryIrad51_2" parameterClass="map" resultClass="java.util.HashMap">
    		SELECT * FROM wsjb.irad51 WHERE aab001 = #aab001# and aae001 = #aae001# and iaa011 = 'A16'
    	</select>
-   	
- 	<select id="getCount" parameterClass="map" resultClass="java.util.HashMap">
+
+	<select id="getCount" parameterClass="map" resultClass="java.util.HashMap">
   		SELECT to_char(COUNT(1)) as ab05a1count FROM xasi2.ac01k8 WHERE aab001 = #aab001# and aae001 = #aae001# and yab019 = '1'
    	</select>
-   	
-   	<!-- 下载年审资料 -->
+
+	<!-- 下载年审资料 -->
 	<select id="getfile" parameterClass="map" resultClass="iraa07Domain">
 		 SELECT FILENAME     ,
 				FILECONTENT  ,
@@ -1577,9 +1577,9 @@
 		  FROM 	WSJB.IRAA07
 	     WHERE 	iaz021 = '100000000001019'
 	</select>
-   	
-   	<!-- 养老台帐查询 -->
-    <select id="getIrac08a2List" parameterClass="map" resultClass="dto">
+
+	<!-- 养老台帐查询 -->
+	<select id="getIrac08a2List" parameterClass="map" resultClass="dto">
        SELECT aab001,
 			  aac001,
 			  aac003,
@@ -1591,38 +1591,38 @@
 	     FROM WSJB.IRAC08A2
 	    WHERE aab001 = #aab001# 
     </select>
-   	
-   <!-- 查询是否有审核通过记录 -->
-   <select id="get51count_1" parameterClass="map" resultClass="java.lang.Integer">
+
+	<!-- 查询是否有审核通过记录 -->
+	<select id="get51count_1" parameterClass="map" resultClass="java.lang.Integer">
   		SELECT COUNT(1) as i FROM WSJB.IRAD51 WHERE aab001 = #aab001# AND aae001 = #aae001# and iaa002 = '2' and iaa006 = '1' and iaa011 = 'A05'
    </select>
-   	
-   	
+
+
 	<!-- 查询单位人员年审原基数-->
-	<parameterMap id="prc_queryjishuMap"  class="java.util.Map"> 
-	    <parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
-        <parameter property="prm_yae092" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
-        <parameter property="prm_aae001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
-        <parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" /> 
-        <parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  /> 
-    </parameterMap>
-    <procedure id="yearApply_prc_queryjishu" parameterMap="prc_queryjishuMap">{call wsjb.pkg_YearApply.prc_queryjishu(?,?,?,?,?)} </procedure>
-    
-     <!-- 查询单养老单位人员年审原基数-->
-	<parameterMap id="prc_YLqueryjishuMap"  class="java.util.Map"> 
-	    <parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
-        <parameter property="prm_yae092" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
-        <parameter property="prm_aae001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
-        <parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" /> 
-        <parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  /> 
-    </parameterMap>
-    <procedure id="yearApply_prc_YLqueryjishu" parameterMap="prc_YLqueryjishuMap">{call wsjb.pkg_YearApply.prc_YLqueryjishu(?,?,?,?,?)} </procedure>
+	<parameterMap id="prc_queryjishuMap"  class="java.util.Map">
+		<parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="prm_yae092" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="prm_aae001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" />
+		<parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  />
+	</parameterMap>
+	<procedure id="yearApply_prc_queryjishu" parameterMap="prc_queryjishuMap">{call wsjb.pkg_YearApply.prc_queryjishu(?,?,?,?,?)} </procedure>
+
+	<!-- 查询单养老单位人员年审原基数-->
+	<parameterMap id="prc_YLqueryjishuMap"  class="java.util.Map">
+		<parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="prm_yae092" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+		<parameter property="prm_aae001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" />
+		<parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  />
+	</parameterMap>
+	<procedure id="yearApply_prc_YLqueryjishu" parameterMap="prc_YLqueryjishuMap">{call wsjb.pkg_YearApply.prc_YLqueryjishu(?,?,?,?,?)} </procedure>
 	<!-- 查询是否有年申报记录 -->
-   <select id="get51count" parameterClass="map" resultClass="java.lang.Integer">
+	<select id="get51count" parameterClass="map" resultClass="java.lang.Integer">
   		SELECT COUNT(1) as i FROM wsjb.irad51 WHERE aab001 = #aab001# AND aae001 = #aae001# and iaa002 = '1' and iaa011 = 'A05'
    </select>
-   <!-- 单位相关信息 -->
-    <select id="queryUnitInfo" parameterClass="map" resultClass="dto">
+	<!-- 单位相关信息 -->
+	<select id="queryUnitInfo" parameterClass="map" resultClass="dto">
     	SELECT B.AAB001 as aab001,
     		   A.AAB004 as aab004,
 		       B.AAB016 as aab016,
@@ -1633,85 +1633,85 @@
 		 WHERE A.AAB001 = B.AAB001
 		   AND B.YAE092 = #yae092#
     </select>
-    <!-- 年审补差明细 -->
-    <select id="zcmx" parameterClass="map" resultClass="dto">
-    	<isEqual property="aae140" compareValue="01">
-    		 SELECT
-		           B.AAC002 AS aac002,
-		           B.AAC003 AS aac003,
-		           A.AAC001 AS aac001,
-		           A.AAB001 AS aab001,
-		           A.AAE002 AS aae002,
-		           DECODE(YAC505, '021', '农业', '020', '城镇') AS aac009,
-		           A.AAE180 AS aae180,
-		           (A.YAB157 + A.YAB158) AS grjf,
-		           (A.AAB212 + A.AAB213) AS dwjf,
-		           (A.YAB157 + A.YAB158+A.AAB212 + A.AAB213) AS jfzh
-		      FROM wsjb.IRAC08a1 A, XASI2.AC01 B
-		     WHERE A.AAC001 = B.AAC001
-		       AND A.AAB001 = #aab001#
-		       AND AAE140 = '01'
-		       AND AAE002 >= to_number(#aae001#||'01')
-<![CDATA[      AND AAE002 <= to_number(#aae001#||'12') ]]>
-		       AND AAE143 = '05'
-		       <isEqual property="aae001" compareValue="2018">
-<![CDATA[	   AND (A.AAE036 < to_date('2018-06-29 22:00:00','yyyy-mm-dd hh24:mi:ss')  ]]>
-<![CDATA[	   or A.AAE036 > to_date('2018-07-04 00:00:00','yyyy-mm-dd hh24:mi:ss'))  ]]>
-			   </isEqual>
-		       ORDER BY aae002,aac003
-    	</isEqual>
-    	<isNotEqual property="aae140" compareValue="01">
-    		SELECT
-		           B.AAC002 AS aac002,
-		           B.AAC003 AS aac003,
-		           A.AAC001 AS aac001,
-		           A.AAB001 AS aab001,
-		           A.AAE002 AS aae002,
-		           DECODE(YAC505, '021', '农业', '020', '城镇') AS aac009,
-		           A.AAE180 AS aae180,
-		           (A.YAB157 + A.YAB158) AS grjf,
-		           (A.AAB212 + A.AAB213) AS dwjf,
-		           (A.YAB157 + A.YAB158+A.AAB212 + A.AAB213) AS jfzh
-		      FROM xasi2.AC08 A, XASI2.AC01 B
-		     WHERE A.AAC001 = B.AAC001
-		       AND A.AAB001 = #aab001#
-		       AND AAE140 = #aae140#
-			   AND aae076 in
-				       (select aae076
-				          from XASI2.AB08A8
-				         where aab001 = #aab001#
-				           and AAE140 = #aae140#
+	<!-- 年审补差明细 -->
+	<select id="zcmx" parameterClass="map" resultClass="dto">
+		<isEqual property="aae140" compareValue="01">
+			SELECT
+			B.AAC002 AS aac002,
+			B.AAC003 AS aac003,
+			A.AAC001 AS aac001,
+			A.AAB001 AS aab001,
+			A.AAE002 AS aae002,
+			DECODE(YAC505, '021', '农业', '020', '城镇') AS aac009,
+			A.AAE180 AS aae180,
+			(A.YAB157 + A.YAB158) AS grjf,
+			(A.AAB212 + A.AAB213) AS dwjf,
+			(A.YAB157 + A.YAB158+A.AAB212 + A.AAB213) AS jfzh
+			FROM wsjb.IRAC08a1 A, XASI2.AC01 B
+			WHERE A.AAC001 = B.AAC001
+			AND A.AAB001 = #aab001#
+			AND AAE140 = '01'
+			AND AAE002 >= to_number(#aae001#||'01')
+			<![CDATA[      AND AAE002 <= to_number(#aae001#||'12') ]]>
+			AND AAE143 = '05'
+			<isEqual property="aae001" compareValue="2018">
+				<![CDATA[	   AND (A.AAE036 < to_date('2018-06-29 22:00:00','yyyy-mm-dd hh24:mi:ss')  ]]>
+				<![CDATA[	   or A.AAE036 > to_date('2018-07-04 00:00:00','yyyy-mm-dd hh24:mi:ss'))  ]]>
+			</isEqual>
+			ORDER BY aae002,aac003
+		</isEqual>
+		<isNotEqual property="aae140" compareValue="01">
+			SELECT
+			B.AAC002 AS aac002,
+			B.AAC003 AS aac003,
+			A.AAC001 AS aac001,
+			A.AAB001 AS aab001,
+			A.AAE002 AS aae002,
+			DECODE(YAC505, '021', '农业', '020', '城镇') AS aac009,
+			A.AAE180 AS aae180,
+			(A.YAB157 + A.YAB158) AS grjf,
+			(A.AAB212 + A.AAB213) AS dwjf,
+			(A.YAB157 + A.YAB158+A.AAB212 + A.AAB213) AS jfzh
+			FROM xasi2.AC08 A, XASI2.AC01 B
+			WHERE A.AAC001 = B.AAC001
+			AND A.AAB001 = #aab001#
+			AND AAE140 = #aae140#
+			AND aae076 in
+			(select aae076
+			from XASI2.AB08A8
+			where aab001 = #aab001#
+			and AAE140 = #aae140#
 			<![CDATA[	   and AAE002 >= to_number(#aae001#||'01') ]]>
 			<![CDATA[	   AND AAE002 <= to_number(#aae001#||'12') ]]>
-				           and yae517 = 'H12'
-         <![CDATA[         and (yae550 < to_date('2018-06-29 22:00:00', 'yyyy-mm-dd hh24:mi:ss') or  ]]>
-		 <![CDATA[              yae550 > to_date('2018-07-04 00:00:00', 'yyyy-mm-dd hh24:mi:ss')))  ]]>
-		     UNION 
-		    SELECT
-		           B.AAC002 AS aac002,
-		           B.AAC003 AS aac003,
-		           A.AAC001 AS aac001,
-		           A.AAB001 AS aab001,
-		           A.AAE002 AS aae002,
-		           DECODE(YAC505, '021', '农业', '020', '城镇') AS aac009,
-		           A.AAE180 AS 缴费基数,
-		           (A.YAB157 + A.YAB158) AS grjf,
-		           (A.AAB212 + A.AAB213) AS dwjf,
-		           (A.YAB157 + A.YAB158+A.AAB212 + A.AAB213) AS jfzh
-		      FROM xasi2.AC08a1 A, XASI2.AC01 B
-		     WHERE A.AAC001 = B.AAC001
-		       AND A.AAB001 = #aab001#
-		       AND AAE140 = #aae140#
-		       AND AAE002 >= to_number(#aae001#||'01')
-<![CDATA[      AND AAE002 <= to_number(#aae001#||'12') ]]>
-		       AND AAE143 = '05'
-<![CDATA[	   AND (A.AAE036 < to_date('2018-06-29 22:00:00','yyyy-mm-dd hh24:mi:ss')  ]]>
-<![CDATA[	   or A.AAE036 > to_date('2018-07-04 00:00:00','yyyy-mm-dd hh24:mi:ss'))  ]]>
-		       ORDER BY aae002,aac003
-    	</isNotEqual>
-    </select>
-    
-    <select id="getIrac01Yl" parameterClass="map" resultClass="java.lang.Integer">
+			and yae517 = 'H12'
+			<![CDATA[         and (yae550 < to_date('2018-06-29 22:00:00', 'yyyy-mm-dd hh24:mi:ss') or  ]]>
+			<![CDATA[              yae550 > to_date('2018-07-04 00:00:00', 'yyyy-mm-dd hh24:mi:ss')))  ]]>
+			UNION
+			SELECT
+			B.AAC002 AS aac002,
+			B.AAC003 AS aac003,
+			A.AAC001 AS aac001,
+			A.AAB001 AS aab001,
+			A.AAE002 AS aae002,
+			DECODE(YAC505, '021', '农业', '020', '城镇') AS aac009,
+			A.AAE180 AS 缴费基数,
+			(A.YAB157 + A.YAB158) AS grjf,
+			(A.AAB212 + A.AAB213) AS dwjf,
+			(A.YAB157 + A.YAB158+A.AAB212 + A.AAB213) AS jfzh
+			FROM xasi2.AC08a1 A, XASI2.AC01 B
+			WHERE A.AAC001 = B.AAC001
+			AND A.AAB001 = #aab001#
+			AND AAE140 = #aae140#
+			AND AAE002 >= to_number(#aae001#||'01')
+			<![CDATA[      AND AAE002 <= to_number(#aae001#||'12') ]]>
+			AND AAE143 = '05'
+			<![CDATA[	   AND (A.AAE036 < to_date('2018-06-29 22:00:00','yyyy-mm-dd hh24:mi:ss')  ]]>
+			<![CDATA[	   or A.AAE036 > to_date('2018-07-04 00:00:00','yyyy-mm-dd hh24:mi:ss'))  ]]>
+			ORDER BY aae002,aac003
+		</isNotEqual>
+	</select>
+
+	<select id="getIrac01Yl" parameterClass="map" resultClass="java.lang.Integer">
 		 SELECT SUM(a) FROM (
 				SELECT aae310 AS a FROM irac01 WHERE aab001=#aab001# and iaa100=to_char(sysdate,'yyyyMM') AND aac001=#aac001#
 				UNION
@@ -1736,277 +1736,283 @@
 			 and   a.aae001 = #aae001#
 			 and   a.aac001 = #aac001#
 		</update>
-		<!-- 是否是重点审核单位(年度写死) -->
+
+	<!-- 是否是重点审核单位(年度写死) -->
 	<select id="getIrad54Count" parameterClass="map" resultClass="java.lang.Integer">
 		SELECT COUNT(1) as k FROM wsjb.irad54 WHERE aab001 = #aab001# AND iaa011 = 'A05' and aae001 = 2019
-	</select>	
-	
+	</select>
+
+	<!-- 是否是基数降低超出比例单位 -->
+	<select id="getIrad54_1Count" parameterClass="map" resultClass="java.lang.Integer">
+		SELECT COUNT(1) as k FROM wsjb.irad54 WHERE aab001 = #aab001# AND iaa011 = 'A05-1' and aae001 = #aae001#
+	</select>
+
 	<!-- 年审校验存储过程 -->
-	<parameterMap id="prc_p_checkInfoByYearMap"  class="java.util.Map"> 
-	    <parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
-        <parameter property="prm_yab139" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
-        <parameter property="prm_aae001" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
-        <parameter property="prm_aae002" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
-        <parameter property="prm_disabledBtn" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
-        <parameter property="prm_msg" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
-        <parameter property="prm_dxby01" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
-        <parameter property="prm_gxby01" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
-        <parameter property="prm_dxby03" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
-        <parameter property="prm_gxby03" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
-        <parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" /> 
-        <parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  /> 
-    </parameterMap>
-    <procedure id="prc_p_checkInfoByYear" parameterMap="prc_p_checkInfoByYearMap">
-    {call wsjb.pkg_P_Validate.prc_p_checkInfoByYear(?,?,?,?,?,?,?,?,?,?,?,?)}
-     </procedure>
-   <select id="getIrac01c1Count" parameterClass="map" resultClass="java.lang.Integer">
+	<parameterMap id="prc_p_checkInfoByYearMap"  class="java.util.Map">
+		<parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="prm_yab139" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+		<parameter property="prm_aae001" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
+		<parameter property="prm_aae002" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
+		<parameter property="prm_disabledBtn" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
+		<parameter property="prm_msg" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
+		<parameter property="prm_dxby01" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
+		<parameter property="prm_gxby01" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
+		<parameter property="prm_dxby03" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
+		<parameter property="prm_gxby03" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
+		<parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" />
+		<parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  />
+	</parameterMap>
+	<procedure id="prc_p_checkInfoByYear" parameterMap="prc_p_checkInfoByYearMap">
+		{call wsjb.pkg_P_Validate.prc_p_checkInfoByYear(?,?,?,?,?,?,?,?,?,?,?,?)}
+	</procedure>
+	<select id="getIrac01c1Count" parameterClass="map" resultClass="java.lang.Integer">
 		SELECT COUNT(1) as k FROM wsjb.irac01c1 WHERE aab001 = #aab001# AND aac002 = #aac002# and yab029 = #aac001# and yae031='1' and substr(iaa100,1,4)=#aae001#
 	</select>
 	<!-- 数据清除-->
-	<parameterMap id="prc_YearSalaryClearMap"  class="java.util.Map"> 
-	    <parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
-        <parameter property="prm_aae001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
-        <parameter property="prm_aae011" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
-        <parameter property="prm_flag" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"  />
-        <parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" /> 
-        <parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  /> 
-    </parameterMap>
-    <procedure id="prc_YearSalaryClear" parameterMap="prc_YearSalaryClearMap">{call wsjb.pkg_YearApply.prc_YearSalaryClear(?,?,?,?,?,?)} </procedure>
-		<!-- 是否是重点审核单位(年度写死) -->
+	<parameterMap id="prc_YearSalaryClearMap"  class="java.util.Map">
+		<parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="prm_aae001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+		<parameter property="prm_aae011" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+		<parameter property="prm_flag" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"  />
+		<parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" />
+		<parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  />
+	</parameterMap>
+	<procedure id="prc_YearSalaryClear" parameterMap="prc_YearSalaryClearMap">{call wsjb.pkg_YearApply.prc_YearSalaryClear(?,?,?,?,?,?)} </procedure>
+	<!-- 是否是重点审核单位(年度写死) -->
 	<select id="getIrad56Count" parameterClass="map" resultClass="java.lang.Integer">
 		SELECT COUNT(1) as k FROM wsjb.irad56 WHERE aab001 = #aab001# 
-	</select>	
-	
-	  <!-- 年审二次补差明细 -->
-    <select id="zcmx1" parameterClass="map" resultClass="dto">
-    	<isEqual property="aae140" compareValue="01">
-    		 SELECT
-		           B.AAC002 AS aac002,
-		           B.AAC003 AS aac003,
-		           A.AAC001 AS aac001,
-		           A.AAB001 AS aab001,
-		           A.AAE002 AS aae002,
-		           DECODE(YAC505, '021', '农业', '020', '城镇') AS aac009,
-		           A.AAE180 AS aae180,
-		           (A.YAB157 + A.YAB158) AS grjf,
-		           (A.AAB212 + A.AAB213) AS dwjf,
-		           (A.YAB157 + A.YAB158+A.AAB212 + A.AAB213) AS jfzh
-		      FROM wsjb.IRAC08a1 A, XASI2.AC01 B
-		     WHERE A.AAC001 = B.AAC001
-		       AND A.AAB001 = #aab001#
-		       AND AAE140 = '01'
-<![CDATA[	   AND AAE002 >= to_number(#aae001#||'01') ]]>
-<![CDATA[      AND AAE002 <= to_number(#aae001#||'12') ]]>
-		       AND AAE143 = '05'
-<![CDATA[	   AND A.AAE036 > to_date('2018-06-29 22:00:00','yyyy-mm-dd hh24:mi:ss')  ]]>
-<![CDATA[	   AND A.AAE036 < to_date('2018-07-04 00:00:00','yyyy-mm-dd hh24:mi:ss')  ]]>
-		       ORDER BY aae002,aac003
-    	</isEqual>
-    	<isNotEqual property="aae140" compareValue="01">
-    		SELECT
-		           B.AAC002 AS aac002,
-		           B.AAC003 AS aac003,
-		           A.AAC001 AS aac001,
-		           A.AAB001 AS aab001,
-		           A.AAE002 AS aae002,
-		           DECODE(YAC505, '021', '农业', '020', '城镇') AS aac009,
-		           A.AAE180 AS aae180,
-		           (A.YAB157 + A.YAB158) AS grjf,
-		           (A.AAB212 + A.AAB213) AS dwjf,
-		           (A.YAB157 + A.YAB158+A.AAB212 + A.AAB213) AS jfzh
-		      FROM xasi2.AC08 A, XASI2.AC01 B
-		     WHERE A.AAC001 = B.AAC001
-		       AND A.AAB001 = #aab001#
-		       AND AAE140 = #aae140#
-			   AND aae076 in
-				       (select aae076
-				          from XASI2.AB08A8
-				         where aab001 = #aab001#
-				           and AAE140 = #aae140#
+	</select>
+
+	<!-- 年审二次补差明细 -->
+	<select id="zcmx1" parameterClass="map" resultClass="dto">
+		<isEqual property="aae140" compareValue="01">
+			SELECT
+			B.AAC002 AS aac002,
+			B.AAC003 AS aac003,
+			A.AAC001 AS aac001,
+			A.AAB001 AS aab001,
+			A.AAE002 AS aae002,
+			DECODE(YAC505, '021', '农业', '020', '城镇') AS aac009,
+			A.AAE180 AS aae180,
+			(A.YAB157 + A.YAB158) AS grjf,
+			(A.AAB212 + A.AAB213) AS dwjf,
+			(A.YAB157 + A.YAB158+A.AAB212 + A.AAB213) AS jfzh
+			FROM wsjb.IRAC08a1 A, XASI2.AC01 B
+			WHERE A.AAC001 = B.AAC001
+			AND A.AAB001 = #aab001#
+			AND AAE140 = '01'
+			<![CDATA[	   AND AAE002 >= to_number(#aae001#||'01') ]]>
+			<![CDATA[      AND AAE002 <= to_number(#aae001#||'12') ]]>
+			AND AAE143 = '05'
+			<![CDATA[	   AND A.AAE036 > to_date('2018-06-29 22:00:00','yyyy-mm-dd hh24:mi:ss')  ]]>
+			<![CDATA[	   AND A.AAE036 < to_date('2018-07-04 00:00:00','yyyy-mm-dd hh24:mi:ss')  ]]>
+			ORDER BY aae002,aac003
+		</isEqual>
+		<isNotEqual property="aae140" compareValue="01">
+			SELECT
+			B.AAC002 AS aac002,
+			B.AAC003 AS aac003,
+			A.AAC001 AS aac001,
+			A.AAB001 AS aab001,
+			A.AAE002 AS aae002,
+			DECODE(YAC505, '021', '农业', '020', '城镇') AS aac009,
+			A.AAE180 AS aae180,
+			(A.YAB157 + A.YAB158) AS grjf,
+			(A.AAB212 + A.AAB213) AS dwjf,
+			(A.YAB157 + A.YAB158+A.AAB212 + A.AAB213) AS jfzh
+			FROM xasi2.AC08 A, XASI2.AC01 B
+			WHERE A.AAC001 = B.AAC001
+			AND A.AAB001 = #aab001#
+			AND AAE140 = #aae140#
+			AND aae076 in
+			(select aae076
+			from XASI2.AB08A8
+			where aab001 = #aab001#
+			and AAE140 = #aae140#
 			<![CDATA[	   and AAE002 >= to_number(#aae001#||'01') ]]>
 			<![CDATA[	   AND AAE002 <= to_number(#aae001#||'12') ]]>
-				           and yae517 = 'H12'
-         <![CDATA[         and (yae550 > to_date('2018-06-29 22:00:00', 'yyyy-mm-dd hh24:mi:ss') and  ]]>
-		 <![CDATA[              yae550 < to_date('2018-07-04 00:00:00', 'yyyy-mm-dd hh24:mi:ss')))  ]]>
-		     UNION 
-		    SELECT
-		           B.AAC002 AS aac002,
-		           B.AAC003 AS aac003,
-		           A.AAC001 AS aac001,
-		           A.AAB001 AS aab001,
-		           A.AAE002 AS aae002,
-		           DECODE(YAC505, '021', '农业', '020', '城镇') AS aac009,
-		           A.AAE180 AS 缴费基数,
-		           (A.YAB157 + A.YAB158) AS grjf,
-		           (A.AAB212 + A.AAB213) AS dwjf,
-		           (A.YAB157 + A.YAB158+A.AAB212 + A.AAB213) AS jfzh
-		      FROM xasi2.AC08a1 A, XASI2.AC01 B
-		     WHERE A.AAC001 = B.AAC001
-		       AND A.AAB001 = #aab001#
-		       AND AAE140 = #aae140#
-<![CDATA[	   AND AAE002 >= to_number(#aae001#||'01') ]]>
-<![CDATA[      AND AAE002 <= to_number(#aae001#||'12') ]]>
-		       AND AAE143 = '05'
-<![CDATA[	   AND A.AAE036 > to_date('2018-06-29 22:00:00','yyyy-mm-dd hh24:mi:ss')  ]]>
-<![CDATA[	   AND A.AAE036 < to_date('2018-07-04 00:00:00','yyyy-mm-dd hh24:mi:ss')  ]]>
-		       ORDER BY aae002,aac003
-    	</isNotEqual>
-    </select>
-    
-    
-    <!-- 根据做帐期号查询单位的二次补差信息 -->
+			and yae517 = 'H12'
+			<![CDATA[         and (yae550 > to_date('2018-06-29 22:00:00', 'yyyy-mm-dd hh24:mi:ss') and  ]]>
+			<![CDATA[              yae550 < to_date('2018-07-04 00:00:00', 'yyyy-mm-dd hh24:mi:ss')))  ]]>
+			UNION
+			SELECT
+			B.AAC002 AS aac002,
+			B.AAC003 AS aac003,
+			A.AAC001 AS aac001,
+			A.AAB001 AS aab001,
+			A.AAE002 AS aae002,
+			DECODE(YAC505, '021', '农业', '020', '城镇') AS aac009,
+			A.AAE180 AS 缴费基数,
+			(A.YAB157 + A.YAB158) AS grjf,
+			(A.AAB212 + A.AAB213) AS dwjf,
+			(A.YAB157 + A.YAB158+A.AAB212 + A.AAB213) AS jfzh
+			FROM xasi2.AC08a1 A, XASI2.AC01 B
+			WHERE A.AAC001 = B.AAC001
+			AND A.AAB001 = #aab001#
+			AND AAE140 = #aae140#
+			<![CDATA[	   AND AAE002 >= to_number(#aae001#||'01') ]]>
+			<![CDATA[      AND AAE002 <= to_number(#aae001#||'12') ]]>
+			AND AAE143 = '05'
+			<![CDATA[	   AND A.AAE036 > to_date('2018-06-29 22:00:00','yyyy-mm-dd hh24:mi:ss')  ]]>
+			<![CDATA[	   AND A.AAE036 < to_date('2018-07-04 00:00:00','yyyy-mm-dd hh24:mi:ss')  ]]>
+			ORDER BY aae002,aac003
+		</isNotEqual>
+	</select>
+
+
+	<!-- 根据做帐期号查询单位的二次补差信息 -->
 	<select id="getInsPayInfo1" parameterClass="map" resultClass="dto">
 		SELECT P.AAE140,
-              MAX(P.YAB538) AS YAB538,
-              SUM(P.AAB121) AS AAB121,
-              SUM(P.AAB120) AS AAB120,
-              SUM(P.AAB156) AS AAB156,
-              (SELECT COUNT(1)
-                 FROM wsjb.TMP_AC43 A
-                WHERE A.AAB001 = #aab001#
-                  AND A.AAE001 = #aae001#
-                  AND A.AAE140 = P.AAE140
-                  AND (A.YAC401 + A.YAC402 + A.YAC403 + A.YAC404 + A.YAC405 +
-                      A.YAC406 + A.YAC407 + A.YAC408 + A.YAC409 + A.YAC410 +
-<![CDATA[             A.YAC411 + A.YAC412) <> 0) AS YAE231, ]]>
-              SUM(P.PAY_U) AS PAY_U,
-              SUM(P.PAY_P) AS PAY_P,
-              SUM(P.PAY_A) AS PAY_A,
-              MAX(P.AAE076) AS AAE076
-         FROM (SELECT A.AAE140,
-                      A.YAB538,
-                      NVL(A.AAB121, 0.0) AS AAB121,
-                      NVL(A.AAB120, 0.0) AS AAB120,
-                      NVL(A.AAB156, 0.0) AS AAB156,
-                      NVL(A.YAE231, 0) AS YAE231,
-                      (NVL(A.AAB151, 0.0) + NVL(A.AAB152, 0.0)) AS PAY_U,
-                      (NVL(A.AAB150, 0.0) + NVL(A.YAB031, 0.0)) AS PAY_P,
-                      (NVL(A.AAB151, 0.0) + NVL(A.AAB152, 0.0) +
-                      NVL(A.AAB150, 0.0) + NVL(A.YAB031, 0.0)) AS PAY_A,
-                      A.AAE076
-                 FROM XASI2.AB08 A
-                WHERE AAB001 = #aab001#
-                  AND (A.YAB538 = '1' OR A.AAE140 != '03')
-                  <isNotEmpty prepend="AND" property="yae010">
-				    a.yae010 = '1'
-				 </isNotEmpty>
-                  AND A.YAE517 = 'H12'
-  <![CDATA[       AND A.YAB222 <> '100000000001' ]]> 
-  <!--               AND A.AAE003 = #aae003#  -->   
-  <![CDATA[       AND A.AAE036 > to_date('2018-06-29 22:00:00','yyyy-mm-dd hh24:mi:ss') ]]> 
-  <![CDATA[    AND A.AAE036 < to_date('2018-07-04 00:00:00','yyyy-mm-dd hh24:mi:ss') ]]>
-               UNION
-               SELECT A.AAE140,
-                      A.YAB538,
-                      NVL(A.AAB121, 0.0) AS AAB121,
-                      NVL(A.AAB120, 0.0) AS AAB120,
-                      NVL(A.AAB156, 0.0) AS AAB156,
-                      NVL(A.YAE231, 0) AS YAE231,
-                      (NVL(A.AAB151, 0.0) + NVL(A.AAB152, 0.0)) AS PAY_U,
-                      (NVL(A.AAB150, 0.0) + NVL(A.YAB031, 0.0)) AS PAY_P,
-                      (NVL(A.AAB151, 0.0) + NVL(A.AAB152, 0.0) +
-                      NVL(A.AAB150, 0.0) + NVL(A.YAB031, 0.0)) AS PAY_A,
-                      A.AAE076 AS AAE076
-                 FROM XASI2.AB08A8 A
-                WHERE AAB001 = #aab001#
-                  AND (A.YAB538 = '1' OR A.AAE140 != '03')
-                  <isNotEmpty prepend="AND" property="yae010">
-				   a.yae010 = '1'
-				  </isNotEmpty>
-                  AND A.YAE517 in ('H17','H12')
-  <![CDATA[       AND A.YAB222 <> '100000000001' ]]>
-  <!--            AND A.AAE003 = #aae003#  -->
-    <![CDATA[     AND A.yae550 > to_date('2018-06-29 22:00:00','yyyy-mm-dd hh24:mi:ss') ]]> 
-    <![CDATA[    AND A.yae550 < to_date('2018-07-04 00:00:00','yyyy-mm-dd hh24:mi:ss') ]]>
-                  ) P
-      <![CDATA[   WHERE P.AAE140 <> '06']]>
-       <isNotEmpty prepend="AND" property="aae140">
-       		<![CDATA[ aae140 IN ($aae140$) ]]>
-        </isNotEmpty>
-                  GROUP BY P.AAE140
+		MAX(P.YAB538) AS YAB538,
+		SUM(P.AAB121) AS AAB121,
+		SUM(P.AAB120) AS AAB120,
+		SUM(P.AAB156) AS AAB156,
+		(SELECT COUNT(1)
+		FROM wsjb.TMP_AC43 A
+		WHERE A.AAB001 = #aab001#
+		AND A.AAE001 = #aae001#
+		AND A.AAE140 = P.AAE140
+		AND (A.YAC401 + A.YAC402 + A.YAC403 + A.YAC404 + A.YAC405 +
+		A.YAC406 + A.YAC407 + A.YAC408 + A.YAC409 + A.YAC410 +
+		<![CDATA[             A.YAC411 + A.YAC412) <> 0) AS YAE231, ]]>
+		SUM(P.PAY_U) AS PAY_U,
+		SUM(P.PAY_P) AS PAY_P,
+		SUM(P.PAY_A) AS PAY_A,
+		MAX(P.AAE076) AS AAE076
+		FROM (SELECT A.AAE140,
+		A.YAB538,
+		NVL(A.AAB121, 0.0) AS AAB121,
+		NVL(A.AAB120, 0.0) AS AAB120,
+		NVL(A.AAB156, 0.0) AS AAB156,
+		NVL(A.YAE231, 0) AS YAE231,
+		(NVL(A.AAB151, 0.0) + NVL(A.AAB152, 0.0)) AS PAY_U,
+		(NVL(A.AAB150, 0.0) + NVL(A.YAB031, 0.0)) AS PAY_P,
+		(NVL(A.AAB151, 0.0) + NVL(A.AAB152, 0.0) +
+		NVL(A.AAB150, 0.0) + NVL(A.YAB031, 0.0)) AS PAY_A,
+		A.AAE076
+		FROM XASI2.AB08 A
+		WHERE AAB001 = #aab001#
+		AND (A.YAB538 = '1' OR A.AAE140 != '03')
+		<isNotEmpty prepend="AND" property="yae010">
+			a.yae010 = '1'
+		</isNotEmpty>
+		AND A.YAE517 = 'H12'
+		<![CDATA[       AND A.YAB222 <> '100000000001' ]]>
+		<!--               AND A.AAE003 = #aae003#  -->
+		<![CDATA[       AND A.AAE036 > to_date('2018-06-29 22:00:00','yyyy-mm-dd hh24:mi:ss') ]]>
+		<![CDATA[    AND A.AAE036 < to_date('2018-07-04 00:00:00','yyyy-mm-dd hh24:mi:ss') ]]>
+		UNION
+		SELECT A.AAE140,
+		A.YAB538,
+		NVL(A.AAB121, 0.0) AS AAB121,
+		NVL(A.AAB120, 0.0) AS AAB120,
+		NVL(A.AAB156, 0.0) AS AAB156,
+		NVL(A.YAE231, 0) AS YAE231,
+		(NVL(A.AAB151, 0.0) + NVL(A.AAB152, 0.0)) AS PAY_U,
+		(NVL(A.AAB150, 0.0) + NVL(A.YAB031, 0.0)) AS PAY_P,
+		(NVL(A.AAB151, 0.0) + NVL(A.AAB152, 0.0) +
+		NVL(A.AAB150, 0.0) + NVL(A.YAB031, 0.0)) AS PAY_A,
+		A.AAE076 AS AAE076
+		FROM XASI2.AB08A8 A
+		WHERE AAB001 = #aab001#
+		AND (A.YAB538 = '1' OR A.AAE140 != '03')
+		<isNotEmpty prepend="AND" property="yae010">
+			a.yae010 = '1'
+		</isNotEmpty>
+		AND A.YAE517 in ('H17','H12')
+		<![CDATA[       AND A.YAB222 <> '100000000001' ]]>
+		<!--            AND A.AAE003 = #aae003#  -->
+		<![CDATA[     AND A.yae550 > to_date('2018-06-29 22:00:00','yyyy-mm-dd hh24:mi:ss') ]]>
+		<![CDATA[    AND A.yae550 < to_date('2018-07-04 00:00:00','yyyy-mm-dd hh24:mi:ss') ]]>
+		) P
+		<![CDATA[   WHERE P.AAE140 <> '06']]>
+		<isNotEmpty prepend="AND" property="aae140">
+			<![CDATA[ aae140 IN ($aae140$) ]]>
+		</isNotEmpty>
+		GROUP BY P.AAE140
 	</select>
-	
+
 	<!-- 养老补差 -->
 	<select id="getYLInsInfo1" parameterClass="map" resultClass="dto">
-		  SELECT A.AAE140,
-	             (SELECT COUNT(distinct aac001) 
-	                 FROM wsjb.irac08a1 
-	                where AAB001 = #aab001#  
-	                  and AAE140 = '01'
-	<!--  		      and AAE003 = #aae003#   -->   
-	                  and aae143 = '05' 
-	<![CDATA[         and AAE036 > to_date('2018-06-29 22:00:00','yyyy-mm-dd hh24:mi:ss') ]]>
-	<![CDATA[    	  and AAE036 < to_date('2018-07-04 00:00:00','yyyy-mm-dd hh24:mi:ss')) as YAE231,]]>
-		         SUM(A.AAB120) AS AAB120,
-		         SUM(A.AAB121) AS AAB121,
-		         MAX(A.AAE076) AS AAE076,
-		         MAX(A.YAB538) AS YAB538,
-		         SUM(A.AAB150) AS PAY_P,
-		         SUM(A.AAB152) AS PAY_U,
-		         SUM((A.AAB150 + A.AAB152)) AS PAY_A,
-		         SUM(A.AAB156) AS AAB156
-		    FROM wsjb.IRAB08 A
-		   WHERE 1=1
-		    <isNotEmpty prepend="AND" property="aae140">
-       	    	<![CDATA[ aae140 IN ($aae140$) ]]>
-            </isNotEmpty>
-		    <isNotEmpty prepend="AND" property="yae010">
-				a.yae010 = '1'
-			</isNotEmpty>
-		     AND A.AAB001 = #aab001#
-		<!--    AND A.AAE003 = #aae003# -->   
-		     AND A.YAE517 IN ('H12', 'H17')
-<![CDATA[    AND A.AAE036 > to_date('2018-06-29 22:00:00','yyyy-mm-dd hh24:mi:ss') ]]>
-<![CDATA[    AND A.AAE036 < to_date('2018-07-04 00:00:00','yyyy-mm-dd hh24:mi:ss') ]]>
-		   GROUP BY A.AAE140
+		SELECT A.AAE140,
+		(SELECT COUNT(distinct aac001)
+		FROM wsjb.irac08a1
+		where AAB001 = #aab001#
+		and AAE140 = '01'
+		<!--  		      and AAE003 = #aae003#   -->
+		and aae143 = '05'
+		<![CDATA[         and AAE036 > to_date('2018-06-29 22:00:00','yyyy-mm-dd hh24:mi:ss') ]]>
+		<![CDATA[    	  and AAE036 < to_date('2018-07-04 00:00:00','yyyy-mm-dd hh24:mi:ss')) as YAE231,]]>
+		SUM(A.AAB120) AS AAB120,
+		SUM(A.AAB121) AS AAB121,
+		MAX(A.AAE076) AS AAE076,
+		MAX(A.YAB538) AS YAB538,
+		SUM(A.AAB150) AS PAY_P,
+		SUM(A.AAB152) AS PAY_U,
+		SUM((A.AAB150 + A.AAB152)) AS PAY_A,
+		SUM(A.AAB156) AS AAB156
+		FROM wsjb.IRAB08 A
+		WHERE 1=1
+		<isNotEmpty prepend="AND" property="aae140">
+			<![CDATA[ aae140 IN ($aae140$) ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="yae010">
+			a.yae010 = '1'
+		</isNotEmpty>
+		AND A.AAB001 = #aab001#
+		<!--    AND A.AAE003 = #aae003# -->
+		AND A.YAE517 IN ('H12', 'H17')
+		<![CDATA[    AND A.AAE036 > to_date('2018-06-29 22:00:00','yyyy-mm-dd hh24:mi:ss') ]]>
+		<![CDATA[    AND A.AAE036 < to_date('2018-07-04 00:00:00','yyyy-mm-dd hh24:mi:ss') ]]>
+		GROUP BY A.AAE140
 	</select>
-	
-		<!-- 养老补差人员列表 -->
+
+	<!-- 养老补差人员列表 -->
 	<select id="getAc02List" parameterClass="map" resultClass="dto">
 		select aac001,
-          	   aac002,
-          	   aac003,
-          	   aac009,
-               aab001,
-               yac506,
-    <![CDATA[  (case when yac506 <= 3082 then 3082 when yac506 >= 16947 then 16947 else yac506 end) as yac507, ]]>
-    <![CDATA[  (case when yac506 <= 3481 then 3481 when yac506 >= 17402 then 17402 else yac506 end) as yac508, ]]>
-               yac503,
-               aac040,
-   <![CDATA[   (case when aac040 <= 3372 then 3372 when aac040 >= 16858 then 16858 else aac040 end) as yac004, ]]>
-   <![CDATA[   (case when aac040 <= 3889 then 3889 when aac040 >= 19443 then 19443 else aac040 end) as yaa333, ]]>
-               yac005
-          from (select a.aac001,
-          		       e.aac002,
-          		       e.aac003,
-          		       e.aac009,
-                       a.aab001,
-                       max(aac040) AS yac506, 	<!-- 原缴费工资 -->
-                       0 AS yac507, 			<!--原养老基数-->
-                       0 AS yac508, 			<!--原缴费基数-->
-                       '0' AS yac503, 			<!--工资类别-->
-                       max(aac040) as aac040,
-                       0 AS yac004, 			<!--变更后养老缴费基数-->
-                       0 AS yaa333, 			<!--变更后缴费基数-->
-                       max(aac040) AS yac005 	<!--工伤缴费工资-->
-                  from xasi2.ac02  a,XASI2.AC01 e
-                 where a.aac001 = e.aac001
-                   and a.aab001 = #aab001#
-                   and a.aac031 = '1'
-                   and exists (select 1
-		                         from xasi2.kc01 b
-		                        where a.aac001 = b.aac001
-		                          and akc021 = '11')
-                   and not exists (select 1
-                          			 from xasi2.ac02_zy b
-                         			where a.aac001 = b.aac001)
-                   and a.aae140 not in ('06', '07', '08')
-    <![CDATA[      and (a.aac040 < #aac040_1# or a.aac040 > #aac040_2#)  ]]>
-                 group by a.aac001, a.aab001,e.aac002,e.aac003,e.aac009
-                 )
-                
+		aac002,
+		aac003,
+		aac009,
+		aab001,
+		yac506,
+		<![CDATA[  (case when yac506 <= 3082 then 3082 when yac506 >= 16947 then 16947 else yac506 end) as yac507, ]]>
+		<![CDATA[  (case when yac506 <= 3481 then 3481 when yac506 >= 17402 then 17402 else yac506 end) as yac508, ]]>
+		yac503,
+		aac040,
+		<![CDATA[   (case when aac040 <= 3372 then 3372 when aac040 >= 16858 then 16858 else aac040 end) as yac004, ]]>
+		<![CDATA[   (case when aac040 <= 3889 then 3889 when aac040 >= 19443 then 19443 else aac040 end) as yaa333, ]]>
+		yac005
+		from (select a.aac001,
+		e.aac002,
+		e.aac003,
+		e.aac009,
+		a.aab001,
+		max(aac040) AS yac506, 	<!-- 原缴费工资 -->
+		0 AS yac507, 			<!--原养老基数-->
+		0 AS yac508, 			<!--原缴费基数-->
+		'0' AS yac503, 			<!--工资类别-->
+		max(aac040) as aac040,
+		0 AS yac004, 			<!--变更后养老缴费基数-->
+		0 AS yaa333, 			<!--变更后缴费基数-->
+		max(aac040) AS yac005 	<!--工伤缴费工资-->
+		from xasi2.ac02  a,XASI2.AC01 e
+		where a.aac001 = e.aac001
+		and a.aab001 = #aab001#
+		and a.aac031 = '1'
+		and exists (select 1
+		from xasi2.kc01 b
+		where a.aac001 = b.aac001
+		and akc021 = '11')
+		and not exists (select 1
+		from xasi2.ac02_zy b
+		where a.aac001 = b.aac001)
+		and a.aae140 not in ('06', '07', '08')
+		<![CDATA[      and (a.aac040 < #aac040_1# or a.aac040 > #aac040_2#)  ]]>
+		group by a.aac001, a.aab001,e.aac002,e.aac003,e.aac009
+		)
+
 	</select>
-	
+
 	<select id="getAAE003" parameterClass="map" resultClass="java.lang.Integer">
 		  select nvl(max(aae003),0)+1
             from wsjb.irab08

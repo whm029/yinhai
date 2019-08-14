@@ -2,13 +2,13 @@
      
 wsjb.pkg_P_Validate.prc_p_checkInfoByYear
 
-select * from xasi2.ac01k8 where aab001='854518' and aae001='2019' and  aac001='0003488038'
+select * from xasi2.ac01k8 where aab001='854518' and aae001='2019' -- for update 
 select * from wsjb.irad51 where aab001='854518' 
-select * from wsjb.yearapply_confirm  for update  --for update 
+select * from wsjb.yearapply_confirm --for update 
 
 select * from wsjb.tmp_ac42 where aab001='854518' 
 
-select * from irad54 where aab001='822094' and aae001='2015'
+select * from irad54 where aab001='854518'-- for update 
 
 
 
@@ -31,17 +31,27 @@ select * from irad54 where aab001='822094' and aae001='2015'
 xasi2.pkg_p_yearOfCarefulFinal.prc_p_getJobStartTime
 prm_daytype 人数超过2千的写2
  
- 
- 
- select * from xasi2.aa35 where aae001='2019' for update;
- select * from xasi2.ab05 where aab001='854518' for update;
- select * from xasi2.ab02 where aab001='854518' for update;   
- select * from wsjb.irab08 where aab001='854518' and aae003>201812 --for update;
- 
-insert into xasi2.aa35 (YAB139, AAE001, AAE030, AAE031, YAE097)
-values ('$$$$', 2019, to_date('01-08-2019', 'dd-mm-yyyy'), to_date('31-12-2019', 'dd-mm-yyyy'), 201908);
+--申报补差校验(预览用)
+--------------------------------------
+XASI2.pkg_p_salaryExamineAdjust
 
+ --modify by fenggg at 20181202 begin
+ --高新四险基数降低不退费,所以负补差基数处理成0
+   IF prm_yab139 = '610127' and prm_yac004 < 0 then
+      prm_yac004 := 0;
+   END IF;
+ --modify by fenggg at 20181202 end
 
+ --基数没变化。
+   IF prm_yac004 = 0 THEN
+      prm_AppCode := gs_FunNo||var_procNo||'02';
+      prm_ErrMsg  := '基数没有发生变化，不用补差';
+      RETURN;
+   END IF;
+--------------------------------------        
+         
+ 
+ 
 
 SELECT  
        A.AAC040 AS AAC040,  -- 新缴费工资 -->
