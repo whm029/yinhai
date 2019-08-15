@@ -314,7 +314,7 @@ public class YearInternetApplyAction extends NetHallBaseAction {
     /* 是否为重点审核单位 */
     String year_0 = String.valueOf(Integer.valueOf(aae001) - 1);
     int j = service.getIrad54Count(XmlConverUtil.map2Xml(dto));
-        j = service.getIrad54_1Count(XmlConverUtil.map2Xml(dto));
+    j = service.getIrad54_1Count(XmlConverUtil.map2Xml(dto));
 
     if (j == 0) {
       //setMsg("已提交年审信息，请进行年审业务预约，并打印相关报表、携带相关资料，到社保中心审核! </br>社保中心审核通过前如发现有误，可自行撤销提交，修改正确后再次提交办理。" +

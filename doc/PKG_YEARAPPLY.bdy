@@ -1888,21 +1888,34 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
              END IF;
            END LOOP;
        
-      --modify by whm 20190813 这里注释掉, 提前结算单独写一条 ac01k8 start
-      /*
+      --modify by whm 20190813 提前结算且没有续保回原单位,续保回原单位的在下面单独写一条ac01k8 start
+   
       --检查是否为养老提前结算
-      SELECT count(1)
+       SELECT count(1)
         INTO n_count
         FROM wsjb.irad51a1
        WHERE aac001 = v_aac001
          AND aab001 = prm_aab001
          AND yae031 = '1'
-         and aae041 = prm_aae001||'01';
+         AND aae041 >= prm_aae001||'01'
+         AND aae041 <= prm_aae001||'12'
+         AND not exists (select 1 from wsjb.irac01a3 a where a.aab001=prm_aab001 and a.aac001=v_aac001 and aae110='2');
       IF n_count > 0 THEN
-         v_yae110 := v_yae110||'养老提前结算/';
+        --拼接提前结算注释  
+          select max(decode(aae002, prm_aae001 || '01', '01月/')) ||
+                        max(decode(aae002, prm_aae001 || '02', '02月/')) ||
+                        max(decode(aae002, prm_aae001 || '03', '03月/')) ||
+                        max(decode(aae002, prm_aae001 || '04', '04月/')) ||
+                        max(decode(aae002, prm_aae001 || '05', '05月/')) ||
+                        max(decode(aae002, prm_aae001 || '06', '06月/')) 
+                    as tqjsyf into v_tqjsyf
+                   from wsjb.irad51a2
+                  where aac001 = v_aac001
+                    and aae002 >= prm_aae001 || '01'
+                    and aae002 <= prm_aae001 || '12';    
+         v_yae110 := v_yae110||'养老提前结算/'||v_tqjsyf;
       END IF;
-      */
-      --modify by whm 20190813 这里注释掉, 提前结算单独写一条 ac01k8 end
+      --modify by whm 20190813 提前结算且没有续保回原单位,续保回原单位的在下面单独写一条ac01k8 ac01k8 end
       
       --判断是否参医疗记录
         SELECT count(1)
@@ -2569,15 +2582,19 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                     );
                                     
                                     
-            -- 提前结算的单独写一条 AC01K8                                    
-            SELECT count(1)
-              INTO n_count
-              FROM wsjb.irad51a1
-             WHERE aac001 = v_aac001
-               AND aab001 = prm_aab001
-               AND yae031 = '1'
-               and aae041 = prm_aae001||'01';
-            IF n_count > 0 THEN
+          -- 提前结算后又续回的单独写一条 AC01K8                                    
+           SELECT count(1)
+            INTO n_count
+            FROM wsjb.irad51a1 a, wsjb.irac01a3 b
+           WHERE b.aae110 = '2'
+             AND a.aac001 = b.aac001
+             AND a.aab001 = b.aab001
+             AND a.aac001 = v_aac001
+             AND a.aab001 = prm_aab001
+             AND a.yae031 = '1'
+             AND a.aae041 >= prm_aae001||'01'
+             AND a.aae041 <= prm_aae001||'12';
+           IF n_count > 0 THEN
                  select max(decode(aae002, prm_aae001 || '01', '01月/')) ||
                         max(decode(aae002, prm_aae001 || '02', '02月/')) ||
                         max(decode(aae002, prm_aae001 || '03', '03月/')) ||
@@ -2587,9 +2604,19 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                     as tqjsyf into v_tqjsyf
                    from wsjb.irad51a2
                   where aac001 = v_aac001
-                    and aae002 >= prm_aae001 || '01';
-                    v_yae110 := '养老提前结算/'||v_tqjsyf;
-                   
+                    and aae002 >= prm_aae001 || '01'
+                    and aae002 <= prm_aae001 || '12';
+                 --拼接提前结算注释  
+                  v_yae110 := '养老提前结算/'||v_tqjsyf;
+                  --获取结算月度的原工资和原养老基数(如果提前结算的人续保回来从AC02或IRAC01A3取就不对了)
+                  select distinct aac040, yac004, yac005
+                    into n_yac506, n_yac507, n_yac508
+                    from irad51a2 a, irac01 b
+                   where a.aae002 = b.iaa100
+                     and a.aac001 = b.aac001
+                     and b.aab001 = prm_aab001
+                     and a.aac001 = v_aac001;
+   
                      INSERT INTO xasi2.ac01k8 (
                                             aac001,
                                             aab001,
@@ -2616,7 +2643,8 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                             yae410,
                                             yae510,
                                             yab019,
-                                            aae034
+                                            aae034,
+                                            aae013
                                             )VALUES(
                                             v_aac001,
                                             prm_aab001,
@@ -2643,7 +2671,8 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                             v_yae410,
                                             v_yae510,
                                             '1',
-                                            SYSDATE
+                                            SYSDATE,
+                                            '21'
                                             );
             END IF;                        
       END LOOP;
@@ -9782,7 +9811,7 @@ BEGIN
 /*初始化变量*/
       prm_AppCode  := gn_def_OK;
       prm_ErrorMsg := '';
-      v_proportions_constant := -1;
+      v_proportions_constant := -35;
       v_proportions_msg := '';
       
         -- 单位是否有4险

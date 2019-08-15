@@ -2,16 +2,18 @@
      
 wsjb.pkg_P_Validate.prc_p_checkInfoByYear
 
-select * from xasi2.ac01k8 where aab001='854518' and aae001='2019' -- for update 
+select * from xasi2.ac01k8 where aab001='854518' and aae001='2019' --for update 
 select * from wsjb.irad51 where aab001='854518' 
 select * from wsjb.yearapply_confirm --for update 
 
-select * from wsjb.tmp_ac42 where aab001='854518' 
+select * from wsjb.tmp_ac42 where aab001='854518'  and aac001='1000504673'
 
 select * from irad54 where aab001='854518'-- for update 
 
-select * from  wsjb.irad51a1 
- 
+select * from  wsjb.irad51a1  where aab001='854518'
+
+
+
 
  select  
   decode(aae140,

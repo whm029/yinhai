@@ -185,7 +185,7 @@
     var aae013 = data.item.aae013;
     var yac506 = data.item.yac506;
     var yac507 = data.item.yac507;
-    var yac508 = data.item.yac508;
+    //var yac508 = data.item.yac508;
     var yac004 = 0; //新养老基数
     var yac005 = 0; //原工伤缴费工资
     var yaa333_02 = 0; //新失业基数
@@ -319,14 +319,14 @@
       Base.alert("该人员为到龄退休年限不足继续缴费人员！");
       Base.setGridCellData("sucGrid", rownum, data.cell, aac040); //新缴费工资
       Base.setGridCellData("sucGrid", rownum, data.cell + 1, yac004); //新养老基数
-      Base.setGridCellData("sucGrid", rownum, data.cell + 2, yac508); //原其他基数
+      //Base.setGridCellData("sucGrid", rownum, data.cell + 2, yac508); //原其他基数
       return;
     }
-    if (aae013 == "2") {
+    if (aae013 == "2" || aae013 == "21") {
       Base.alert("该人员已经办理过养老保险提前结算，不能修改基数！");
       Base.setGridCellData("sucGrid", rownum, data.cell, yac506); //原缴费工资
       Base.setGridCellData("sucGrid", rownum, data.cell + 1, yac507); //原养老基数
-      Base.setGridCellData("sucGrid", rownum, data.cell + 2, yac508); //原其他基数
+      //Base.setGridCellData("sucGrid", rownum, data.cell + 2, yac508); //原其他基数
       return;
     }
     Base.setGridCellData("sucGrid", rownum, data.cell + 1, yac004); //新养老基数
