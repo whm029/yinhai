@@ -9845,7 +9845,7 @@ BEGIN
              and aae041 > (prm_aae001 - 1) || 12;
         end if;
         
-        -- 按险种获取当年最早一次核费的单位基数 和tmp_ac42 中最早的一个月的补差进行对比
+        -- 按险种获取当年最早一次核费的单位基数 ac01k8 中新基数对比
         -- 只要有一个险种基数补差降低大于35%的 就写入一条irad54记录
         if num_count>0 then
           --非单养老单位处理养老险种
@@ -9964,7 +9964,8 @@ BEGIN
           end if;
           
          <<leb_next>>
-            
+         
+         if v_proportions_msg is not null then 
          insert into wsjb.irad54
             (AAB001,
              IAA011,
@@ -9979,6 +9980,7 @@ BEGIN
              sysdate,
              prm_aae001,
              v_proportions_msg);
+         end if;   
               
         EXCEPTION
         WHEN OTHERS THEN

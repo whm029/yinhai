@@ -288,7 +288,7 @@ public class YearInternetApplyAction extends NetHallBaseAction {
         service.updateYac004(XmlConverUtil.map2Xml(dto1)); //更新ac01k8的基数Yac004
         /* 调用养老接口写入 */
         key.put("aac040", key.getAsBigDecimal("yac004"));
-        baseCommService.insertYLINFOBy11(XmlConverUtil.map2Xml(key));
+        //发布的时候要放开baseCommService.insertYLINFOBy11(XmlConverUtil.map2Xml(key));
       }
     }
     /* 检查是否能提交申请 */
@@ -331,7 +331,7 @@ public class YearInternetApplyAction extends NetHallBaseAction {
 
     }
     setDisabled("exportBtn,importBtn,retainBtn,applyBtn,printBtn3,printBtn4,printBtn5,delBtn");
-    setEnable("cancelBtn");
+    setEnable("cancelBtn,printBtn1,printBtn2");
     return JSON;
   }
 
