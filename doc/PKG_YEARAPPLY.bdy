@@ -2608,14 +2608,14 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                     and aae002 <= prm_aae001 || '12';
                  --拼接提前结算注释  
                   v_yae110 := '养老提前结算/'||v_tqjsyf;
-                  --获取结算月度的原工资和原养老基数(如果提前结算的人续保回来从AC02或IRAC01A3取就不对了)
-                  select distinct aac040, yac004, yac005
-                    into n_yac506, n_yac507, n_yac508
-                    from irad51a2 a, irac01 b
-                   where a.aae002 = b.iaa100
-                     and a.aac001 = b.aac001
-                     and b.aab001 = prm_aab001
-                     and a.aac001 = v_aac001;
+                  --获取结算月度的结算上账基数(如果提前结算的人续保回来从AC02或IRAC01A3取就不对了)
+                  select distinct b.yaa334,b.yaa334,b.yaa334
+                     into n_yac506,n_yac507,n_yac508
+                    from irad51a1 a, irad51a2 b
+                   where a.yae031 ='1' 
+                   and a.yae518 =b.yae518
+                   and  a.aab001 = prm_aab001
+                   and a.aac001 = v_aac001;
    
                      INSERT INTO xasi2.ac01k8 (
                                             aac001,

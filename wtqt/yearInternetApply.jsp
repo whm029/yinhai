@@ -322,7 +322,7 @@
       //Base.setGridCellData("sucGrid", rownum, data.cell + 2, yac508); //原其他基数
       return;
     }
-    if (aae013 == "2" || aae013 == "21") {
+    if ((aae013 == "2") || (aae013 == "21")) {
       Base.alert("该人员已经办理过养老保险提前结算，不能修改基数！");
       Base.setGridCellData("sucGrid", rownum, data.cell, yac506); //原缴费工资
       Base.setGridCellData("sucGrid", rownum, data.cell + 1, yac507); //原养老基数
