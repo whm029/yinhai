@@ -364,6 +364,7 @@ PROCEDURE prc_YearSalaryAdjustPaded(prm_aab001       IN     irab01.aab001%TYPE,-
                          ELSE
                            num_yac004 := rec_ab05a1.yac004;
                          END IF;
+                         
                          IF var_aae140 = xasi2.pkg_comm.AAE140_JBYL THEN
                              --退休逐月缴费人员
                              SELECT count(1)
@@ -385,9 +386,9 @@ PROCEDURE prc_YearSalaryAdjustPaded(prm_aab001       IN     irab01.aab001%TYPE,-
                                  END IF;
                               END IF;
                           END IF;
+                          
                           DELETE xasi2.tmp_grbs01;                 --清空临时表
                           --插入补差临时表中
-
                           INSERT INTO xasi2.tmp_grbs01
                                                (aac001,   --个人编码
                                                 aae041,   --开始期号
@@ -2580,9 +2581,28 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                     '1',
                                     SYSDATE
                                     );
+      -- 提前结算没有再续保的人员把新旧缴费工资和基数写成一样的
+       SELECT count(1)
+        INTO n_count
+        FROM wsjb.irad51a1
+       WHERE aac001 = v_aac001
+         AND aab001 = prm_aab001
+         AND yae031 = '1'
+         AND aae041 >= prm_aae001||'01'
+         AND aae041 <= prm_aae001||'12'
+         AND not exists (select 1 from wsjb.irac01a3 a where a.aab001=prm_aab001 and a.aac001=v_aac001 and aae110='2');                            
+        if n_count >0 then
+          update xasi2.ac01k8
+             set aac040 = n_yac506,
+                 yac004 = n_yac507,
+                 yaa333 = n_yac508,
+                 aae013 = '2'
+           where aab001 = prm_aab001
+             and aac001 = v_aac001
+             and aae001 = prm_aae001;
+        end if;
                                     
-                                    
-          -- 提前结算后又续回的单独写一条 AC01K8                                    
+        -- 提前结算后又续回的单独写一条 AC01K8                                    
            SELECT count(1)
             INTO n_count
             FROM wsjb.irad51a1 a, wsjb.irac01a3 b
@@ -2608,15 +2628,15 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                     and aae002 <= prm_aae001 || '12';
                  --拼接提前结算注释  
                   v_yae110 := '养老提前结算/'||v_tqjsyf;
-                  --获取结算月度的结算上账基数(如果提前结算的人续保回来从AC02或IRAC01A3取就不对了)
-                  select distinct b.yaa334,b.yaa334,b.yaa334
-                     into n_yac506,n_yac507,n_yac508
+                  --获取结算月度的结算上账基数(如果提前结算的人续保回来从AC02或IRAC01取就不对了,所以取结算的基数)
+                  select distinct b.yaa334,b.yaa334
+                     into n_yac506,n_yac507
                     from irad51a1 a, irad51a2 b
                    where a.yae031 ='1' 
                    and a.yae518 =b.yae518
                    and  a.aab001 = prm_aab001
                    and a.aac001 = v_aac001;
-   
+                    --提前结算的直接把新旧缴费工资和基数写成一样的
                      INSERT INTO xasi2.ac01k8 (
                                             aac001,
                                             aab001,
@@ -2626,6 +2646,9 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                             yac506,
                                             yac507,
                                             yac508,
+                                            aac040,
+                                            yac004,
+                                            yaa333,
                                             aae110,
                                             aae210,
                                             aae310,
@@ -2652,6 +2675,9 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                             v_aac003,
                                             v_aac009,
                                             n_yac506,
+                                            n_yac507,
+                                            n_yac508,
+                                            n_yac506, 
                                             n_yac507,
                                             n_yac508,
                                             v_aae110,
@@ -4190,6 +4216,8 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
             prm_ErrorMsg := '没有获取到档案编号!';
             RETURN;
          END IF;
+         
+      -- 年申报补差
       prc_YearSalaryAdjustPaded(prm_aab001  ,--单位编号  必填
                                 ''  ,--个人编号  非必填
                                 0  , --工资 非必填
@@ -7744,10 +7772,13 @@ PROCEDURE prc_UpdateAc01k8 (
  IS
 
  var_yab136     VARCHAR2(6);  --AB01单位管理类型
+ var_aab019     VARCHAR2(6);
  var_aae002     NUMBER(6);     --费款所属期 
  var_yab003     VARCHAR2(6);  
- num_yaa333   NUMBER(14,2);  --市社平基数
- num_yac004   NUMBER(14,2);  --省社平基数
+ num_yaa333     NUMBER(14,2);  --市社平基数
+ num_yac004     NUMBER(14,2);  --省社平基数
+ num_yaa444     NUMBER(14,2);  --工伤基数
+ num_spgz       xasi2.ac02.aac040%TYPE;
  
  cursor cur_aae140 is  --ac01k8 中个人可以补差的险种(行专列)
    select decode(aae140,
@@ -7759,7 +7790,7 @@ PROCEDURE prc_UpdateAc01k8 (
                  'AAE311','07') AS aae140, 
                  aac031
     from xasi2.ac01k8 unpivot
-    (aac031 for aae140 in(aae210, aae310,aae410,aae510, aae311))
+    (aac031 for aae140 in(aae110,aae210, aae310,aae410,aae510, aae311))
    where aab001 = prm_aab001
      and aac001 = prm_aac001
      and aae001 = prm_aae001;
@@ -7780,8 +7811,8 @@ PROCEDURE prc_UpdateAc01k8 (
      
       --获取单位当前的管理类型
       BEGIN
-         SELECT yab136
-           INTO var_yab136
+         SELECT yab136,aab019
+           INTO var_yab136, var_aab019
            FROM xasi2.ab01
           WHERE aab001 = prm_aab001;
       EXCEPTION
@@ -7796,32 +7827,59 @@ PROCEDURE prc_UpdateAc01k8 (
              IF rec_aae140.aae140 IN ('03','05') THEN
                  --市社平保底封顶
                  SELECT pkg_common.fun_p_getcontributionbase(
-                                                    null,                                              --个人编码 aac001
-                                                    prm_aab001,                                --单位编码 aab001
+                                                    null,                              --个人编码 aac001
+                                                    prm_aab001,                        --单位编码 aab001
                                                     ROUND(prm_aac040),                 --缴费工资 aac040
-                                                    '0',                                                  --工资类别 yac503
-                                                    rec_aae140.aae140,                      --险种类型 aae140
-                                                    '1',                                                  --缴费人员类别 yac505
-                                                    var_yab136,                                   --单位管理类型（区别独立缴费人员） yab136
-                                                    var_aae002,                                  --费款所属期 aae002
-                                                    var_yab003)                                 --参保分中心 yab139
+                                                    '0',                               --工资类别 yac503
+                                                    rec_aae140.aae140,                 --险种类型 aae140
+                                                    '1',                               --缴费人员类别 yac505
+                                                    var_yab136,                        --单位管理类型（区别独立缴费人员） yab136
+                                                    var_aae002,                        --费款所属期 aae002
+                                                    var_yab003)                         --参保分中心 yab139
                     INTO num_yaa333
                  FROM dual;
-             ELSIF rec_aae140.aae140 IN ('01','02','04') THEN
-                 --省社平保底封顶
+                 
+             ELSIF rec_aae140.aae140 IN ('02','04') THEN
+                 --省社平保底封顶(19年年审工伤失业 一般企业和个体工商都是60%到300% 所以用yaa444)
                  SELECT pkg_common.fun_p_getcontributionbase(
-                                                    null,                                              --个人编码 aac001
-                                                    prm_aab001,                                --单位编码 aab001
-                                                    ROUND(prm_aac040),                 --缴费工资 aac040
-                                                    '0',                                                 --工资类别 yac503
-                                                    rec_aae140.aae140,                      --险种类型 aae140
-                                                    '1',                                                 --缴费人员类别 yac505
-                                                    var_yab136,                                   --单位管理类型（区别独立缴费人员） yab136
-                                                    var_aae002,                                   --费款所属期 aae002
-                                                    var_yab003)                                 --参保分中心 yab139
+                                                    null,                                --个人编码 aac001
+                                                    prm_aab001,                          --单位编码 aab001
+                                                    ROUND(prm_aac040),                   --缴费工资 aac040
+                                                    '0',                                 --工资类别 yac503
+                                                    rec_aae140.aae140,                   --险种类型 aae140
+                                                    '1',                                 --缴费人员类别 yac505
+                                                    var_yab136,                          --单位管理类型（区别独立缴费人员） yab136
+                                                    var_aae002,                          --费款所属期 aae002
+                                                    var_yab003)                          --参保分中心 yab139
+                    INTO num_yaa444
+                 FROM dual;
+               
+             ELSIF rec_aae140.aae140 = '01'THEN
+                     --一般企业的养老
+                     SELECT pkg_common.fun_p_getcontributionbase(
+                                                    null,                                --个人编码 aac001
+                                                    prm_aab001,                          --单位编码 aab001
+                                                    ROUND(prm_aac040),                   --缴费工资 aac040
+                                                    '0',                                 --工资类别 yac503
+                                                    rec_aae140.aae140,                   --险种类型 aae140
+                                                    '1',                                 --缴费人员类别 yac505
+                                                    var_yab136,                          --单位管理类型（区别独立缴费人员） yab136
+                                                    var_aae002,                          --费款所属期 aae002
+                                                    var_yab003)                          --参保分中心 yab139
                   INTO num_yac004
                FROM dual;
-             END IF; 
+               
+               ELSIF rec_aae140.aae140 = '01' AND var_aab019 ='60' THEN  
+                     --个体工商养老是50% 到300%
+                     num_spgz := xasi2.pkg_comm.fun_GetAvgSalary(rec_aae140.aae140,'16',var_aae002,pkg_Constant.YAB003_JBFZX);
+                     IF prm_aac040 > ROUND(num_spgz/12) THEN
+                        num_yac004 := ROUND(num_spgz/12);
+                     ELSIF prm_aac040 < TRUNC(num_spgz/24)+1 THEN
+                        num_yac004 := TRUNC(num_spgz/24)+1;
+                     ELSE
+                        num_yac004 := prm_aac040;
+                     END IF;
+              END IF; 
       EXCEPTION
          WHEN OTHERS THEN
              prm_AppCode  :=  gn_def_ERR;
@@ -7833,7 +7891,8 @@ PROCEDURE prc_UpdateAc01k8 (
     UPDATE xasi2.ac01k8 
        SET aac040 = prm_aac040,  
               yaa333 = num_yaa333,
-              yac004 = num_yac004
+              yac004 = num_yac004,
+              yaa444 = num_yaa444
      WHERE aab001 = prm_aab001
        AND aac001 = prm_aac001
        AND aae001 = prm_aae001

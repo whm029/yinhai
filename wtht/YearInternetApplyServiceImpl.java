@@ -90,25 +90,25 @@ public class YearInternetApplyServiceImpl extends WsBaseService implements YearI
       map = (HashMap) list.get(i);
       map.put("rownum", i + 1);
       String aac001 = (String) map.get("aac001");
-      String aae013_1 = (String) map.get("aae013");;
       String aae001_b = aae001 + "01";
       String aae001_e = aae001 + "12";
       map.put("aae001_b", aae001_b);
       map.put("aae001_e", aae001_e);
       Integer ac02_zy = (Integer) dao.queryForObject("yearApply.getac02_zy", aac001);//判断是否为到龄年限不足继续缴费
       if (ac02_zy > 0) {
-        aae013_1 = "1";
+        map.put("aae013_1", "1");
+        dao.update("yearApply.updateAb05a1_1", map);
       }
+      /*
       Integer Irad51a1_1 = (Integer) dao.queryForObject("yearApply.getIrad51a1_1", map);//判断是否办理过养老保险提前结算.且没有续回原单位
       if (Irad51a1_1 > 0) {
-        aae013_1 = "2";
+        aae013_1 = "2"; //写2的挪到过程中了
       }
       Integer Irad51a1_2 = (Integer) dao.queryForObject("yearApply.getIrad51a1_2", map);//判断是否办理过养老保险提前结算.且续回原单位
       if (Irad51a1_2 > 0) {
-        aae013_1 = "22"; //过程中还写了一条21的 是记录结算月份的, 这里21 是续回来的月份要补差的
+        aae013_1 = "22"; //写22是为了排序,页面不显示了也不用写了 过程中还写了一条21的 是记录结算月份的, 这里21 是续回来的月份要补差的
       }
-      map.put("aae013_1", aae013_1);
-      dao.update("yearApply.updateAb05a1_1", map);
+      */
     }
     ab05a1s.setList(list);
     return XmlConverUtil.PageBean2Xml(ab05a1s);

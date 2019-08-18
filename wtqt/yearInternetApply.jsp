@@ -48,6 +48,7 @@
         <ta:datagridItem id="rownum" key="序号" width="50" align="center" dataAlign="center"/>
         <ta:datagridItem id="ck" key="查看" width="40" align="center" click="fnInfo" icon="icon-search"/>
 
+        <ta:datagridItem id="aae013" key="备注" width="105" align="left" showDetailed="true"/>
         <ta:datagridItem id="iaa002" key="审核标志" width="70" align="center" dataAlign="left" collection="IAA002"/>
         <ta:datagridItem id="yab029" key="养老个人编号" width="95" align="center" dataAlign="left"/>
         <ta:datagridItem id="aac001" key="个人编号" width="85" align="center" dataAlign="left"/>
@@ -83,7 +84,7 @@
         <ta:datagridItem id="yae210" key="失业备注" width="105" align="left" showDetailed="true"/>
         <ta:datagridItem id="yae410" key="工伤备注" width="105" align="left" showDetailed="true"/>
         <ta:datagridItem id="yae510" key="生育备注" width="105" align="left" showDetailed="true"/>
-        <ta:datagridItem id="aae013" key="备注" width="105" align="left" showDetailed="true" hiddenColumn="false"/>
+
         <ta:dataGridToolPaging url="yearInternetApplyAction!queryDetail.do" submitIds="form1" showButton="true" showCount="true" selectExpButtons="1" pageSize="100">
         </ta:dataGridToolPaging>
       </ta:datagrid>

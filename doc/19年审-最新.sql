@@ -1,21 +1,27 @@
 --854518 
+
+-- 原缴费工资和基数是从 AC02取的 取不到再去irac01取, 但是如果提前结算的人转出去了 ac02 取不到 irac01取的是 减少的那一天工资是0
      
 wsjb.pkg_P_Validate.prc_p_checkInfoByYear
 
-select * from xasi2.ac01k8 where aab001='854518' and aae001='2019' --for update 
-select * from wsjb.irad51 where aab001='854518' 
+select * from xasi2.ac01k8 where aab001='855555' and aae001='2019' --for update 
+select * from wsjb.irad51 where aab001='855555' 
 select * from wsjb.yearapply_confirm --for update 
 
-select * from wsjb.tmp_ac42 where aab001='854518'  and aac001='1002531597'
-select * from xasi2.ac01k8 where aab001='854518' and aae001='2019' and aac001='1005456822' --for update 
+select * from wsjb.tmp_ac42 where aab001='855555'  and aac001='1006218794'
+select * from xasi2.ac01k8 where aab001='855555' and aae001='2019' and aac001='9910506277' --for update 
+select * from xasi2.ac01k8 where aab001='855555' and aae001='2019' and (aae013 is null or aae013 ='1')
 
-select * from irad54 where aab001='854518'-- for update 
 
-select * from  wsjb.irad51a1  where aab001='854518'
-select * from xasi2.ab05 where aab001='854518' for update 
+select * from irad54 where aab001='855555'-- for update 
 
-select * from wsjb.tmp_ac42 where aab001='854518' and aae140='01'
-select * from xasi2.ac01k8 where aab001='854518' and  aae110 is not null
+select * from  wsjb.irad51a1 for update 
+select * from  wsjb.irad51a2 for update 
+
+select * from xasi2.ab05 where aab001='855555' for update 
+
+select * from wsjb.tmp_ac42 where aab001='855555' and aae140='01'
+select * from xasi2.ac01k8 where aab001='855555' and  aae110 is not null
 
 
 
@@ -31,9 +37,9 @@ select * from xasi2.ac01k8 where aab001='854518' and  aae110 is not null
    aac031
   from xasi2.ac01k8 
   unpivot(aac031 for aae140 in(aae110,aae210, aae310,aae410,aae510, aae311))
- where aab001 = '854518'
+ where aab001 = '855555'
    and aae001 = '2019'
-   and aac001 = '0003488038'
+   and aac001 = '1006218794'
  
 --补差过程
 xasi2.pkg_p_yearOfCarefulFinal.prc_p_getJobStartTime

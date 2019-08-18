@@ -1443,8 +1443,12 @@
 		A.YAC508 AS YAC508_05, <!-- 原生育基数 -->
 		A.AAC040 AS AAC040,  <!-- 新缴费工资 -->
 		DECODE (A.AAE110, null, '', A.YAC004) AS YAC004,  <!-- 新养老基数 -->
-		DECODE(SIGN(#aae001#-2019),0,A.YAC004,1,A.YAC004,A.YAA333) AS YAA333_02,  <!-- 新工伤基数 -->
-		DECODE(SIGN(#aae001#-2019),0,A.YAC004,1,A.YAC004,A.YAA333) AS YAA333_04,  <!-- 新失业基数 -->
+		<!--
+		DECODE(SIGN(#aae001#-2019),0,A.YAA004,1,A.YAC004,A.YAA333) AS YAA333_02,   新失业基数
+		DECODE(SIGN(#aae001#-2019),0,A.YAC004,1,A.YAC004,A.YAA333) AS YAA333_04,   新工伤基数
+		-->
+		A.YAA444 AS YAA333_02,  <!-- 新失业基数 -->
+		A.YAA444 AS YAA333_04,  <!-- 新工伤基数 -->
 		A.YAA333 AS YAA333_03,  <!-- 新医疗基数 -->
 		A.YAA333 AS YAA333_05,  <!-- 新生育基数 -->
 		A.AAE110 AS AAE110,
@@ -1476,9 +1480,8 @@
 		AND A.AAB001 = #aab001#
 		AND A.AAE001 = #aae001#
 		AND A.YAB019 = '1'
+		AND (A.AAE013 is null or A.AAE013 ='1')
 		ORDER BY
-		A.AAE013 DESC,
-		A.AAC003,
 		A.YAE110 DESC,
 		A.YAE310 DESC,
 		A.YAE210 DESC,
@@ -1720,6 +1723,8 @@
 				UNION
 				SELECT aae311 AS a FROM irac01 WHERE aab001=#aab001# AND iaa100=to_char(sysdate,'yyyyMM') AND aac001=#aac001#)
 	</select>
+
+	<!--
 	<select id="getIrad51a1_1" parameterClass="map" resultClass="java.lang.Integer">
 		 SELECT count(1)
 		FROM wsjb.irad51a1
@@ -1742,6 +1747,7 @@
 <![CDATA[ AND a.aae041>= #aae001_b# ]]>
 <![CDATA[ AND a.aae042<= #aae001_e# ]]>
 	</select>
+	-->
 
 	<select id="getac02_zy" parameterClass="java.lang.String" resultClass="java.lang.Integer">
 		 SELECT count(1) FROM xasi2.ac02_zy where aac001 = #aac001#
