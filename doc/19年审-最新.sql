@@ -22,8 +22,7 @@ select * from  wsjb.irad51a2 for update
 select * from xasi2.ab05 where aab001='855555' for update 
 
 select * from wsjb.tmp_ac42 where aab001='855555' and aae140='01'
-select * from xasi2.ac01k8 where aab001='855555' and  aae110 is not null
-
+select * from xasi2.ac01k8 where aab001='855555'  
 
 
 

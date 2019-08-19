@@ -61,15 +61,15 @@
         </ta:datagridItem>
 
         <ta:datagridItem id="yac004" key="新养老基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
-        <ta:datagridItem id="yaa333_02" key="新工伤基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
-        <ta:datagridItem id="yaa333_04" key="新失业基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
+        <ta:datagridItem id="yaa444_02" key="新工伤基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
+        <ta:datagridItem id="yaa444_04" key="新失业基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
         <ta:datagridItem id="yaa333_03" key="新医疗基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
         <ta:datagridItem id="yaa333_05" key="新生育基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
 
         <ta:datagridItem id="yac506" key="原缴费工资" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
         <ta:datagridItem id="yac507" key="原养老基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
-        <ta:datagridItem id="yac508_02" key="原工伤基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
-        <ta:datagridItem id="yac508_04" key="原失业基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
+        <ta:datagridItem id="yac005_02" key="原工伤基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
+        <ta:datagridItem id="yac005_04" key="原失业基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
         <ta:datagridItem id="yac508_03" key="原医疗基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
         <ta:datagridItem id="yac508_05" key="原生育基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
 
@@ -189,8 +189,8 @@
     //var yac508 = data.item.yac508;
     var yac004 = 0; //新养老基数
     var yac005 = 0; //原工伤缴费工资
-    var yaa333_02 = 0; //新失业基数
-    var yaa333_04 = 0; //新工伤基数
+    var yaa444_02 = 0; //新失业基数
+    var yaa444_04 = 0; //新工伤基数
     var yaa333_03 = 0; //新医疗基数
     var yaa333_05 = 0; //新生育基数
 
@@ -218,39 +218,39 @@
           if (aac040 >= sx01) {
             if (aac040 >= sx03) {
               yac004 = sx01;
-              yaa333_02 = sx01;
-              yaa333_04 = sx01;
+              yaa444_02 = sx01;
+              yaa444_04 = sx01;
               yaa333_03 = sx03;
               yaa333_05 = sx03;
               //yac005 = sx03;
             } else {
               yac004 = sx01;
-              yaa333_02 = sx01;
-              yaa333_04 = sx01;
+              yaa444_02 = sx01;
+              yaa444_04 = sx01;
               yaa333_03 = aac040;
               yaa333_05 = aac040;
               //yac005 = aac040;
             }
           } else {
             yac004 = aac040;
-            yaa333_02 = aac040;
-            yaa333_04 = aac040;
+            yaa444_02 = aac040;
+            yaa444_04 = aac040;
             yaa333_03 = aac040;
             yaa333_05 = aac040;
             //yac005 = aac040;
           }
         } else {
           yac004 = aac040;
-          yaa333_02 = aac040;
-          yaa333_04 = aac040;
+          yaa444_02 = aac040;
+          yaa444_04 = aac040;
           yaa333_03 = xx03;
           yaa333_05 = xx03;
           //yac005 = xx03;
         }
       } else {
         yac004 = xx01;
-        yaa333_02 = xx01;
-        yaa333_04 = xx01;
+        yaa444_02 = xx01;
+        yaa444_04 = xx01;
         yaa333_03 = xx03;
         yaa333_05 = xx03;
         //yac005 = xx03;
@@ -262,35 +262,35 @@
         if (aac040 >= xx03) {
           if (aac040 >= sx01) {
             if (aac040 >= sx03) {
-              yaa333_02 = sx01;
-              yaa333_04 = sx01;
+              yaa444_02 = sx01;
+              yaa444_04 = sx01;
               yaa333_03 = sx03;
               yaa333_05 = sx03;
               //yac005 = sx03;
             } else {
-              yaa333_02 = sx01;
-              yaa333_04 = sx01;
+              yaa444_02 = sx01;
+              yaa444_04 = sx01;
               yaa333_03 = aac040;
               yaa333_05 = aac040;
               //yac005 = aac040;
             }
           } else {
-            yaa333_02 = aac040;
-            yaa333_04 = aac040;
+            yaa444_02 = aac040;
+            yaa444_04 = aac040;
             yaa333_03 = aac040;
             yaa333_05 = aac040;
             //yac005 = aac040;
           }
         } else {
-          yaa333_02 = aac040;
-          yaa333_04 = aac040;
+          yaa444_02 = aac040;
+          yaa444_04 = aac040;
           yaa333_03 = xx03;
           yaa333_05 = xx03;
           //yac005 = xx03;
         }
       } else {
-        yaa333_02 = xx01;
-        yaa333_04 = xx01;
+        yaa444_02 = xx01;
+        yaa444_04 = xx01;
         yaa333_03 = xx03;
         yaa333_05 = xx03;
         //yac005 = xx03;
@@ -331,8 +331,8 @@
       return;
     }
     Base.setGridCellData("sucGrid", rownum, data.cell + 1, yac004); //新养老基数
-    Base.setGridCellData("sucGrid", rownum, data.cell + 2, yaa333_02); //新工伤基数
-    Base.setGridCellData("sucGrid", rownum, data.cell + 3, yaa333_04); //新失业基数
+    Base.setGridCellData("sucGrid", rownum, data.cell + 2, yaa444_02); //新工伤基数
+    Base.setGridCellData("sucGrid", rownum, data.cell + 3, yaa444_04); //新失业基数
     Base.setGridCellData("sucGrid", rownum, data.cell + 4, yaa333_03); //新医疗基数
     Base.setGridCellData("sucGrid", rownum, data.cell + 5, yaa333_05); //新生育基数
     //Base.setGridCellData("sucGrid", rownum, data.cell + 2, yac005); //原工伤缴费工资

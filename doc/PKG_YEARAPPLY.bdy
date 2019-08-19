@@ -364,7 +364,7 @@ PROCEDURE prc_YearSalaryAdjustPaded(prm_aab001       IN     irab01.aab001%TYPE,-
                          ELSE
                            num_yac004 := rec_ab05a1.yac004;
                          END IF;
-                         
+
                          IF var_aae140 = xasi2.pkg_comm.AAE140_JBYL THEN
                              --退休逐月缴费人员
                              SELECT count(1)
@@ -386,7 +386,7 @@ PROCEDURE prc_YearSalaryAdjustPaded(prm_aab001       IN     irab01.aab001%TYPE,-
                                  END IF;
                               END IF;
                           END IF;
-                          
+
                           DELETE xasi2.tmp_grbs01;                 --清空临时表
                           --插入补差临时表中
                           INSERT INTO xasi2.tmp_grbs01
@@ -1615,7 +1615,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
        num_aae002_end NUMBER(6);
        maxiaa100 NUMBER(6);
        v_tqjsyf xasi2.ac01k8.yae110%TYPE;
-       
+
        cursor cur_aac001 is
           SELECT DISTINCT AAC001
             FROM xasi2.ac08 A
@@ -1686,7 +1686,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
         --                        AND A.AAB001 = B.AAB001
         --                        AND B.YAE031 = '1')
              ORDER BY IAA100, AAE036;
-     
+
             /*  受月报多次提交影响 重写了此游标 但是张钊说不用 又改回去了
              SELECT T.iaa001,
                   T.aac001,
@@ -1730,7 +1730,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
              AND T.iaa002 = '2'
              AND T.iaa100 >= to_number('2019'||'01')
              ORDER BY IAA100; */
-             
+
      --日常年审区分每月备案人员与正常人员
       cursor cur_aac001Ba IS
          SELECT DISTINCT AAC001
@@ -1888,9 +1888,9 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                v_aae310 := '21';
              END IF;
            END LOOP;
-       
+
       --modify by whm 20190813 提前结算且没有续保回原单位,续保回原单位的在下面单独写一条ac01k8 start
-   
+
       --检查是否为养老提前结算
        SELECT count(1)
         INTO n_count
@@ -1902,24 +1902,24 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
          AND aae041 <= prm_aae001||'12'
          AND not exists (select 1 from wsjb.irac01a3 a where a.aab001=prm_aab001 and a.aac001=v_aac001 and aae110='2');
       IF n_count > 0 THEN
-        --拼接提前结算注释  
+        --拼接提前结算注释
           select max(decode(aae002, prm_aae001 || '01', '01月/')) ||
                         max(decode(aae002, prm_aae001 || '02', '02月/')) ||
                         max(decode(aae002, prm_aae001 || '03', '03月/')) ||
                         max(decode(aae002, prm_aae001 || '04', '04月/')) ||
                         max(decode(aae002, prm_aae001 || '05', '05月/')) ||
-                        max(decode(aae002, prm_aae001 || '06', '06月/')) 
+                        max(decode(aae002, prm_aae001 || '06', '06月/'))
                     as tqjsyf into v_tqjsyf
                    from wsjb.irad51a2
                   where aac001 = v_aac001
                     and aae002 >= prm_aae001 || '01'
-                    and aae002 <= prm_aae001 || '12';    
+                    and aae002 <= prm_aae001 || '12';
          v_yae110 := v_yae110||'养老提前结算/'||v_tqjsyf;
       END IF;
       --modify by whm 20190813 提前结算且没有续保回原单位,续保回原单位的在下面单独写一条ac01k8 ac01k8 end
-      
-      
-      
+
+
+
       --判断是否参医疗记录
         SELECT count(1)
           INTO n_count
@@ -1977,212 +1977,54 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                  AND iaa002 = '2'
                                  AND iaa100 >= to_number(prm_aae001||'01'));
          IF n_count > 0 THEN
-           select aac040,
-                   yac005
-              into n_yac506,
-                   n_yac508
+            select max(iaa100)
+              into maxiaa100
               from wsjb.irac01
-             where aab001 = prm_aab001
+             WHERE AAB001 = prm_aab001
+               AND AAC001 = v_aac001
+               AND IAA001 IN ('1', '5', '8', '6', '3', '7', '9', '10')
+               AND iaa002 = '2'
+               AND iaa100 >= to_number(prm_aae001 || '01');
+               IF maxiaa100<=201904 THEN
+               --modify by wanghm start 受月报多次提交影响 4月后会返回多行 20190729
+               select aac040,
+                      yac005
+                 into n_yac506,
+                      n_yac508
+               from wsjb.irac01
+              where aab001 = prm_aab001
                and aac001 = v_aac001
-               AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
-              AND iaa002 = '2'
+               and IAA001 IN ('1', '5', '8', '6','3','7','9','10')
+               and iaa002 = '2'
                and iaa100 = (select max(iaa100) from wsjb.irac01
                               WHERE AAB001 = prm_aab001
                                 AND AAC001 = v_aac001
                                 AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
                                 AND iaa002 = '2'
                                 AND iaa100 >= to_number(prm_aae001||'01'));
-
-           -- SELECT yac503 INTO v_yac503 FROM ac02 WHERE aac001 = v_aac001 and aae140 = '03';
+               ELSE
+               select aac040,
+                      CASE WHEN aae310 <> 0 THEN yac005 ELSE 0 END
+                 into n_yac506,
+                      n_yac508
+               from wsjb.irac01
+               where iac001 = (
+                       SELECT iac001
+                        FROM (SELECT a.iac001, a.iaa100, a.aac001,
+                                     ROW_NUMBER() OVER(PARTITION BY aac001 ORDER BY aae036 DESC) LEV
+                                FROM wsjb.irad02a1 a) t
+                       WHERE LEV = 1
+                         and t.aac001 = v_aac001
+                          and iaa100 =  (select max(iaa100) from wsjb.irac01
+                                                        WHERE AAB001 = prm_aab001
+                                                       AND AAC001 = v_aac001
+                                                       AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
+                                                       AND iaa002 = '2'
+                                                       AND iaa100 >= to_number(2019||'01')));		
+               END IF;
          END IF;
        END IF;
-
-
-        --判断是否参失业记录
-        SELECT count(1)
-          INTO n_count
-          FROM xasi2.ac02
-         WHERE AAB001 = prm_aab001
-           AND AAC001 = rec_aac001.aac001
-           AND aae140 = '02';
-       IF n_count > 0 THEN
-         SELECT count(1)
-          INTO n_count1
-          FROM xasi2.ac02
-         WHERE AAB001 = prm_aab001
-           AND AAC001 = rec_aac001.aac001
-           AND AAC031 = '1'
-           AND aae140 = '02';
-        SELECT count(1)
-          INTO n_count2
-          FROM xasi2.ac02
-         WHERE AAB001 = prm_aab001
-           AND AAC001 = rec_aac001.aac001
-           AND AAC031 = '2'
-           AND aae140 = '02';
-         IF n_count1 > 0 THEN
-          v_aae210 := '2';
-          IF n_yac506 = 0 AND n_yac508 = 0 THEN
-            SELECT aac040,yac004,yac503
-              INTO n_yac506,n_yac508,v_yac503
-              FROM xasi2.ac02
-             WHERE AAB001 = prm_aab001
-               AND AAC001 = rec_aac001.aac001
-               AND aac031 = '1'
-               AND aae140 = '02';
-          END IF;
-         END IF;
-         IF n_count2 > 0 THEN
-          IF n_yac506 = 0 AND n_yac508 = 0 THEN
-            SELECT aac040,yac004,yac503
-              INTO n_yac506,n_yac508,v_yac503
-              FROM xasi2.ac02
-             WHERE AAB001 = prm_aab001
-               AND AAC001 = rec_aac001.aac001
-               AND aac031 = '2'
-               AND aae140 = '02';
-          END IF;
-         END IF;
-
-       ELSE
-          select COUNT(1)
-             INTO n_count
-              from wsjb.irac01
-            where aab001 = prm_aab001
-               and aac001 = v_aac001
-               AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
-             AND iaa002 = '2'
-               and iaa100 = (select max(iaa100) from wsjb.irac01
-                                  WHERE AAB001 = prm_aab001
-                                 AND AAC001 = v_aac001
-                                 AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
-                                 AND iaa002 = '2'
-                                 AND iaa100 >= to_number(prm_aae001||'01'));
-        IF n_count > 0 THEN
-          IF n_yac506 = 0 AND n_yac508 = 0 THEN
-                select aac040,
-                       yac005
-                  into n_yac506,
-                       n_yac508
-                  from wsjb.irac01
-                 where aab001 = prm_aab001
-                   and aac001 = v_aac001
-                   AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
-                 AND iaa002 = '2'
-                   and iaa100 = (select max(iaa100) from wsjb.irac01
-                                    WHERE AAB001 = prm_aab001
-                                   AND AAC001 = v_aac001
-                                   AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
-                                   AND iaa002 = '2'
-                                   AND iaa100 >= to_number(prm_aae001||'01'));
-            --   SELECT yac503 INTO v_yac503 FROM ac02 WHERE aac001 = v_aac001 and aae140 = '02';
-           END IF;
-        END IF;
-       END IF;
-
-       --判断是否参工伤记录
-        SELECT count(1)
-          INTO n_count
-          FROM xasi2.ac02
-         WHERE AAB001 = prm_aab001
-           AND AAC001 = v_aac001
-           AND aae140 = '04';
-       IF n_count > 0 THEN
-         SELECT count(1)
-          INTO n_count1
-          FROM xasi2.ac02
-         WHERE AAB001 = prm_aab001
-           AND AAC001 = v_aac001
-           AND AAC031 = '1'
-           AND aae140 = '04';
-        SELECT count(1)
-          INTO n_count2
-          FROM xasi2.ac02
-         WHERE AAB001 = prm_aab001
-           AND AAC001 = v_aac001
-           AND AAC031 = '2'
-           AND aae140 = '04';
-         IF n_count1 > 0 THEN
-          v_aae410 := '2';
-          IF n_yac506 = 0 AND n_yac508 = 0 THEN
-            SELECT aac040,yac004,yac503
-              INTO n_yac506,n_yac508,v_yac503
-              FROM xasi2.ac02
-             WHERE AAB001 = prm_aab001
-               AND AAC001 = v_aac001
-               AND aac031 = '1'
-               AND aae140 = '04';
-               n_yac005 := n_yac508;
-          ELSE
-            SELECT yac004
-              INTO n_yac005
-              FROM xasi2.ac02
-             WHERE AAB001 = prm_aab001
-               AND AAC001 = v_aac001
-               AND aac031 = '1'
-               AND aae140 = '04';
-          END IF;
-         END IF;
-         IF n_count2 > 0 THEN
-          IF n_yac506 = 0 AND n_yac508 = 0 THEN
-            SELECT aac040,yac004,yac503
-              INTO n_yac506,n_yac508,v_yac503
-              FROM xasi2.ac02
-             WHERE AAB001 = prm_aab001
-               AND AAC001 = v_aac001
-               AND aac031 IN ('2','3')
-               AND aae140 = '04';
-               n_yac005 := n_yac508;
-          ELSE
-            SELECT yac004
-              INTO n_yac005
-              FROM xasi2.ac02
-             WHERE AAB001 = prm_aab001
-               AND AAC001 = v_aac001
-               AND aac031 IN ('2','3')
-               AND aae140 = '04';
-          END IF;
-         END IF;
-
-       ELSE
-         select COUNT(1)
-             INTO n_count
-              from wsjb.irac01
-            where aab001 = prm_aab001
-               and aac001 = v_aac001
-               AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
-             AND iaa002 = '2'
-               and iaa100 = (select max(iaa100) from wsjb.irac01
-                                  WHERE AAB001 = prm_aab001
-                                 AND AAC001 = v_aac001
-                                 AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
-                                 AND iaa002 = '2'
-                                 AND iaa100 >= to_number(prm_aae001||'01'));
-        IF n_count > 0 THEN
-          IF n_yac506 = 0 AND n_yac508 = 0 THEN
-              select aac040,
-                     yac005
-                into n_yac506,
-                     n_yac508
-                from wsjb.irac01
-               where aab001 = prm_aab001
-                 and aac001 = v_aac001
-                 AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
-               AND iaa002 = '2'
-                 and iaa100 = (select max(iaa100) from wsjb.irac01
-                                  WHERE AAB001 = prm_aab001
-                                 AND AAC001 = v_aac001
-                                 AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
-                                 AND iaa002 = '2'
-                                 AND iaa100 >= to_number(prm_aae001||'01'));
-              -- SELECT yac503 INTO v_yac503 FROM ac02 WHERE aac001 = v_aac001 and aae140 = '04';
-               n_yac005 := n_yac508;
-          ELSE
-            n_yac005 := n_yac508;
-          END IF;
-         END IF;
-       END IF;
-
+       
        --判断是否参生育记录
         SELECT count(1)
           INTO n_count
@@ -2245,26 +2087,55 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                  AND iaa100 >= to_number(prm_aae001||'01'));
          IF n_count > 0 THEN
              IF n_yac506 = 0 AND n_yac508 = 0 THEN
-                select aac040,
-                       yac005
-                  into n_yac506,
-                       n_yac508
-                  from wsjb.irac01
-                 where aab001 = prm_aab001
-                   and aac001 = v_aac001
-                   AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
-                 AND iaa002 = '2'
-                   and iaa100 = (select max(iaa100) from wsjb.irac01
-                                    WHERE AAB001 = prm_aab001
-                                   AND AAC001 = v_aac001
-                                   AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
-                                   AND iaa002 = '2'
-                                   AND iaa100 >= to_number(prm_aae001||'01'));
-               --  SELECT yac503 INTO v_yac503 FROM ac02 WHERE aac001 = v_aac001 and aae140 = '04';
+             select max(iaa100)
+              into maxiaa100
+              from wsjb.irac01
+             WHERE AAB001 = prm_aab001
+               AND AAC001 = v_aac001
+               AND IAA001 IN ('1', '5', '8', '6', '3', '7', '9', '10')
+               AND iaa002 = '2'
+               AND iaa100 >= to_number(prm_aae001 || '01');
+               IF maxiaa100<=201904 THEN
+               --modify by wanghm start 受月报多次提交影响 4月后会返回多行 20190729
+               select aac040,
+                      yac005
+                 into n_yac506,
+                      n_yac508
+               from wsjb.irac01
+              where aab001 = prm_aab001
+               and aac001 = v_aac001
+               and IAA001 IN ('1', '5', '8', '6','3','7','9','10')
+               and iaa002 = '2'
+               and iaa100 = (select max(iaa100) from wsjb.irac01
+                              WHERE AAB001 = prm_aab001
+                                AND AAC001 = v_aac001
+                                AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
+                                AND iaa002 = '2'
+                                AND iaa100 >= to_number(prm_aae001||'01'));
+               ELSE
+               select aac040,
+                      CASE WHEN aae510 <> 0 THEN yac005 ELSE 0 END
+                 into n_yac506,
+                      n_yac508
+               from wsjb.irac01
+               where iac001 = (
+                       SELECT iac001
+                        FROM (SELECT a.iac001, a.iaa100, a.aac001,
+                                     ROW_NUMBER() OVER(PARTITION BY aac001 ORDER BY aae036 DESC) LEV
+                                FROM wsjb.irad02a1 a) t
+                       WHERE LEV = 1
+                         and t.aac001 = v_aac001
+                          and iaa100 =  (select max(iaa100) from wsjb.irac01
+                                                        WHERE AAB001 = prm_aab001
+                                                       AND AAC001 = v_aac001
+                                                       AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
+                                                       AND iaa002 = '2'
+                                                       AND iaa100 >= to_number(2019||'01')));		
+               END IF;
              END IF;
           END IF;
        END IF;
-
+       
         --判断是否参大额记录
         SELECT count(1)
           INTO n_count
@@ -2291,9 +2162,270 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
           v_aae311 := '2';
          END IF;
        END IF;
+       
+       
+        --判断是否参失业记录
+        SELECT count(1)
+          INTO n_count
+          FROM xasi2.ac02
+         WHERE AAB001 = prm_aab001
+           AND AAC001 = rec_aac001.aac001
+           AND aae140 = '02';
+       IF n_count > 0 THEN
+         SELECT count(1)
+          INTO n_count1
+          FROM xasi2.ac02
+         WHERE AAB001 = prm_aab001
+           AND AAC001 = rec_aac001.aac001
+           AND AAC031 = '1'
+           AND aae140 = '02';
+        SELECT count(1)
+          INTO n_count2
+          FROM xasi2.ac02
+         WHERE AAB001 = prm_aab001
+           AND AAC001 = rec_aac001.aac001
+           AND AAC031 = '2'
+           AND aae140 = '02';
+         IF n_count1 > 0 THEN
+          v_aae210 := '2';
+            SELECT aac040,yac004,yac503
+              INTO n_yac506,n_yac005,v_yac503
+              FROM xasi2.ac02
+             WHERE AAB001 = prm_aab001
+               AND AAC001 = rec_aac001.aac001
+               AND aac031 = '1'
+               AND aae140 = '02';
+         END IF;
+         IF n_count2 > 0 THEN
+            SELECT aac040,yac004,yac503
+              INTO n_yac506,n_yac005,v_yac503
+              FROM xasi2.ac02
+             WHERE AAB001 = prm_aab001
+               AND AAC001 = rec_aac001.aac001
+               AND aac031 = '2'
+               AND aae140 = '02';
+         END IF;
 
+       ELSE
+          select COUNT(1)
+             INTO n_count
+              from wsjb.irac01
+            where aab001 = prm_aab001
+               and aac001 = v_aac001
+               AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
+             AND iaa002 = '2'
+               and iaa100 = (select max(iaa100) from wsjb.irac01
+                                  WHERE AAB001 = prm_aab001
+                                 AND AAC001 = v_aac001
+                                 AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
+                                 AND iaa002 = '2'
+                                 AND iaa100 >= to_number(prm_aae001||'01'));
+        IF n_count > 0 THEN
+          IF n_yac506 = 0 AND n_yac005 = 0 THEN
+            IF prm_aae001 <= 2019 THEN  --失业19年年审以前都是用市社平		
+              select max(iaa100)
+                into maxiaa100
+                from wsjb.irac01
+               WHERE AAB001 = prm_aab001
+                 AND AAC001 = v_aac001
+                 AND IAA001 IN ('1', '5', '8', '6', '3', '7', '9', '10')
+                 AND iaa002 = '2'
+                 AND iaa100 >= to_number(prm_aae001 || '01');
+			         IF maxiaa100<=201904 THEN
+               --modify by wanghm start 受月报多次提交影响 4月后会返回多行 20190729
+               select aac040,
+                      yac005
+                 into n_yac506,
+                      n_yac005
+                 from wsjb.irac01
+                where aab001 = prm_aab001
+                 and aac001 = v_aac001
+                 and IAA001 IN ('1', '5', '8', '6','3','7','9','10')
+                 and iaa002 = '2'
+                 and iaa100 = (select max(iaa100) from wsjb.irac01
+                                WHERE AAB001 = prm_aab001
+                                  AND AAC001 = v_aac001
+                                  AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
+                                  AND iaa002 = '2'
+                                  AND iaa100 >= to_number(prm_aae001||'01'));  
+               ELSE
+               select aac040,
+                      CASE WHEN aae210 <> 0 THEN yac005 ELSE 0 END
+                 into n_yac506,
+                      n_yac005
+               from wsjb.irac01
+               where iac001 = (
+                       SELECT iac001
+                        FROM (SELECT a.iac001, a.iaa100, a.aac001,
+                                     ROW_NUMBER() OVER(PARTITION BY aac001 ORDER BY aae036 DESC) LEV
+                                FROM wsjb.irad02a1 a) t
+                       WHERE LEV = 1
+                         and t.aac001 = v_aac001
+                          and iaa100 =  (select max(iaa100) from wsjb.irac01
+                                                        WHERE AAB001 = prm_aab001
+                                                       AND AAC001 = v_aac001
+                                                       AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
+                                                       AND iaa002 = '2'
+                                                       AND iaa100 >= to_number(2019||'01')));		
+               END IF;
+            ELSE
+               select aac040,
+                      CASE WHEN aae210 <> 0 THEN yac004 ELSE 0 END
+                 into n_yac506,
+                      n_yac005
+               from wsjb.irac01
+               where iac001 = (
+                       SELECT iac001
+                        FROM (SELECT a.iac001, a.iaa100, a.aac001,
+                                     ROW_NUMBER() OVER(PARTITION BY aac001 ORDER BY aae036 DESC) LEV
+                                FROM wsjb.irad02a1 a) t
+                       WHERE LEV = 1
+                         and t.aac001 = v_aac001
+                          and iaa100 =  (select max(iaa100) from wsjb.irac01
+                                                        WHERE AAB001 = prm_aab001
+                                                       AND AAC001 = v_aac001
+                                                       AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
+                                                       AND iaa002 = '2'
+                                                       AND iaa100 >= to_number(2019||'01')));		
+            END IF;
+          END IF;
+        END IF;
+       END IF;
+       
+       
+       --判断是否参工伤记录
+        SELECT count(1)
+          INTO n_count
+          FROM xasi2.ac02
+         WHERE AAB001 = prm_aab001
+           AND AAC001 = v_aac001
+           AND aae140 = '04';
+       IF n_count > 0 THEN
+         SELECT count(1)
+          INTO n_count1
+          FROM xasi2.ac02
+         WHERE AAB001 = prm_aab001
+           AND AAC001 = v_aac001
+           AND AAC031 = '1'
+           AND aae140 = '04';
+        SELECT count(1)
+          INTO n_count2
+          FROM xasi2.ac02
+         WHERE AAB001 = prm_aab001
+           AND AAC001 = v_aac001
+           AND AAC031 = '2'
+           AND aae140 = '04';
+         IF n_count1 > 0 THEN
+          v_aae410 := '2';
+          IF n_yac506 = 0 AND n_yac005 = 0 THEN
+            SELECT aac040,yac004,yac503
+              INTO n_yac506,n_yac005,v_yac503
+              FROM xasi2.ac02
+             WHERE AAB001 = prm_aab001
+               AND AAC001 = v_aac001
+               AND aac031 = '1'
+               AND aae140 = '04';
+          END IF;
+         END IF;
+         IF n_count2 > 0 THEN
+          IF n_yac506 = 0 AND n_yac005 = 0 THEN
+            SELECT aac040,yac004,yac503
+              INTO n_yac506,n_yac005,v_yac503
+              FROM xasi2.ac02
+             WHERE AAB001 = prm_aab001
+               AND AAC001 = v_aac001
+               AND aac031 IN ('2','3')
+               AND aae140 = '04';
+          END IF;
+         END IF;
 
-        --判断是否参养老记录
+       ELSE
+         select COUNT(1)
+             INTO n_count
+              from wsjb.irac01
+            where aab001 = prm_aab001
+               and aac001 = v_aac001
+               AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
+             AND iaa002 = '2'
+               and iaa100 = (select max(iaa100) from wsjb.irac01
+                                  WHERE AAB001 = prm_aab001
+                                 AND AAC001 = v_aac001
+                                 AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
+                                 AND iaa002 = '2'
+                                 AND iaa100 >= to_number(prm_aae001||'01'));
+          IF n_count > 0 THEN
+          IF n_yac506 = 0 AND n_yac005 = 0 THEN
+            IF prm_aae001 <= 2019 THEN  --工伤19年年审以前都是用市社平		
+              select max(iaa100)
+                into maxiaa100
+                from wsjb.irac01
+               WHERE AAB001 = prm_aab001
+                 AND AAC001 = v_aac001
+                 AND IAA001 IN ('1', '5', '8', '6', '3', '7', '9', '10')
+                 AND iaa002 = '2'
+                 AND iaa100 >= to_number(prm_aae001 || '01');
+			         IF maxiaa100<=201904 THEN
+               --modify by wanghm start 受月报多次提交影响 4月后会返回多行 20190729
+               select aac040,
+                      yac005
+                 into n_yac506,
+                      n_yac005
+                 from wsjb.irac01
+                where aab001 = prm_aab001
+                 and aac001 = v_aac001
+                 and IAA001 IN ('1', '5', '8', '6','3','7','9','10')
+                 and iaa002 = '2'
+                 and iaa100 = (select max(iaa100) from wsjb.irac01
+                                WHERE AAB001 = prm_aab001
+                                  AND AAC001 = v_aac001
+                                  AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
+                                  AND iaa002 = '2'
+                                  AND iaa100 >= to_number(prm_aae001||'01'));  
+               ELSE
+               select aac040,
+                      CASE WHEN aae410 <> 0 THEN yac005 ELSE 0 END
+                 into n_yac506,
+                      n_yac005
+               from wsjb.irac01
+               where iac001 = (
+                       SELECT iac001
+                        FROM (SELECT a.iac001, a.iaa100, a.aac001,
+                                     ROW_NUMBER() OVER(PARTITION BY aac001 ORDER BY aae036 DESC) LEV
+                                FROM wsjb.irad02a1 a) t
+                       WHERE LEV = 1
+                         and t.aac001 = v_aac001
+                          and iaa100 =  (select max(iaa100) from wsjb.irac01
+                                                        WHERE AAB001 = prm_aab001
+                                                       AND AAC001 = v_aac001
+                                                       AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
+                                                       AND iaa002 = '2'
+                                                       AND iaa100 >= to_number(2019||'01')));		
+               END IF;
+            ELSE
+               select aac040,
+                      CASE WHEN aae410 <> 0 THEN yac004 ELSE 0 END
+                 into n_yac506,
+                      n_yac005
+               from wsjb.irac01
+               where iac001 = (
+                       SELECT iac001
+                        FROM (SELECT a.iac001, a.iaa100, a.aac001,
+                                     ROW_NUMBER() OVER(PARTITION BY aac001 ORDER BY aae036 DESC) LEV
+                                FROM wsjb.irad02a1 a) t
+                       WHERE LEV = 1
+                         and t.aac001 = v_aac001
+                          and iaa100 =  (select max(iaa100) from wsjb.irac01
+                                                        WHERE AAB001 = prm_aab001
+                                                       AND AAC001 = v_aac001
+                                                       AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
+                                                       AND iaa002 = '2'
+                                                       AND iaa100 >= to_number(2019||'01')));		
+            END IF;
+          END IF;
+        END IF;
+       END IF;
+
+       --判断是否参养老记录
        SELECT count(1)
           INTO n_count
           FROM wsjb.IRAC01A3
@@ -2359,7 +2491,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                AND IAA001 IN ('1', '5', '8', '6', '3', '7', '9', '10')
                AND iaa002 = '2'
                AND iaa100 >= to_number(prm_aae001 || '01');
-               
+
               IF maxiaa100<=201904 THEN
                 select distinct (CASE WHEN aae110 <> 0 THEN yac004 ELSE 0 END)
                   into n_yac507
@@ -2391,7 +2523,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                                        AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
                                                        AND iaa002 = '2'
                                                        AND iaa100 >= to_number(prm_aae001||'01')));
-              END IF;                                                        
+              END IF;
            ELSE
              --有缴费记录才给显示缴费基数
              SELECT count(1)
@@ -2448,7 +2580,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                AND IAA001 IN ('1', '5', '8', '6', '3', '7', '9', '10')
                AND iaa002 = '2'
                AND iaa100 >= to_number('2019' || '01');
-               
+
            IF maxiaa100<=201904 THEN
            select CASE WHEN aae110 <> 0 THEN yac004 ELSE 0 END
                 into n_yac507
@@ -2463,7 +2595,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                  AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
                                  AND iaa002 = '2'
                                  AND iaa100 >= to_number(prm_aae001||'01'));
-           ELSE                    
+           ELSE
            select  CASE WHEN aae110 <> 0 THEN yac004 ELSE 0 END
                into n_yac507
                 from wsjb.irac01
@@ -2480,15 +2612,15 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                                        AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
                                                        AND iaa002 = '2'
                                                        AND iaa100 >= to_number(prm_aae001||'01')));
-           END IF;                  
+           END IF;
          END IF;
 
        END IF;
-       
-       
+
+
 
        IF n_yac506 IS NULL THEN
-           n_yac506 := 0;
+          n_yac506 := 0;
        END IF;
        IF n_yac507 IS NULL OR n_yac507 <= 0 THEN
          --是否存在养老缴费记录
@@ -2593,9 +2725,9 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
          AND yae031 = '1'
          AND aae041 >= prm_aae001||'01'
          AND aae041 <= prm_aae001||'12'
-         AND not exists (select 1 from wsjb.irac01a3 a where a.aab001=prm_aab001 and a.aac001=v_aac001 and aae110='2');                            
+         AND not exists (select 1 from wsjb.irac01a3 a where a.aab001=prm_aab001 and a.aac001=v_aac001 and aae110='2');
         if n_count >0 then
-          
+
           update xasi2.ac01k8
              set aac040 = n_yac506,
                  yac004 = n_yac507,
@@ -2605,8 +2737,8 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
              and aac001 = v_aac001
              and aae001 = prm_aae001;
         end if;
-                                    
-        -- 提前结算后又续回的单独写一条 AC01K8                                    
+
+        -- 提前结算后又续回的单独写一条 AC01K8
            SELECT count(1)
             INTO n_count
             FROM wsjb.irad51a1 a, wsjb.irac01a3 b
@@ -2624,19 +2756,19 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                         max(decode(aae002, prm_aae001 || '03', '03月/')) ||
                         max(decode(aae002, prm_aae001 || '04', '04月/')) ||
                         max(decode(aae002, prm_aae001 || '05', '05月/')) ||
-                        max(decode(aae002, prm_aae001 || '06', '06月/')) 
+                        max(decode(aae002, prm_aae001 || '06', '06月/'))
                     as tqjsyf into v_tqjsyf
                    from wsjb.irad51a2
                   where aac001 = v_aac001
                     and aae002 >= prm_aae001 || '01'
                     and aae002 <= prm_aae001 || '12';
-                 --拼接提前结算注释  
+                 --拼接提前结算注释
                   v_yae110 := '养老提前结算/'||v_tqjsyf;
                   --获取结算月度的结算上账基数(如果提前结算的人续保回来从AC02或IRAC01取就不对了,所以取结算的基数)
                   select distinct b.yaa334,b.yaa334
                      into n_yac506,n_yac507
                     from irad51a1 a, irad51a2 b
-                   where a.yae031 ='1' 
+                   where a.yae031 ='1'
                    and a.yae518 =b.yae518
                    and  a.aab001 = prm_aab001
                    and a.aac001 = v_aac001;
@@ -2681,7 +2813,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                             n_yac506,
                                             n_yac507,
                                             n_yac508,
-                                            n_yac506, 
+                                            n_yac506,
                                             n_yac507,
                                             n_yac508,
                                             v_aae110,
@@ -2704,10 +2836,10 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                             SYSDATE,
                                             '21'
                                             );
-            END IF;                        
+            END IF;
       END LOOP;
 
-   --这是养老备案的 201811后已经没有这个业务了 
+   --这是养老备案的 201811后已经没有这个业务了
    FOR rec_aac001Ba in cur_aac001Ba LOOP
         v_yac503 := '0';
         n_count  :=0;
@@ -4220,7 +4352,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
             prm_ErrorMsg := '没有获取到档案编号!';
             RETURN;
          END IF;
-         
+
       -- 年申报补差
       prc_YearSalaryAdjustPaded(prm_aab001  ,--单位编号  必填
                                 ''  ,--个人编号  非必填
@@ -4349,8 +4481,8 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                   sysdate,
                   sysdate
                  );
-                 
-          -- 计算基数变化比例        
+
+          -- 计算基数变化比例
           prc_YearApplyJSProportions (prm_aab001,--单位编号
                        prm_aae001,--年审年度
                        prm_yae092, --经办人
@@ -4698,13 +4830,13 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
        WHERE aab001 = prm_aab001
          AND aae001 = prm_aae001;
      --modify by fenggg at 20181208 end
-     
+
      --modify by whm at 20190812start
      --撤销年审申报的同时删除irad54中基数降低的记录
      DELETE wsjb.irad54
        WHERE iaa011 ='A05-1'
          AND aab001 = prm_aab001
-         AND aae001 = prm_aae001;          
+         AND aae001 = prm_aae001;
      --modify by whm at 20190812end
 
       EXCEPTION
@@ -7617,7 +7749,7 @@ END prc_insertIRAC08A1;
       INTO v_yae097,v_aae002
       FROM xasi2.AA35
      WHERE AAE001 = prm_aae001;
-     
+
 
      FOR rec_tmp_ac40 IN cur_tmp_ac40 LOOP
          n_aac040 :=0;
@@ -7635,7 +7767,7 @@ END prc_insertIRAC08A1;
          v_aac003 := rec_tmp_ac40.aac003;
          v_aab001 := rec_tmp_ac40.aab001;
          n_aac040 := rec_tmp_ac40.aac040;
-         
+
          SELECT count(1)
            INTO n_count
            FROM xasi2.ac01k8
@@ -7673,8 +7805,8 @@ END prc_insertIRAC08A1;
            prm_ErrorMsg := v_aac003||'('||v_aac002||','||v_aac001||')的工资信息小于1800元。请更正后再导入。';
            RETURN;
          END IF;
-      
-         
+
+
        /*  这里注释掉 改为批量调用 单个的过程prc_UpdateAc01k8  by whm 20190809 start
          --判断各险种状态
         SELECT aae110,aae210,aae310,aae410,aae510
@@ -7686,7 +7818,7 @@ END prc_insertIRAC08A1;
             AND aac003 = v_aac003
             AND aae001 = prm_aae001
             AND yab019 = prm_yab019;
-        
+
          IF v_aae210 IS NULL AND v_aae310 IS NULL AND v_aae410 IS NULL AND v_aae510 IS NULL THEN
            n_yac005 :=0;
          ELSE
@@ -7697,7 +7829,7 @@ END prc_insertIRAC08A1;
           FROM dual;
           n_yaa444 := n_yac005;--工伤基数赋值
         END IF;
-        
+
          IF v_aae110 IS NOT NULL THEN
            SELECT count(1)
              INTO n_count
@@ -7739,7 +7871,7 @@ END prc_insertIRAC08A1;
             AND yab019 = prm_yab019;
     这里注释掉 改为批量调用 单个的过程prc_UpdateAc01k8  by whm 20190809 end;
     */
-    
+
     -- 调用单个的
      prc_UpdateAc01k8 (
         v_aab001    ,--申报单位
@@ -7748,9 +7880,9 @@ END prc_insertIRAC08A1;
         n_aac040    , --新缴费工资
         prm_AppCode   ,
         prm_ErrorMsg  );
-        
+
        END LOOP;
-   
+
 
      EXCEPTION
       -- WHEN NO_DATA_FOUND THEN
@@ -7777,13 +7909,13 @@ PROCEDURE prc_UpdateAc01k8 (
 
  var_yab136     VARCHAR2(6);  --AB01单位管理类型
  var_aab019     VARCHAR2(6);
- var_aae002     NUMBER(6);     --费款所属期 
- var_yab003     VARCHAR2(6);  
+ var_aae002     NUMBER(6);     --费款所属期
+ var_yab003     VARCHAR2(6);
  num_yaa333     NUMBER(14,2);  --市社平基数
  num_yac004     NUMBER(14,2);  --省社平基数
  num_yaa444     NUMBER(14,2);  --工伤基数
  num_spgz       xasi2.ac02.aac040%TYPE;
- 
+
  cursor cur_aae140 is  --ac01k8 中个人可以补差的险种(行专列)
    select decode(aae140,
                  'AAE110','01',
@@ -7791,28 +7923,28 @@ PROCEDURE prc_UpdateAc01k8 (
                  'AAE310','03',
                  'AAE410','04',
                  'AAE510','05',
-                 'AAE311','07') AS aae140, 
+                 'AAE311','07') AS aae140,
                  aac031
     from xasi2.ac01k8 unpivot
     (aac031 for aae140 in(aae110,aae210, aae310,aae410,aae510, aae311))
    where aab001 = prm_aab001
      and aac001 = prm_aac001
      and aae001 = prm_aae001;
- 
- 
+
+
  BEGIN
       prm_AppCode  := gn_def_OK;
       prm_ErrorMsg := '';
       var_yab003 := '610127';
-      
-      
+
+
       SELECT --to_char(YAE097) as yae097,
        TO_CHAR(ADD_MONTHS(TO_DATE(TO_CHAR(YAE097), 'yyyyMM'), 1), 'yyyyMM') AS AAE002
        INTO var_aae002
       FROM xasi2.AA35
      WHERE AAE001 = prm_aae001;
-     
-     
+
+
       --获取单位当前的管理类型
       BEGIN
          SELECT yab136,aab019
@@ -7842,7 +7974,7 @@ PROCEDURE prc_UpdateAc01k8 (
                                                     var_yab003)                         --参保分中心 yab139
                     INTO num_yaa333
                  FROM dual;
-                 
+
              ELSIF rec_aae140.aae140 IN ('02','04') THEN
                  --省社平保底封顶(19年年审工伤失业 一般企业和个体工商都是60%到300% 所以用yaa444)
                  SELECT pkg_common.fun_p_getcontributionbase(
@@ -7857,7 +7989,7 @@ PROCEDURE prc_UpdateAc01k8 (
                                                     var_yab003)                          --参保分中心 yab139
                     INTO num_yaa444
                  FROM dual;
-               
+
              ELSIF rec_aae140.aae140 = '01'THEN
                      --一般企业的养老
                      SELECT pkg_common.fun_p_getcontributionbase(
@@ -7872,8 +8004,8 @@ PROCEDURE prc_UpdateAc01k8 (
                                                     var_yab003)                          --参保分中心 yab139
                   INTO num_yac004
                FROM dual;
-               
-               ELSIF rec_aae140.aae140 = '01' AND var_aab019 ='60' THEN  
+
+               ELSIF rec_aae140.aae140 = '01' AND var_aab019 ='60' THEN
                      --个体工商养老是50% 到300%
                      num_spgz := xasi2.pkg_comm.fun_GetAvgSalary(rec_aae140.aae140,'16',var_aae002,pkg_Constant.YAB003_JBFZX);
                      IF prm_aac040 > ROUND(num_spgz/12) THEN
@@ -7883,17 +8015,17 @@ PROCEDURE prc_UpdateAc01k8 (
                      ELSE
                         num_yac004 := prm_aac040;
                      END IF;
-              END IF; 
+              END IF;
       EXCEPTION
          WHEN OTHERS THEN
              prm_AppCode  :=  gn_def_ERR;
              prm_ErrorMsg  := '个人编号'||prm_aac001||'没有获取到险种:'||rec_aae140.aae140||'的保底封顶基数';
-             RETURN;                  
+             RETURN;
       END;
     END LOOP;
-    
-    UPDATE xasi2.ac01k8 
-       SET aac040 = prm_aac040,  
+
+    UPDATE xasi2.ac01k8
+       SET aac040 = prm_aac040,
               yaa333 = num_yaa333,
               yac004 = num_yac004,
               yaa444 = num_yaa444
@@ -7901,7 +8033,7 @@ PROCEDURE prc_UpdateAc01k8 (
        AND aac001 = prm_aac001
        AND aae001 = prm_aae001
        AND YAB019 = '1';
-  
+
  EXCEPTION
         WHEN OTHERS THEN
         /*关闭打开的游标*/
@@ -9857,7 +9989,7 @@ PROCEDURE prc_YearApplyJSProportions (prm_aab001       IN     xasi2.ab01.aab001%
                                prm_aae001       IN     NUMBER            ,--年审年度
                                prm_aae011       IN     irad31.aae011%TYPE, --经办人
                                prm_AppCode      OUT    VARCHAR2          ,
-                               prm_ErrorMsg     OUT    VARCHAR2          )     
+                               prm_ErrorMsg     OUT    VARCHAR2          )
 IS
   num_count NUMBER(6);
   v_minaae041 NUMBER(6);
@@ -9866,17 +9998,17 @@ IS
   v_proportions NUMBER(6,2);
   v_proportions_constant NUMBER(6);
   v_proportions_msg  irad54.aae013%type;
-  
+
   cursor ab02_cur is select aae140 from xasi2.ab02 where  aae140 !='07' and aab051 = '1'  and aab001 = prm_aab001 ;
-  
+
 BEGIN
-  
+
 /*初始化变量*/
       prm_AppCode  := gn_def_OK;
       prm_ErrorMsg := '';
       v_proportions_constant := -35;
       v_proportions_msg := '';
-      
+
         -- 单位是否有4险
         select count(1)
           into num_count
@@ -9885,7 +10017,7 @@ BEGIN
            and aae140 !='07'
            and aab001 = prm_aab001;
         -- 有四险取当年四险最小核费期号
-        if num_count >0 then 
+        if num_count >0 then
           select min(aae041)
             into v_minaae041
             from (select aae041
@@ -9898,7 +10030,7 @@ BEGIN
                     from xasi2.ab08a8
                    where yae517 = 'H01'
                      and aab001 = prm_aab001
-                     and aae041 > (prm_aae001 - 1) || 12);                        
+                     and aae041 > (prm_aae001 - 1) || 12);
         else --没有四险就是单养老单位取当年养老最小核费期号
           select min(aae041)
             into v_minaae041
@@ -9907,7 +10039,7 @@ BEGIN
              and aab001 = prm_aab001
              and aae041 > (prm_aae001 - 1) || 12;
         end if;
-        
+
         -- 按险种获取当年最早一次核费的单位基数 ac01k8 中新基数对比
         -- 只要有一个险种基数补差降低大于35%的 就写入一条irad54记录
         if num_count>0 then
@@ -9925,16 +10057,16 @@ BEGIN
             where aab001 = prm_aab001
               and aae001 = prm_aae001
               and aae110 is not null;
-             --计算比例 
+             --计算比例
              select (trunc((v_aab121_new / v_aab121_old), 4) - 1) * 100
                into v_proportions
                from DUAL;
               if v_proportions <= v_proportions_constant then
                  v_proportions_msg:='01险种'||v_minaae041||'基数降低比例低于'||v_proportions_constant;
                  GOTO leb_next;
-              end if;  
+              end if;
           --非单养老单位处理 4险
-          for ab02_rec in ab02_cur loop 
+          for ab02_rec in ab02_cur loop
             select aab121
               into v_aab121_old
               from (select aab121
@@ -9949,8 +10081,8 @@ BEGIN
                      where yae517 = 'H01'
                        and aae140 = ab02_rec.aae140
                        and aab001 = prm_aab001
-                       and aae041 = v_minaae041);          
-            --失业19年后使用省社平                       
+                       and aae041 = v_minaae041);
+            --失业19年后使用省社平
             if ab02_rec.aae140 = '02' and prm_aae001 > 2018 then
                select sum(yac004)
                  into v_aab121_new
@@ -9963,7 +10095,7 @@ BEGIN
                  from xasi2.ac01k8
                 where aab001 = prm_aab001
                   and aae210 = '2';
-            end if; 
+            end if;
             --工伤19年后使用省社平
             if ab02_rec.aae140 = '04' and prm_aae001 > 2018 then
                select sum(yac004)
@@ -10001,9 +10133,9 @@ BEGIN
               if v_proportions <= v_proportions_constant then
                  v_proportions_msg:=ab02_rec.aae140||'险种'||v_minaae041||'基数降低比例低于'||v_proportions_constant;
                  GOTO leb_next;
-              end if;                                 
-          end loop;                    
-        else    --单养老   
+              end if;
+          end loop;
+        else    --单养老
             select aab121
                into v_aab121_old
                from wsjb.irab08
@@ -10017,18 +10149,18 @@ BEGIN
               where aab001 = prm_aab001
                 and aae001 = prm_aae001
                 and aae110 is not null;
-             --计算比例 
+             --计算比例
              select (trunc((v_aab121_new / v_aab121_old), 4) - 1) * 100
               into v_proportions
               from DUAL;
               if v_proportions <= v_proportions_constant then
                  v_proportions_msg:='01险种'||v_minaae041||'基数降低比例低于'||v_proportions_constant;
-              end if;  
+              end if;
           end if;
-          
+
          <<leb_next>>
-         
-         if v_proportions_msg is not null then 
+
+         if v_proportions_msg is not null then
          insert into wsjb.irad54
             (AAB001,
              IAA011,
@@ -10043,8 +10175,8 @@ BEGIN
              sysdate,
              prm_aae001,
              v_proportions_msg);
-         end if;   
-              
+         end if;
+
         EXCEPTION
         WHEN OTHERS THEN
         /*关闭打开的游标*/
@@ -10052,6 +10184,6 @@ BEGIN
              prm_ErrorMsg := '数据库错误:'|| SQLERRM ;
              RETURN;
 END prc_YearApplyJSProportions;
-                                      
+
 end PKG_YearApply;
 /

@@ -1437,8 +1437,8 @@
 		A.AAC009 AS AAC009,
 		A.YAC506 AS YAC506, <!-- 原缴费工资 -->
 		A.YAC507 AS YAC507, <!-- 原养老基数 -->
-		A.YAC508 AS YAC508_02, <!-- 原工伤基数 -->
-		A.YAC508 AS YAC508_04, <!-- 原失业基数 -->
+		A.YAC005 AS YAC005_02, <!-- 原工伤基数 -->
+		A.YAC005 AS YAC005_04, <!-- 原失业基数 -->
 		A.YAC508 AS YAC508_03, <!-- 原医疗基数 -->
 		A.YAC508 AS YAC508_05, <!-- 原生育基数 -->
 		A.AAC040 AS AAC040,  <!-- 新缴费工资 -->
@@ -1447,8 +1447,8 @@
 		DECODE(SIGN(#aae001#-2019),0,A.YAA004,1,A.YAC004,A.YAA333) AS YAA333_02,   新失业基数
 		DECODE(SIGN(#aae001#-2019),0,A.YAC004,1,A.YAC004,A.YAA333) AS YAA333_04,   新工伤基数
 		-->
-		A.YAA444 AS YAA333_02,  <!-- 新失业基数 -->
-		A.YAA444 AS YAA333_04,  <!-- 新工伤基数 -->
+		A.YAA444 AS YAA444_02,  <!-- 新失业基数 -->
+		A.YAA444 AS YAA444_04,  <!-- 新工伤基数 -->
 		A.YAA333 AS YAA333_03,  <!-- 新医疗基数 -->
 		A.YAA333 AS YAA333_05,  <!-- 新生育基数 -->
 		A.AAE110 AS AAE110,
