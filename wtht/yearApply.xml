@@ -1480,7 +1480,9 @@
 		AND A.AAB001 = #aab001#
 		AND A.AAE001 = #aae001#
 		AND A.YAB019 = '1'
+		<!--
 		AND (A.AAE013 is null or A.AAE013 ='1')
+		-->
 		ORDER BY
 		A.YAE110 DESC,
 		A.YAE310 DESC,
