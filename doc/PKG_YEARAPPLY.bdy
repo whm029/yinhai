@@ -1918,6 +1918,8 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
       END IF;
       --modify by whm 20190813 提前结算且没有续保回原单位,续保回原单位的在下面单独写一条ac01k8 ac01k8 end
       
+      
+      
       --判断是否参医疗记录
         SELECT count(1)
           INTO n_count
@@ -2029,7 +2031,6 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                AND aac031 = '1'
                AND aae140 = '02';
           END IF;
-
          END IF;
          IF n_count2 > 0 THEN
           IF n_yac506 = 0 AND n_yac508 = 0 THEN
@@ -2121,7 +2122,6 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                AND aac031 = '1'
                AND aae140 = '04';
           END IF;
-
          END IF;
          IF n_count2 > 0 THEN
           IF n_yac506 = 0 AND n_yac508 = 0 THEN
@@ -2292,8 +2292,9 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
          END IF;
        END IF;
 
+
         --判断是否参养老记录
-        SELECT count(1)
+       SELECT count(1)
           INTO n_count
           FROM wsjb.IRAC01A3
          WHERE AAB001 = prm_aab001
@@ -2483,6 +2484,8 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
          END IF;
 
        END IF;
+       
+       
 
        IF n_yac506 IS NULL THEN
            n_yac506 := 0;
@@ -2592,6 +2595,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
          AND aae041 <= prm_aae001||'12'
          AND not exists (select 1 from wsjb.irac01a3 a where a.aab001=prm_aab001 and a.aac001=v_aac001 and aae110='2');                            
         if n_count >0 then
+          
           update xasi2.ac01k8
              set aac040 = n_yac506,
                  yac004 = n_yac507,
