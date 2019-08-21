@@ -63,15 +63,15 @@
         </ta:datagridItem>
 
         <ta:datagridItem id="yac004" key="新养老基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
-        <ta:datagridItem id="yaa444_02" key="新工伤基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
-        <ta:datagridItem id="yaa444_04" key="新失业基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
+        <ta:datagridItem id="yaa444_02" key="新失业基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
+        <ta:datagridItem id="yaa444_04" key="新工伤基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
         <ta:datagridItem id="yaa333_03" key="新医疗基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
         <ta:datagridItem id="yaa333_05" key="新生育基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
 
         <ta:datagridItem id="yac506" key="原缴费工资" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
         <ta:datagridItem id="yac507" key="原养老基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
-        <ta:datagridItem id="yac005_02" key="原工伤基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
-        <ta:datagridItem id="yac005_04" key="原失业基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
+        <ta:datagridItem id="yac005_02" key="原失业基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
+        <ta:datagridItem id="yac005_04" key="原工伤基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
         <ta:datagridItem id="yac508_03" key="原医疗基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
         <ta:datagridItem id="yac508_05" key="原生育基数" width="80" align="center" dataAlign="left" showDetailed="true" dataType="Number"/>
 
@@ -176,8 +176,8 @@
     var sx01 = Base.getValue("sx01");//省社平上线
     var xx03 = Base.getValue("xx03");//市社平下线
     var sx03 = Base.getValue("sx03");//市社平上线
-    var xx60 = Base.getValue("xx60");//市社平下线
-    var sx60 = Base.getValue("sx60");//市社平上线
+    var xx60 = Base.getValue("xx60");//
+    var sx60 = Base.getValue("sx60");//
 
     var rownum = data.item.rownum;
     var aac001 = data.item.aac001;
@@ -193,7 +193,7 @@
     var yac507 = data.item.yac507;
     //var yac508 = data.item.yac508;
     var yac004 = 0; //新养老基数
-    var yac005 = 0; //原工伤缴费工资
+    //var yac005 = 0; //原工伤缴费工资
     var yaa444_02 = 0; //新失业基数
     var yaa444_04 = 0; //新工伤基数
     var yaa333_03 = 0; //新医疗基数
@@ -204,8 +204,8 @@
       Base.setGridCellData("sucGrid", rownum, data.cell, "");
       return;
     }
-    // 单养老的
-    if (((aae110 == '2') || (aae110 == '21') || (aae110 == '备案'))&&(((aae210 == null) || (aae210 == '')) && ((aae310 == null) || (aae310 == '')) && ((aae410 == null) || (aae410 == '')) && ((aae510 == null) || (aae510 == '')))) {
+    // 养老
+    if (aae110 == '2' || aae110 == '21' || aae110 == '备案') {
       if (aac040 > xx01) {
         if (aac040 > sx01) {
           yac004 = sx01;
@@ -216,107 +216,82 @@
         yac004 = xx01;
       }
     }
-    // 非单养老 有省社平险种 并且有养老险种的
-    else if(((aae110 == '2') || (aae110 == '21') || (aae110 == '备案')) && ((aae210 == '2') || (aae210 == '21') || (aae410 == '2') || (aae410 == '21'))) {
-      if (aac040 >= xx01) {
-        if (aac040 >= xx03) {
-          if (aac040 >= sx01) {
-            if (aac040 >= sx03) {
-              yac004 = sx01;
-              yaa444_02 = sx01;
-              yaa444_04 = sx01;
-              yaa333_03 = sx03;
-              yaa333_05 = sx03;
-              //yac005 = sx03;
-            } else {
-              yac004 = sx01;
-              yaa444_02 = sx01;
-              yaa444_04 = sx01;
-              yaa333_03 = aac040;
-              yaa333_05 = aac040;
-              //yac005 = aac040;
-            }
-          } else {
-            yac004 = aac040;
-            yaa444_02 = aac040;
-            yaa444_04 = aac040;
-            yaa333_03 = aac040;
-            yaa333_05 = aac040;
-            //yac005 = aac040;
-          }
-        } else {
-          yac004 = aac040;
-          yaa444_02 = aac040;
-          yaa444_04 = aac040;
-          yaa333_03 = xx03;
-          yaa333_05 = xx03;
-          //yac005 = xx03;
-        }
-      } else {
-        yac004 = xx01;
-        yaa444_02 = xx01;
-        yaa444_04 = xx01;
-        yaa333_03 = xx03;
-        yaa333_05 = xx03;
-        //yac005 = xx03;
-      }
 
-      // 非单养老 有省社平险种 没有养老险种的
-    } else if(((aae110 == '') || (aae110 == null)) && ((aae210 == '2') || (aae210 == '21') || (aae410 == '2') || (aae410 == '21'))) {
-      if (aac040 >= xx01) {
-        if (aac040 >= xx03) {
-          if (aac040 >= sx01) {
-            if (aac040 >= sx03) {
-              yaa444_02 = sx01;
-              yaa444_04 = sx01;
-              yaa333_03 = sx03;
-              yaa333_05 = sx03;
-              //yac005 = sx03;
-            } else {
-              yaa444_02 = sx01;
-              yaa444_04 = sx01;
-              yaa333_03 = aac040;
-              yaa333_05 = aac040;
-              //yac005 = aac040;
-            }
+    // 失业
+    if (aae210 == '2' || aae210 == '21') {
+      if(xx60 > 0 && sx60 > 0){  //19年后的个体工商户基数
+        if (aac040 > xx60) {
+          if (aac040 > sx60) {
+            yaa444_02 = sx60;
           } else {
             yaa444_02 = aac040;
-            yaa444_04 = aac040;
-            yaa333_03 = aac040;
-            yaa333_05 = aac040;
-            //yac005 = aac040;
           }
         } else {
-          yaa444_02 = aac040;
-          yaa444_04 = aac040;
-          yaa333_03 = xx03;
-          yaa333_05 = xx03;
-          //yac005 = xx03;
+          yaa444_02 = xx60;
         }
-      } else {
-        yaa444_02 = xx01;
-        yaa444_04 = xx01;
-        yaa333_03 = xx03;
-        yaa333_05 = xx03;
-        //yac005 = xx03;
+      }else {
+        if (aac040 > xx01) {
+          if (aac040 > sx01) {
+            yaa444_02 = sx01;
+          } else {
+            yaa444_02 = aac040;
+          }
+        } else {
+          yaa444_02 = xx01;
+        }
       }
+    }
 
-      // 非单养老只有市社平险种的
-    } else {
+
+    // 工伤
+    if (aae410 == '2' || aae410 == '21') {
+      if(xx60 > 0 && sx60 > 0){  //19年后的个体工商户基数
+        if (aac040 > xx60) {
+          if (aac040 > sx60) {
+            yaa444_04 = sx60;
+          } else {
+            yaa444_04 = aac040;
+          }
+        } else {
+          yaa444_04 = xx60;
+        }
+      }else {
+        if (aac040 > xx01) {
+          if (aac040 > sx01) {
+            yaa444_04 = sx01;
+          } else {
+            yaa444_04 = aac040;
+          }
+        } else {
+          yaa444_04 = xx01;
+        }
+      }
+    }
+
+    // 医疗
+    if (aae310 == '2' || aae310 == '21') {
       if (aac040 > xx03) {
         if (aac040 > sx03) {
           yaa333_03 = sx03;
-          yaa333_05 = sx03;
-          //yac005 = sx03;
         } else {
           yaa333_03 = aac040;
-          yaa333_05 = aac040;
-          //yac005 = aac040;
         }
       } else {
         yaa333_03 = xx03;
+      }
+    }
+
+
+    // 生育
+    if (aae510 == '2' || aae510 == '21') {
+      if (aac040 > xx03) {
+        if (aac040 > sx03) {
+          yaa333_05 = sx03;
+        } else {
+          yaa333_05 = aac040;
+        }
+      } else {
         yaa333_05 = xx03;
-        yac005 = xx03;
       }
     }
 

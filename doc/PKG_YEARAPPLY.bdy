@@ -7994,7 +7994,7 @@ PROCEDURE prc_UpdateAc01k8 (
                  FROM dual;
 
              ELSIF rec_aae140.aae140 = '01'THEN
-                     --一般企业的养老
+                     --养老(养老保底封顶中已经区分了一般企业和个体工商)
                      SELECT pkg_common.fun_p_getcontributionbase(
                                                     null,                                --个人编码 aac001
                                                     prm_aab001,                          --单位编码 aab001
@@ -8007,18 +8007,8 @@ PROCEDURE prc_UpdateAc01k8 (
                                                     var_yab003)                          --参保分中心 yab139
                   INTO num_yac004
                FROM dual;
-
-               ELSIF rec_aae140.aae140 = '01' AND var_aab019 ='60' THEN
-                     --个体工商养老是50% 到300%
-                     num_spgz := xasi2.pkg_comm.fun_GetAvgSalary(rec_aae140.aae140,'16',var_aae002,pkg_Constant.YAB003_JBFZX);
-                     IF prm_aac040 > ROUND(num_spgz/12) THEN
-                        num_yac004 := ROUND(num_spgz/12);
-                     ELSIF prm_aac040 < TRUNC(num_spgz/24)+1 THEN
-                        num_yac004 := TRUNC(num_spgz/24)+1;
-                     ELSE
-                        num_yac004 := prm_aac040;
-                     END IF;
-              END IF;
+              
+            END IF;
       EXCEPTION
          WHEN OTHERS THEN
              prm_AppCode  :=  gn_def_ERR;
@@ -8035,7 +8025,9 @@ PROCEDURE prc_UpdateAc01k8 (
      WHERE aab001 = prm_aab001
        AND aac001 = prm_aac001
        AND aae001 = prm_aae001
-       AND YAB019 = '1';
+       AND yab019 = '1'
+       AND (aae013 is null or aae013 ='1');     -- 提前结算的不更
+       
 
  EXCEPTION
         WHEN OTHERS THEN

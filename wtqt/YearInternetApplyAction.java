@@ -288,7 +288,7 @@ public class YearInternetApplyAction extends NetHallBaseAction {
         dto1.put("aae001", aae001);
         dto1.put("yab003", yab003);
         dto1.putAll(key);
-        service.updateYac004(XmlConverUtil.map2Xml(dto1)); //更新ac01k8的基数Yac004
+        service.updateYac004(XmlConverUtil.map2Xml(dto1)); //更新ac01k8的基数重新保底封顶
         /* 调用养老接口写入 */
         key.put("aac040", key.getAsBigDecimal("yac004"));
         //发布的时候要放开baseCommService.insertYLINFOBy11(XmlConverUtil.map2Xml(key));
@@ -727,6 +727,7 @@ public class YearInternetApplyAction extends NetHallBaseAction {
     print.setLista(bclist);
     Map beans = new HashMap();
     beans.put("print", print);
+
     // 输出文件
     response.setContentType("*/*");
     response.setHeader("Content-disposition", "attachment; filename=" + destFileName);

@@ -865,13 +865,17 @@
 	<!-- 单位每个月缴费汇总(养老) -->
 	<select id="queryUnitJS" parameterClass="map" resultClass="dto">
 		    SELECT COUNT(1) AS yae231,
+		           COUNT(T.AAC001) AS jsrs,
 			       SUM(A.AAE180) AS aab121,
 			       SUM(B.YAC004) AS xjsh,
 			       SUM(B.YAC004 - A.AAE180) AS JSC,
 			       to_char(A.AAE002) AS IAA100
-			  FROM wsjb.IRAC08a1 A, xasi2.ac01k8 B
+			  FROM wsjb.IRAC08a1 A, xasi2.ac01k8 B,
+			  (select c.aac001,d.aae002 from wsjb.irad51a1 c, wsjb.irad51a2 d where c.aac001=d.aac001 and c.aab001=#aab001#) T
 			 WHERE A.AAB001 = B.AAB001(+)
 			   AND A.AAC001 = B.AAC001(+)
+			   AND A.AAC001 = T.AAC001(+)
+               AND A.AAE002 = T.AAE002(+)
 			   AND A.aae143 = '01'
 			   AND A.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = '01' AND aae001 = #aae001#)
     <![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = '01' AND aae001 = #aae001#)
@@ -981,7 +985,10 @@
 				                      2) AS AAC009,
 				               A.AAC040 AS AAC040,
 				               A.YAC004 AS YAC004,
-				               A.YAA333 AS YAC005,
+				               A.YAA444 AS YAA444_02,  <!-- 新失业基数 -->
+		                       A.YAA444 AS YAA444_04,  <!-- 新工伤基数 -->
+		                       A.YAA333 AS YAA333_03,  <!-- 新医疗基数 -->
+                               A.YAA333 AS YAA333_05,  <!-- 新生育基数 -->
 				               DECODE(A.AAE110, '2', '√', '21', '√', '') AS AAE110,
 				               DECODE(A.AAE210, '2', '√', '21', '√', '') AS AAE210,
 				               DECODE(A.AAE310, '2', '√', '21', '√', '') AS AAE310,
@@ -1046,7 +1053,10 @@
 				                      2) AS AAC009,
 				               A.AAC040 AS AAC040,
 				               A.YAC004 AS YAC004,
-				               A.YAA333 AS YAC005,
+                               A.YAA444 AS YAA444_02,  <!-- 新失业基数 -->
+                               A.YAA444 AS YAA444_04,  <!-- 新工伤基数 -->
+                               A.YAA333 AS YAA333_03,  <!-- 新医疗基数 -->
+                               A.YAA333 AS YAA333_05,  <!-- 新生育基数 -->
 				               A.AAE110 AS AAE110,
 				               '' AS AAE210,
 				               '' AS AAE310,
@@ -1075,7 +1085,10 @@
 				                      2) AS AAC009,
 				               A.AAC040 AS AAC040,
 				               A.YAC004 AS YAC004,
-				               A.YAA333 AS YAC005,
+				               A.YAA444 AS YAA444_02,  <!-- 新失业基数 -->
+		                       A.YAA444 AS YAA444_04,  <!-- 新工伤基数 -->
+		                       A.YAA333 AS YAA333_03,  <!-- 新医疗基数 -->
+                               A.YAA333 AS YAA333_05,  <!-- 新生育基数 -->
 				               DECODE(A.AAE110, '2', '√', '21', '√', '') AS AAE110,
 				               DECODE(A.AAE210, '2', '√', '21', '√', '') AS AAE210,
 				               DECODE(A.AAE310, '2', '√', '21', '√', '') AS AAE310,
@@ -1140,7 +1153,10 @@
 				                      2) AS AAC009,
 				               A.AAC040 AS AAC040,
 				               A.YAC004 AS YAC004,
-				               A.YAA333 AS YAC005,
+                               A.YAA444 AS YAA444_02,  <!-- 新失业基数 -->
+                               A.YAA444 AS YAA444_04,  <!-- 新工伤基数 -->
+                               A.YAA333 AS YAA333_03,  <!-- 新医疗基数 -->
+                               A.YAA333 AS YAA333_05,  <!-- 新生育基数 -->
 				               A.AAE110 AS AAE110,
 				               '' AS AAE210,
 				               '' AS AAE310,
@@ -1164,7 +1180,10 @@
 		       SUBSTR(xasi2.pkg_comm.fun_getAaa103('AAC009',b.AAC009),0,2) AS AAC009,
 		       xasi2.pkg_comm.fun_getAaa103('AAC012',b.AAC012) AS AAC012,
 		       a.yac004 AS yac004,
-		       a.yaa333 AS yac005,
+		       a.yaa444 as yaa444_02,  <!-- 新失业基数 -->
+		       a.yaa444 as yaa444_04,  <!-- 新工伤基数 -->
+		       a.yaa333 as yaa333_03,  <!-- 新医疗基数 -->
+               a.yaa333 as yaa333_05,  <!-- 新生育基数 -->
 		       DECODE(a.aae110,'2','√','21','√','') AS aae110,
 		       DECODE(a.aae210,'2','√','21','√','') AS aae210,
 		       DECODE(a.aae310,'2','√','21','√','') AS aae310,
