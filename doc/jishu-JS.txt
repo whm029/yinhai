@@ -1,0 +1,204 @@
+ function jishu(data, value) {
+
+    var xx01 = Base.getValue("xx01");//省社平下线
+    var sx01 = Base.getValue("sx01");//省社平上线
+    var xx03 = Base.getValue("xx03");//市社平下线
+    var sx03 = Base.getValue("sx03");//市社平上线
+    var xx60 = Base.getValue("xx60");//个体工商 失业工伤下线
+    var sx60 = Base.getValue("sx60");//个体工商 失业工伤上线
+
+
+    var rownum = data.item.rownum;
+    var aac001 = data.item.aac001;
+    var aac002 = data.item.aac002;
+    var aac040 = Math.round(data.item.aac040);
+    var aae110 = data.item.aae110;
+    var aae210 = data.item.aae210;
+    var aae310 = data.item.aae310;
+    var aae410 = data.item.aae410;
+    var aae510 = data.item.aae510;
+    var aae013 = data.item.aae013;
+    var yac506 = data.item.yac506;
+    var yac507 = data.item.yac507;
+    //var yac508 = data.item.yac508;
+    var yac004 = 0; //新养老基数
+    var yac005 = 0; //原工伤缴费工资
+    var yaa444_02 = 0; //新失业基数
+    var yaa444_04 = 0; //新工伤基数
+    var yaa333_03 = 0; //新医疗基数
+    var yaa333_05 = 0; //新生育基数
+
+    if(aac040<1800){
+      Base.alert("最低工资不能低于1800!");
+      Base.setGridCellData("sucGrid", rownum, data.cell, "");
+      return;
+    }
+    // 单养老的
+    if (((aae110 == '2') || (aae110 == '21') || (aae110 == '备案'))&&(((aae210 == null) || (aae210 == '')) && ((aae310 == null) || (aae310 == '')) && ((aae410 == null) || (aae410 == '')) && ((aae510 == null) || (aae510 == '')))) {
+      if (aac040 > xx01) {
+        if (aac040 > sx01) {
+          yac004 = sx01;
+        } else {
+          yac004 = aac040;
+        }
+      } else {
+        yac004 = xx01;
+      }
+    }
+    // 非单养老 有省社平险种 并且有养老险种的
+    else if(((aae110 == '2') || (aae110 == '21') || (aae110 == '备案')) && ((aae210 == '2') || (aae210 == '21') || (aae410 == '2') || (aae410 == '21'))) {
+      if (aac040 >= xx01) {
+        if (aac040 >= xx03) {
+          if (aac040 >= sx01) {
+            if (aac040 >= sx03) {
+              yac004 = sx01;
+              if(xx60==0 && sx60==0 ){
+                yaa444_02 = sx01;
+                yaa444_04 = sx01;
+              }else{
+                yaa444_02 = sx60;
+                yaa444_04 = sx60;
+              }
+              yaa333_03 = sx03;
+              yaa333_05 = sx03;
+              //yac005 = sx03;
+            } else {
+              yac004 = sx01;
+              if(xx60==0 && sx60==0 ){
+                yaa444_02 = sx01;
+                yaa444_04 = sx01;
+              }else{
+                yaa444_02 = sx60;
+                yaa444_04 = sx60;
+              }
+              yaa333_03 = aac040;
+              yaa333_05 = aac040;
+              //yac005 = aac040;
+            }
+          } else {
+            yac004 = aac040;
+            yaa444_02 = aac040;
+            yaa444_04 = aac040;
+            yaa333_03 = aac040;
+            yaa333_05 = aac040;
+            //yac005 = aac040;
+          }
+        } else {
+          yac004 = aac040;
+          yaa444_02 = aac040;
+          yaa444_04 = aac040;
+          yaa333_03 = xx03;
+          yaa333_05 = xx03;
+          //yac005 = xx03;
+        }
+      } else {
+        yac004 = xx01;
+        if(xx60==0 && sx60==0 ){
+          yaa444_02 = xx01;
+          yaa444_04 = xx01;
+        }else{
+          yaa444_02 = xx60;
+          yaa444_04 = xx60;
+        }
+        yaa333_03 = xx03;
+        yaa333_05 = xx03;
+        //yac005 = xx03;
+      }
+
+      // 非单养老 有省社平险种 没有养老险种的
+    } else if(((aae110 == '') || (aae110 == null)) && ((aae210 == '2') || (aae210 == '21') || (aae410 == '2') || (aae410 == '21'))) {
+      if (aac040 >= xx01) {
+        if (aac040 >= xx03) {
+          if (aac040 >= sx01) {
+            if (aac040 >= sx03) {
+              if(xx60==0 && sx60==0 ){
+                yaa444_02 = sx01;
+                yaa444_04 = sx01;
+              }else{
+                yaa444_02 = sx60;
+                yaa444_04 = sx60;
+              }
+              yaa333_03 = sx03;
+              yaa333_05 = sx03;
+              //yac005 = sx03;
+            } else {
+              if(xx60==0 && sx60==0 ){
+                yaa444_02 = sx01;
+                yaa444_04 = sx01;
+              }else{
+                yaa444_02 = sx60;
+                yaa444_04 = sx60;
+              }
+
+              yaa333_03 = aac040;
+              yaa333_05 = aac040;
+              //yac005 = aac040;
+            }
+          } else {
+            yaa444_02 = aac040;
+            yaa444_04 = aac040;
+            yaa333_03 = aac040;
+            yaa333_05 = aac040;
+            //yac005 = aac040;
+          }
+        } else {
+          yaa444_02 = aac040;
+          yaa444_04 = aac040;
+          yaa333_03 = xx03;
+          yaa333_05 = xx03;
+          //yac005 = xx03;
+        }
+      } else {
+        if(xx60==0 && sx60==0 ){
+          yaa444_02 = xx01;
+          yaa444_04 = xx01;
+        }else{
+          yaa444_02 = xx60;
+          yaa444_04 = xx60;
+        }
+        yaa333_03 = xx03;
+        yaa333_05 = xx03;
+        //yac005 = xx03;
+      }
+
+      // 非单养老只有市社平险种的
+    } else {
+      if (aac040 > xx03) {
+        if (aac040 > sx03) {
+          yaa333_03 = sx03;
+          yaa333_05 = sx03;
+          //yac005 = sx03;
+        } else {
+          yaa333_03 = aac040;
+          yaa333_05 = aac040;
+          //yac005 = aac040;
+        }
+      } else {
+        yaa333_03 = xx03;
+        yaa333_05 = xx03;
+        yac005 = xx03;
+      }
+    }
+
+
+    if (aae013 == "1") {
+      Base.alert("该人员为到龄退休年限不足继续缴费人员！");
+      Base.setGridCellData("sucGrid", rownum, data.cell, aac040); //新缴费工资
+      Base.setGridCellData("sucGrid", rownum, data.cell + 1, yac004); //新养老基数
+      //Base.setGridCellData("sucGrid", rownum, data.cell + 2, yac508); //原其他基数
+      return;
+    }
+    if ((aae013 == "2") || (aae013 == "21")) {
+      Base.alert("该人员已经办理过养老保险提前结算，不能修改基数！");
+      Base.setGridCellData("sucGrid", rownum, data.cell, yac506); //原缴费工资
+      Base.setGridCellData("sucGrid", rownum, data.cell + 1, yac507); //原养老基数
+      //Base.setGridCellData("sucGrid", rownum, data.cell + 2, yac508); //原其他基数
+      return;
+    }
+    Base.setGridCellData("sucGrid", rownum, data.cell + 1, yac004); //新养老基数
+    Base.setGridCellData("sucGrid", rownum, data.cell + 2, yaa444_02); //新工伤基数
+    Base.setGridCellData("sucGrid", rownum, data.cell + 3, yaa444_04); //新失业基数
+    Base.setGridCellData("sucGrid", rownum, data.cell + 4, yaa333_03); //新医疗基数
+    Base.setGridCellData("sucGrid", rownum, data.cell + 5, yaa333_05); //新生育基数
+    //Base.setGridCellData("sucGrid", rownum, data.cell + 2, yac005); //原工伤缴费工资
+  }

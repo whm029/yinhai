@@ -431,18 +431,18 @@ create or replace package body PKG_COMMON as
                                prm_ErrMsg       OUT    VARCHAR2           )     --错误内容
     IS
       /*变量声明*/
-      n_Yaa005                       xasi2.aa02a2.yaa005%TYPE;   --保底数
-      n_Yaa006                       xasi2.aa02a2.yaa006%TYPE;   --封顶数
-      var_procNo                     VARCHAR2(3);          --过程序号
+      n_Yaa005                        xasi2.aa02a2.yaa005%TYPE;   --保底数
+      n_Yaa006                        xasi2.aa02a2.yaa006%TYPE;   --封顶数
+      var_procNo                    VARCHAR2(3);          --过程序号
       var_yaa025                     xasi2.aa02a2.yaa025%TYPE;   --保底封顶类别
-      num_Aac040                     xasi2.ac02.aac040%TYPE;     --缴费工资
+      num_Aac040                  xasi2.ac02.aac040%TYPE;     --缴费工资
       num_spgz                       xasi2.ac02.aac040%TYPE;
       var_yaa001                     xasi2.aa02.yaa001%TYPE;
       var_aae140                     xasi2.ab02.aae140%TYPE;
-      num_yac004                     xasi2.ac02.yac004%TYPE;     --缴费基数
+      num_yac004                   xasi2.ac02.yac004%TYPE;     --缴费基数
       var_yab275                     xasi2.ab01.yab275%TYPE;     --社会保险执行办法
       var_aab019                     xasi2.ab01.aab019%TYPE;     --单位性质
-
+      n_number                       NUMBER;
 
       /*游标声明*/
       CURSOR cur_aa02a2                                        -- 保底封顶信息表
@@ -605,32 +605,47 @@ create or replace package body PKG_COMMON as
       IF var_aab019 = '60' THEN
          --获取社平工资
          num_spgz := xasi2.pkg_comm.fun_GetAvgSalary(prm_aae140,'16',prm_aae002,pkg_Constant.YAB003_JBFZX);
-       
-  /* 
          --如果险种为工伤 缴费工资和缴费基数为社平工资
-         IF prm_aae140 = PKG_Constant.AAE140_GS THEN
-            prm_Yac004 := ROUND(num_spgz/12);
-         END  IF;
-
-         IF prm_aae140 = PKG_Constant.AAE140_JBYL THEN
-            IF num_aac040 > ROUND(num_spgz/12) THEN
-               prm_Yac004 := ROUND(num_spgz/12);
+         
+         select count(1)
+           into n_number
+           from xasi2.aa35
+            where aae001 >= 2019
+            and yae097 >=prm_aae002;
+            
+         IF n_number >0 THEN 
+            IF prm_aae140 = PKG_Constant.AAE140_YL THEN
+                IF num_aac040 > ROUND(num_spgz/12) THEN
+                    prm_Yac004 := ROUND(num_spgz/12);
+                ELSIF num_aac040 < TRUNC(num_spgz/24)+1 THEN
+                    prm_Yac004 := TRUNC(num_spgz/24)+1;
+                ELSE
+                    prm_Yac004 := num_Aac040;
+                END IF;
+         END IF;
+         ELSE
+            IF prm_aae140 = PKG_Constant.AAE140_GS THEN
+                prm_Yac004 := ROUND(num_spgz/12);
             END  IF;
-         END  IF;
-*/
-
-         IF prm_aae140 = PKG_Constant.AAE140_YL THEN
-            IF num_aac040 > ROUND(num_spgz/12) THEN
-               prm_Yac004 := ROUND(num_spgz/12);
---            ELSIF num_aac040 < TRUNC(num_spgz/30)+1 THEN
-            ELSIF num_aac040 < TRUNC(num_spgz/24)+1 THEN
---               prm_Yac004 := TRUNC(num_spgz/30)+1;
-               prm_Yac004 := TRUNC(num_spgz/24)+1;
-            ELSE
-               prm_Yac004 := num_Aac040;
+            IF prm_aae140 = PKG_Constant.AAE140_JBYL THEN
+                IF num_aac040 > ROUND(num_spgz/12) THEN
+                    prm_Yac004 := ROUND(num_spgz/12);
+                END  IF;
+            END  IF;
+            IF prm_aae140 = PKG_Constant.AAE140_YL THEN
+                IF num_aac040 > ROUND(num_spgz/12) THEN
+                    prm_Yac004 := ROUND(num_spgz/12);
+                ELSIF num_aac040 < TRUNC(num_spgz/30)+1 THEN
+                    prm_Yac004 := TRUNC(num_spgz/30)+1;
+                ELSE
+                    prm_Yac004 := num_Aac040;
+                END IF;
             END IF;
          END IF;
+         
       END IF;
+
+
 
       RETURN;
       /*处理失败*/

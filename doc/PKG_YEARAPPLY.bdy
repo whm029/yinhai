@@ -2020,11 +2020,11 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                                        AND AAC001 = v_aac001
                                                        AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
                                                        AND iaa002 = '2'
-                                                       AND iaa100 >= to_number(2019||'01')));		
+                                                       AND iaa100 >= to_number(2019||'01')));
                END IF;
          END IF;
        END IF;
-       
+
        --判断是否参生育记录
         SELECT count(1)
           INTO n_count
@@ -2130,12 +2130,12 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                                        AND AAC001 = v_aac001
                                                        AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
                                                        AND iaa002 = '2'
-                                                       AND iaa100 >= to_number(2019||'01')));		
+                                                       AND iaa100 >= to_number(2019||'01')));
                END IF;
              END IF;
           END IF;
        END IF;
-       
+
         --判断是否参大额记录
         SELECT count(1)
           INTO n_count
@@ -2162,8 +2162,8 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
           v_aae311 := '2';
          END IF;
        END IF;
-       
-       
+
+
         --判断是否参失业记录
         SELECT count(1)
           INTO n_count
@@ -2221,8 +2221,8 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                  AND iaa002 = '2'
                                  AND iaa100 >= to_number(prm_aae001||'01'));
         IF n_count > 0 THEN
-          IF n_yac506 = 0 AND n_yac005 = 0 THEN
-            IF prm_aae001 <= 2019 THEN  --失业19年年审以前都是用市社平		
+          IF  n_yac005 = 0 THEN
+            IF prm_aae001 <= 2019 THEN  --失业19年年审以前都是用市社平
               select max(iaa100)
                 into maxiaa100
                 from wsjb.irac01
@@ -2231,7 +2231,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                  AND IAA001 IN ('1', '5', '8', '6', '3', '7', '9', '10')
                  AND iaa002 = '2'
                  AND iaa100 >= to_number(prm_aae001 || '01');
-			         IF maxiaa100<=201904 THEN
+               IF maxiaa100<=201904 THEN
                --modify by wanghm start 受月报多次提交影响 4月后会返回多行 20190729
                select aac040,
                       yac005
@@ -2247,7 +2247,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                   AND AAC001 = v_aac001
                                   AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
                                   AND iaa002 = '2'
-                                  AND iaa100 >= to_number(prm_aae001||'01'));  
+                                  AND iaa100 >= to_number(prm_aae001||'01'));
                ELSE
                select aac040,
                       CASE WHEN aae210 <> 0 THEN yac005 ELSE 0 END
@@ -2266,7 +2266,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                                        AND AAC001 = v_aac001
                                                        AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
                                                        AND iaa002 = '2'
-                                                       AND iaa100 >= to_number(2019||'01')));		
+                                                       AND iaa100 >= to_number(2019||'01')));
                END IF;
             ELSE
                select aac040,
@@ -2286,13 +2286,13 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                                        AND AAC001 = v_aac001
                                                        AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
                                                        AND iaa002 = '2'
-                                                       AND iaa100 >= to_number(2019||'01')));		
+                                                       AND iaa100 >= to_number(2019||'01')));
             END IF;
           END IF;
         END IF;
        END IF;
-       
-       
+
+
        --判断是否参工伤记录
         SELECT count(1)
           INTO n_count
@@ -2328,7 +2328,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
           END IF;
          END IF;
          IF n_count2 > 0 THEN
-          IF n_yac506 = 0 AND n_yac005 = 0 THEN
+          IF  n_yac005 = 0 THEN
             SELECT aac040,yac004,yac503
               INTO n_yac506,n_yac005,v_yac503
               FROM xasi2.ac02
@@ -2354,8 +2354,8 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                  AND iaa002 = '2'
                                  AND iaa100 >= to_number(prm_aae001||'01'));
           IF n_count > 0 THEN
-          IF n_yac506 = 0 AND n_yac005 = 0 THEN
-            IF prm_aae001 <= 2019 THEN  --工伤19年年审以前都是用市社平		
+          IF  n_yac005 = 0 THEN
+            IF prm_aae001 <= 2019 THEN  --工伤19年年审以前都是用市社平
               select max(iaa100)
                 into maxiaa100
                 from wsjb.irac01
@@ -2364,7 +2364,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                  AND IAA001 IN ('1', '5', '8', '6', '3', '7', '9', '10')
                  AND iaa002 = '2'
                  AND iaa100 >= to_number(prm_aae001 || '01');
-			         IF maxiaa100<=201904 THEN
+               IF maxiaa100<=201904 THEN
                --modify by wanghm start 受月报多次提交影响 4月后会返回多行 20190729
                select aac040,
                       yac005
@@ -2380,7 +2380,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                   AND AAC001 = v_aac001
                                   AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
                                   AND iaa002 = '2'
-                                  AND iaa100 >= to_number(prm_aae001||'01'));  
+                                  AND iaa100 >= to_number(prm_aae001||'01'));
                ELSE
                select aac040,
                       CASE WHEN aae410 <> 0 THEN yac005 ELSE 0 END
@@ -2399,7 +2399,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                                        AND AAC001 = v_aac001
                                                        AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
                                                        AND iaa002 = '2'
-                                                       AND iaa100 >= to_number(2019||'01')));		
+                                                       AND iaa100 >= to_number(2019||'01')));
                END IF;
             ELSE
                select aac040,
@@ -2419,7 +2419,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                                        AND AAC001 = v_aac001
                                                        AND IAA001 IN ('1', '5', '8', '6','3','7','9','10')
                                                        AND iaa002 = '2'
-                                                       AND iaa100 >= to_number(2019||'01')));		
+                                                       AND iaa100 >= to_number(2019||'01')));
             END IF;
           END IF;
         END IF;
@@ -2732,6 +2732,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
              set aac040 = n_yac506,
                  yac004 = n_yac507,
                  yaa333 = n_yac508,
+                 yaa444 = n_yac005,
                  aae013 = '2'
            where aab001 = prm_aab001
              and aac001 = v_aac001
@@ -2801,6 +2802,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                             yae210,
                                             yae410,
                                             yae510,
+                                            yaa444,
                                             yab019,
                                             aae034,
                                             aae013
@@ -2832,6 +2834,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                             v_yae210,
                                             v_yae410,
                                             v_yae510,
+                                            n_yac005,
                                             '1',
                                             SYSDATE,
                                             '21'

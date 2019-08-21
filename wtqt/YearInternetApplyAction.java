@@ -165,6 +165,9 @@ public class YearInternetApplyAction extends NetHallBaseAction {
     setData("sx01", outMap.get("sx01"));  //省社平上线
     setData("xx03", outMap.get("xx03"));  //市社平下线
     setData("sx03", outMap.get("sx03"));  //市社平上线
+    setData("xx60", outMap.get("xx60"));  //个体工商 失业工伤下线
+    setData("sx60", outMap.get("sx60"));  //个体工商 失业工伤上线
+
     String aae001 = (String) outMap.get("aae001");
     String msg = (String) outMap.get("msg");
     String disabledBtn = (String) outMap.get("disabledBtn");

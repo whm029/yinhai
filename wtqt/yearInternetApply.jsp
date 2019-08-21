@@ -21,6 +21,8 @@
     <ta:number id="xx01" key="养老下限基数" display="false"/>
     <ta:number id="sx03" key="医疗上限基数" display="false"/>
     <ta:number id="xx03" key="医疗下限基数" display="false"/>
+    <ta:number id="sx60" key="医疗上限基数" display="false"/>
+    <ta:number id="xx60" key="医疗下限基数" display="false"/>
   </ta:fieldset>
 
   <ta:buttonLayout align="left">
@@ -174,6 +176,9 @@
     var sx01 = Base.getValue("sx01");//省社平上线
     var xx03 = Base.getValue("xx03");//市社平下线
     var sx03 = Base.getValue("sx03");//市社平上线
+    var xx60 = Base.getValue("xx60");//市社平下线
+    var sx60 = Base.getValue("sx60");//市社平上线
+
     var rownum = data.item.rownum;
     var aac001 = data.item.aac001;
     var aac002 = data.item.aac002;

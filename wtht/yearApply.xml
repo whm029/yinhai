@@ -1785,11 +1785,13 @@
 		<parameter property="prm_gxby01" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
 		<parameter property="prm_dxby03" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
 		<parameter property="prm_gxby03" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
+		<parameter property="prm_dxby60" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
+		<parameter property="prm_gxby60" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
 		<parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" />
 		<parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  />
 	</parameterMap>
 	<procedure id="prc_p_checkInfoByYear" parameterMap="prc_p_checkInfoByYearMap">
-		{call wsjb.pkg_P_Validate.prc_p_checkInfoByYear(?,?,?,?,?,?,?,?,?,?,?,?)}
+		{call wsjb.pkg_P_Validate.prc_p_checkInfoByYear(?,?,?,?,?,?,?,?,?,?,?,?,?,?)}
 	</procedure>
 	<select id="getIrac01c1Count" parameterClass="map" resultClass="java.lang.Integer">
 		SELECT COUNT(1) as k FROM wsjb.irac01c1 WHERE aab001 = #aab001# AND aac002 = #aac002# and yab029 = #aac001# and yae031='1' and substr(iaa100,1,4)=#aae001#

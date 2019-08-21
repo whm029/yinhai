@@ -39,6 +39,8 @@ public class YearInternetApplyServiceImpl extends WsBaseService implements YearI
     map.put("sx01", prcDto.getAsString("prm_gxby01"));
     map.put("xx03", prcDto.getAsString("prm_dxby03"));
     map.put("sx03", prcDto.getAsString("prm_gxby03"));
+    map.put("xx60", prcDto.getAsString("prm_dxby60"));
+    map.put("sx60", prcDto.getAsString("prm_gxby60"));
     map.put("disabledBtn", prcDto.getAsString("prm_disabledBtn"));
     map.put("msg", prcDto.getAsString("prm_msg"));
     return XmlConverUtil.map2Xml(map);
