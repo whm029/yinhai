@@ -1624,6 +1624,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
              AND a.aae002 >=num_aae002_begin
              AND a.aae002 <= num_aae002_end
              AND AAB001 = prm_aab001
+             AND yab139 ='610127'
           UNION
           SELECT DISTINCT AAC001
             FROM xasi2.AC08A1 A
@@ -1632,6 +1633,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
              AND a.aae002 >=num_aae002_begin
              AND a.aae002 <= num_aae002_end
              AND AAB001 = prm_aab001
+             AND yab139 ='610127'
            UNION
            SELECT DISTINCT AAC001
              FROM xasi2.AC08A3 A
@@ -1640,6 +1642,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
              AND a.aae002 >=num_aae002_begin
              AND a.aae002 <= num_aae002_end
              AND AAB001 = prm_aab001
+             AND yab139 ='610127'
            UNION
            SELECT DISTINCT AAC001
             FROM wsjb.irac08a1  A
@@ -2716,6 +2719,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                     '1',
                                     SYSDATE
                                     );
+                                    
       -- 提前结算没有再续保的人员把新旧缴费工资和基数写成一样的
        SELECT count(1)
         INTO n_count
@@ -2727,7 +2731,6 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
          AND aae041 <= prm_aae001||'12'
          AND not exists (select 1 from wsjb.irac01a3 a where a.aab001=prm_aab001 and a.aac001=v_aac001 and aae110='2');
         if n_count >0 then
-
           update xasi2.ac01k8
              set aac040 = n_yac506,
                  yac004 = n_yac507,
@@ -2840,6 +2843,20 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                             '21'
                                             );
             END IF;
+            
+            --逐月人员写标志 
+            SELECT count(1)
+              INTO n_count
+              FROM xasi2.ac02_zy
+             where aac001 = v_aac001;
+             IF n_count >0 THEN
+                update xasi2.ac01k8
+                 set aae013 = '1'
+                where aab001 = prm_aab001
+                 and aac001 = v_aac001
+                 and aae001 = prm_aae001;
+             END IF;
+             
       END LOOP;
 
    --这是养老备案的 201811后已经没有这个业务了
