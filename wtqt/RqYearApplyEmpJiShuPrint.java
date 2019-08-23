@@ -1,8 +1,5 @@
 package com.yinhai.nethall.company.yearApply.action;
 
-import java.util.List;
-import java.util.Map;
-
 import com.runqian.report4.dataset.DataSet;
 import com.runqian.report4.dataset.IDataSetFactory;
 import com.runqian.report4.dataset.Row;
@@ -15,6 +12,9 @@ import com.yinhai.nethall.nethallcommon.utils.XmlConverUtil;
 import com.yinhai.sysframework.dto.ParamDTO;
 import com.yinhai.sysframework.util.ValidateUtil;
 import com.yinhai.webframework.BaseAction;
+
+import java.util.List;
+import java.util.Map;
 
 
 public class RqYearApplyEmpJiShuPrint extends BaseAction implements IDataSetFactory {

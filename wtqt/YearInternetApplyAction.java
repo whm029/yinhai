@@ -291,7 +291,8 @@ public class YearInternetApplyAction extends NetHallBaseAction {
         service.updateYac004(XmlConverUtil.map2Xml(dto1)); //更新ac01k8的基数重新保底封顶
         /* 调用养老接口写入 */
         key.put("aac040", key.getAsBigDecimal("yac004"));
-        //发布的时候要放开baseCommService.insertYLINFOBy11(XmlConverUtil.map2Xml(key));
+        //发布的时候要放开
+        baseCommService.insertYLINFOBy11(XmlConverUtil.map2Xml(key));
       }
     }
     /* 检查是否能提交申请 */
