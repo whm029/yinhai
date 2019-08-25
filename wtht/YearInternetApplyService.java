@@ -271,4 +271,14 @@ public interface YearInternetApplyService extends WsService {
 	 */
 	public String insertConfirmTip(String map2Xml) throws AppException;
 
+
+	/**-------------------------------------<br>
+	 * @title: checkAac040
+	 * @description: 查看是有存在未填写新缴费工资的人
+	 * @return: java.lang.String
+	 * @date: 2019/8/25 22:17
+	 * @A19
+	 * -------------------------------------<br>
+	 */
+	public String checkAac040(String map2Xml) throws AppException;
 }

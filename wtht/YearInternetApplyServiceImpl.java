@@ -289,7 +289,7 @@ public class YearInternetApplyServiceImpl extends WsBaseService implements YearI
 
 
   /**
-   * 查看单位补差缴费信息
+   * 年审信息预览
    *
    * @param map2Xml
    * @return
@@ -1090,5 +1090,15 @@ public class YearInternetApplyServiceImpl extends WsBaseService implements YearI
     Map map = XmlConverUtil.xml2Map(map2Xml);
     dao.insert("yearApply.insertYearApplyConfirm", map);
     return null;
+  }
+
+
+
+  @Override
+  public String checkAac040(String map2Xml) throws AppException {
+    Map map = XmlConverUtil.xml2Map(map2Xml);
+    Integer i = (Integer) dao.queryForObject("yearApply.checkAac040", map);
+    map.put("countaac040",i);
+    return XmlConverUtil.map2Xml(map);
   }
 }

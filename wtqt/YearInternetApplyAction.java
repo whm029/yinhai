@@ -291,8 +291,8 @@ public class YearInternetApplyAction extends NetHallBaseAction {
         service.updateYac004(XmlConverUtil.map2Xml(dto1)); //更新ac01k8的基数重新保底封顶
         /* 调用养老接口写入 */
         key.put("aac040", key.getAsBigDecimal("yac004"));
-        //发布的时候要放开
-        baseCommService.insertYLINFOBy11(XmlConverUtil.map2Xml(key));
+        //fixme 发布的时候要放开
+       // baseCommService.insertYLINFOBy11(XmlConverUtil.map2Xml(key));
       }
     }
     /* 检查是否能提交申请 */
@@ -394,11 +394,22 @@ public class YearInternetApplyAction extends NetHallBaseAction {
     ParamDTO dto = getDto();
     dto.put("yae092", dto.getUserInfo().getUserId());
     dto.put("yab139", dto.getUserInfo().getOrgId());
-    String infoXml = service.getPerView(XmlConverUtil.map2Xml(dto));
-    List infoList = XmlConverUtil.xml2List(infoXml);
-    setList("unitInfo", infoList);
-    setData("aae001_1", dto.getAsString("aae001"));
-    setData("aab001_1", dto.getAsString("aab001"));
+
+    String countaac040Xml = service.checkAac040(XmlConverUtil.map2Xml(dto));
+    Map map = XmlConverUtil.xml2Map(countaac040Xml);
+    Integer countaac040 = Integer.valueOf(map.get("countaac040")+"");
+
+    if(countaac040==0){
+      String infoXml = service.getPerView(XmlConverUtil.map2Xml(dto));
+      List infoList = XmlConverUtil.xml2List(infoXml);
+      setList("unitInfo", infoList);
+      setData("aae001_1", dto.getAsString("aae001"));
+      setData("aab001_1", dto.getAsString("aab001"));
+    }else{
+      setMsg("存在新缴费工资为空的人员,请先填写新缴费工资并暂存页面信息或提交年审申报后预览!");
+      setDisabled("aae140_01,aae140_02,aae140_03,aae140_04,aae140_05");
+    }
+
     return "yearApplyUnitInfo";
   }
 

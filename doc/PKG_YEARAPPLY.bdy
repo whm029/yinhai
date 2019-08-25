@@ -144,6 +144,7 @@ PROCEDURE prc_YearSalaryAdjustPaded(prm_aab001       IN     irab01.aab001%TYPE,-
          WHERE aab001 = prm_aab001
            AND aae001 = prm_aae001
            AND yab019 = prm_yab019
+           AND (AAE013 is null or AAE013 ='1' or AAE013 ='2' or AAE013 ='22')
            AND (1 = NVL(prm_aac001,1) OR aac001 = NVL(prm_aac001,1));
       --获取临时表中的校验成功信息(医疗)
       CURSOR cur_tmp IS
@@ -344,9 +345,10 @@ PROCEDURE prc_YearSalaryAdjustPaded(prm_aab001       IN     irab01.aab001%TYPE,-
                              IF prm_AppCode <> xasi2.pkg_comm.gn_def_OK THEN
                                 RETURN;
                              END IF;
-
-                              --判断个体工商户
-                             IF var_aab019 = '60' THEN
+                             
+                             
+                              --判断个体工商户(2019年以前工伤险是社平)
+                              IF var_aab019 = '60' and prm_aae001<2019 THEN
                                --获取社平工资
                                num_spgz := xasi2.pkg_comm.fun_GetAvgSalary(var_aae140,'16',num_aae002_max,PKG_Constant.YAB003_JBFZX);
                                --如果险种为工伤 缴费工资和缴费基数为社平工资
@@ -357,7 +359,8 @@ PROCEDURE prc_YearSalaryAdjustPaded(prm_aab001       IN     irab01.aab001%TYPE,-
                                      num_yac004 := ROUND(num_spgz/12);
                                   END  IF;
                                 END IF;
-                             END IF;
+                             END IF;  
+                             
                              IF var_yac503 = xasi2.pkg_comm.YAC503_LRYLJ THEN
                                 num_yac004 := rec_ab05a1.yaa333;
                              END IF;
@@ -677,13 +680,15 @@ PROCEDURE prc_YearSalaryAdjustPaded(prm_aab001       IN     irab01.aab001%TYPE,-
                      --如果是个人查看则工资为传入参数
                      var_aac001 := rec_ab05a1.aac001;
 
-                     --判断养老是否提前申请结算 如果养老提前结算则不进行补差
+                     --判断养老是否提前申请结算 如果养老提前结算则不进行补差(又续回来的人除外)
                       SELECT count(1)
                         INTO num_count
                         FROM wsjb.irad51a1
                        WHERE aac001 = var_aac001
+                         and aab001 = prm_aab001
                          AND yae031 = '1'
-                         and aae041 = prm_aae001||'01';
+                         and aae041 = prm_aae001||'01'
+                         and not exists (select 1 from xasi2.ac01k8 where aac001=var_aac001 and aab001=prm_aab001 and aae001=prm_aae001 and aae013='22');
                       IF num_count > 0 THEN
                          GOTO leb_next1;
                       END IF;
@@ -735,22 +740,30 @@ PROCEDURE prc_YearSalaryAdjustPaded(prm_aab001       IN     irab01.aab001%TYPE,-
                             num_aac040 := TRUNC(num_aac040*1.1);
                          END IF;
                       END IF;
-                      IF var_aab019 = '60' THEN
+                      
+                      --判断个体工商户(2019年以前养老险是社平的40% 2019年后是50%)
+                      IF var_aab019 = '60'THEN
                          --获取社平工资
                          num_spgz := xasi2.pkg_comm.fun_GetAvgSalary(var_aae140,'16',num_aae002_max,PKG_Constant.YAB003_JBFZX);
-
                          num_yac004 := num_aac040;
-
-                         --如果险种为工伤 缴费工资和缴费基数为社平工资
-                         IF num_aac040 < TRUNC(num_spgz/12*0.4)+1 THEN
-                            num_yac004 := TRUNC(num_spgz/12*0.4)+1;
-                         END IF;
-
-                          IF num_aac040 > ROUND(num_spgz/12) THEN
-                             num_yac004 := ROUND(num_spgz/12);
-                          END  IF;
-
+                         
+                         if prm_aae001<2019 then 
+                            IF num_aac040 < TRUNC(num_spgz/12*0.4)+1 THEN
+                               num_yac004 := TRUNC(num_spgz/12*0.4)+1;
+                            END IF;
+                            IF num_aac040 > ROUND(num_spgz/12) THEN
+                               num_yac004 := ROUND(num_spgz/12);
+                            END  IF;
+                         else
+                            IF num_aac040 < TRUNC(num_spgz/12*0.5)+1 THEN
+                               num_yac004 := TRUNC(num_spgz/12*0.5)+1;
+                            END IF;
+                            IF num_aac040 > ROUND(num_spgz/12) THEN
+                               num_yac004 := ROUND(num_spgz/12);
+                            END  IF;
+                         end if;
                        END IF;
+                       
                      DELETE xasi2.tmp_grbs01;
 
 
@@ -788,51 +801,183 @@ PROCEDURE prc_YearSalaryAdjustPaded(prm_aab001       IN     irab01.aab001%TYPE,-
                             var_aae013 := rec_tmp.aae013;
 
                             IF rec_tmp.aae002 = prm_aae001||'01' THEN
-                               num_yac401 := rec_tmp.AAC040;
+                             select count(1)
+                               into num_count
+                               from wsjb.irad51a1 a, wsjb.irad51a2 b
+                              where a.aab001 = prm_aab001
+                                and a.aac001 = var_aac001
+                                and a.aac001 = b.aac001
+                                and aae002 = prm_aae001 || '01';
+                               if num_count = 0 then
+                                  num_yac401 := rec_tmp.AAC040;
+                               else
+                                  num_yac401 := 0;
+                               end if;                     
                             END IF;
 
                             IF rec_tmp.aae002 = prm_aae001||'02' THEN
-                               num_yac402 := rec_tmp.AAC040;
+                             select count(1)
+                               into num_count
+                               from wsjb.irad51a1 a, wsjb.irad51a2 b
+                              where a.aab001 = prm_aab001
+                                and a.aac001 = var_aac001
+                                and a.aac001 = b.aac001
+                                and aae002 = prm_aae001 || '02';
+                               if num_count = 0 then
+                                  num_yac402 := rec_tmp.AAC040;
+                               else
+                                  num_yac402 := 0;
+                               end if;  
                             END IF;
 
                             IF rec_tmp.aae002 = prm_aae001||'03' THEN
-                               num_yac403 := rec_tmp.AAC040;
+                             select count(1)
+                               into num_count
+                               from wsjb.irad51a1 a, wsjb.irad51a2 b
+                              where a.aab001 = prm_aab001
+                                and a.aac001 = var_aac001
+                                and a.aac001 = b.aac001
+                                and aae002 = prm_aae001 || '03';
+                               if num_count = 0 then
+                                  num_yac403 := rec_tmp.AAC040;
+                               else
+                                  num_yac403 := 0;
+                               end if;  
                             END IF;
 
                             IF rec_tmp.aae002 = prm_aae001||'04' THEN
-                               num_yac404 := rec_tmp.AAC040;
+                             select count(1)
+                               into num_count
+                               from wsjb.irad51a1 a, wsjb.irad51a2 b
+                              where a.aab001 = prm_aab001
+                                and a.aac001 = var_aac001
+                                and a.aac001 = b.aac001
+                                and aae002 = prm_aae001 || '04';
+                               if num_count = 0 then
+                                  num_yac404 := rec_tmp.AAC040;
+                               else
+                                  num_yac404 := 0;
+                               end if;
                             END IF;
 
                             IF rec_tmp.aae002 = prm_aae001||'05' THEN
-                               num_yac405 := rec_tmp.aac040;
+                             select count(1)
+                               into num_count
+                               from wsjb.irad51a1 a, wsjb.irad51a2 b
+                              where a.aab001 = prm_aab001
+                                and a.aac001 = var_aac001
+                                and a.aac001 = b.aac001
+                                and aae002 = prm_aae001 || '05';
+                               if num_count = 0 then
+                                  num_yac405 := rec_tmp.AAC040;
+                               else
+                                  num_yac405 := 0;
+                               end if;
                             END IF;
 
                             IF rec_tmp.aae002 = prm_aae001||'06' THEN
-                               num_yac406 := rec_tmp.aac040;
+                               select count(1)
+                               into num_count
+                               from wsjb.irad51a1 a, wsjb.irad51a2 b
+                              where a.aab001 = prm_aab001
+                                and a.aac001 = var_aac001
+                                and a.aac001 = b.aac001
+                                and aae002 = prm_aae001 || '06';
+                               if num_count = 0 then
+                                  num_yac406 := rec_tmp.AAC040;
+                               else
+                                  num_yac406 := 0;
+                               end if;
                             END IF;
 
                             IF rec_tmp.aae002 = prm_aae001||'07' THEN
-                               num_yac407 := rec_tmp.aac040;
+                             select count(1)
+                               into num_count
+                               from wsjb.irad51a1 a, wsjb.irad51a2 b
+                              where a.aab001 = prm_aab001
+                                and a.aac001 = var_aac001
+                                and a.aac001 = b.aac001
+                                and aae002 = prm_aae001 || '07';
+                               if num_count = 0 then
+                                  num_yac407 := rec_tmp.AAC040;
+                               else
+                                  num_yac407 := 0;
+                               end if;
                             END IF;
 
                             IF rec_tmp.aae002 = prm_aae001||'08' THEN
-                               num_yac408 := rec_tmp.aac040;
+                             select count(1)
+                               into num_count
+                               from wsjb.irad51a1 a, wsjb.irad51a2 b
+                              where a.aab001 = prm_aab001
+                                and a.aac001 = var_aac001
+                                and a.aac001 = b.aac001
+                                and aae002 = prm_aae001 || '08';
+                               if num_count = 0 then
+                                  num_yac408 := rec_tmp.AAC040;
+                               else
+                                  num_yac408 := 0;
+                               end if;
                             END IF;
 
                             IF rec_tmp.aae002 = prm_aae001||'09' THEN
-                               num_yac409 := rec_tmp.aac040;
+                             select count(1)
+                               into num_count
+                               from wsjb.irad51a1 a, wsjb.irad51a2 b
+                              where a.aab001 = prm_aab001
+                                and a.aac001 = var_aac001
+                                and a.aac001 = b.aac001
+                                and aae002 = prm_aae001 || '09';
+                               if num_count = 0 then
+                                  num_yac409 := rec_tmp.AAC040;
+                               else
+                                  num_yac409 := 0;
+                               end if;
                             END IF;
 
                             IF rec_tmp.aae002 = prm_aae001||'10' THEN
-                               num_yac410 := rec_tmp.aac040;
+                             select count(1)
+                               into num_count
+                               from wsjb.irad51a1 a, wsjb.irad51a2 b
+                              where a.aab001 = prm_aab001
+                                and a.aac001 = var_aac001
+                                and a.aac001 = b.aac001
+                                and aae002 = prm_aae001 || '10';
+                               if num_count = 0 then
+                                  num_yac410 := rec_tmp.AAC040;
+                               else
+                                  num_yac410 := 0;
+                               end if;
                             END IF;
 
                             IF rec_tmp.aae002 = prm_aae001||'11' THEN
-                               num_yac411 := rec_tmp.aac040;
+                             select count(1)
+                               into num_count
+                               from wsjb.irad51a1 a, wsjb.irad51a2 b
+                              where a.aab001 = prm_aab001
+                                and a.aac001 = var_aac001
+                                and a.aac001 = b.aac001
+                                and aae002 = prm_aae001 || '11';
+                               if num_count = 0 then
+                                  num_yac411 := rec_tmp.AAC040;
+                               else
+                                  num_yac411 := 0;
+                               end if;
                             END IF;
 
                             IF rec_tmp.aae002 = prm_aae001||'12' THEN
-                               num_yac412 := rec_tmp.aac040;
+                             select count(1)
+                               into num_count
+                               from wsjb.irad51a1 a, wsjb.irad51a2 b
+                              where a.aab001 = prm_aab001
+                                and a.aac001 = var_aac001
+                                and a.aac001 = b.aac001
+                                and aae002 = prm_aae001 || '12';
+                               if num_count = 0 then
+                                  num_yac412 := rec_tmp.AAC040;
+                               else
+                                  num_yac412 := 0;
+                               end if;
                             END IF;
                         END LOOP;
                         <<leb_next1>>
@@ -8043,7 +8188,7 @@ PROCEDURE prc_UpdateAc01k8 (
        AND aac001 = prm_aac001
        AND aae001 = prm_aae001
        AND yab019 = '1'
-       AND (aae013 is null or aae013 ='1');     -- 提前结算的不更
+       AND (aae013 is null or aae013 ='1' or aae013 ='22');     -- 提前结算的不更(aae013=2或21)
        
 
  EXCEPTION
