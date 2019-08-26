@@ -4610,7 +4610,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
 
        UPDATE xasi2.ac01k8
           SET
-          iaz004 = v_iaz004,
+              iaz004 = v_iaz004,
               iaa002 = '1',
               aae035 = sysdate
         WHERE aab001 = prm_aab001
@@ -5406,7 +5406,6 @@ PROCEDURE prc_YearSalary(prm_aab001       IN     irab01.aab001%TYPE,--单位编号  
               IF var_aab019 = '60' THEN
                  --获取社平工资
                  num_spgz := xasi2.pkg_comm.fun_GetAvgSalary('01','16',num_aae002,PKG_Constant.YAB003_JBFZX);
-
                  num_yac004 := num_aac040;
 
                  --如果险种为工伤 缴费工资和缴费基数为社平工资
@@ -5727,7 +5726,8 @@ PROCEDURE prc_YearSalaryBC(prm_aab001       IN     irab01.aab001%TYPE,--单位编号
           FROM xasi2.ac01k8
          WHERE aab001 = prm_aab001
            AND aae001 = prm_aae001
-           AND yab019 = prm_yab019;
+           AND yab019 = prm_yab019
+            AND (aae013 is null or aae013 ='1' or aae013 ='22');  
       --根据征收方式更新费用来源
       CURSOR cur_ab08 IS
       SELECT yae518,

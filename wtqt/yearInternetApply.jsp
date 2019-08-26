@@ -297,6 +297,7 @@
 
     if (aae013 == "1") {
       Base.alert("该人员为逐月缴费人员，不能修改基数！");
+      Base.setGridCellData("sucGrid", rownum, data.cell + 1, yac004); //新养老基数
       Base.setGridCellData("sucGrid", rownum, data.cell, yac506); //原缴费工资
       Base.setGridCellData("sucGrid", rownum, data.cell + 4, yac508_03); //原医疗基数
       //Base.setGridCellData("sucGrid", rownum, data.cell + 2, yac508); //原其他基数
