@@ -2881,7 +2881,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                  yac004 = n_yac507,
                  yaa333 = n_yac508,
                  yaa444 = n_yac005,
-                 aae013 = '2'
+                 aae013 = '2' -- 2 : 提前结算的人
            where aab001 = prm_aab001
              and aac001 = v_aac001
              and aae001 = prm_aae001;
@@ -2900,6 +2900,12 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
              AND a.aae041 >= prm_aae001||'01'
              AND a.aae041 <= prm_aae001||'12';
            IF n_count > 0 THEN
+                 update xasi2.ac01k8
+                   set aae013 = '22' -- 22 : 提前结算又续保的 展示续保的一条记录
+                 where aab001 = prm_aab001
+                   and aac001 = v_aac001
+                   and aae001 = prm_aae001;  
+                 --拼接提前结算注释
                  select max(decode(aae002, prm_aae001 || '01', '01月/')) ||
                         max(decode(aae002, prm_aae001 || '02', '02月/')) ||
                         max(decode(aae002, prm_aae001 || '03', '03月/')) ||
@@ -2911,9 +2917,9 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                   where aac001 = v_aac001
                     and aae002 >= prm_aae001 || '01'
                     and aae002 <= prm_aae001 || '12';
-                 --拼接提前结算注释
                   v_yae110 := '养老提前结算/'||v_tqjsyf;
-                  --获取结算月度的结算上账基数(如果提前结算的人续保回来从AC02或IRAC01取就不对了,所以取结算的基数)
+                  
+                  --获取结算月度的结算上账基数(如果提前结算的人续保回来从AC02或IRAC01取就不对了,所以取结算时的基数)
                   select distinct b.yaa334,b.yaa334
                      into n_yac506,n_yac507
                     from irad51a1 a, irad51a2 b
@@ -2921,7 +2927,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                    and a.yae518 =b.yae518
                    and  a.aab001 = prm_aab001
                    and a.aac001 = v_aac001;
-                    --提前结算的直接把新旧缴费工资和基数写成一样的
+                    --提前结算的新旧缴费工资和基数写成一样的
                      INSERT INTO xasi2.ac01k8 (
                                             aac001,
                                             aab001,
@@ -2985,7 +2991,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                                             n_yac005,
                                             '1',
                                             SYSDATE,
-                                            '21'
+                                            '21' -- 提前结算又续保的 展示提前结算的一条记录
                                             );
             END IF;
             
@@ -5000,6 +5006,11 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
      --撤销年审申报的同时删除irad54中基数降低的记录
      DELETE wsjb.irad54
        WHERE iaa011 ='A05-1'
+         AND aab001 = prm_aab001
+         AND aae001 = prm_aae001;
+     --撤销年审申报的同时删除诚信确认书
+     DELETE wsjb.yearapply_confirm
+       WHERE yae031='1'
          AND aab001 = prm_aab001
          AND aae001 = prm_aae001;
      --modify by whm at 20190812end
@@ -8037,7 +8048,7 @@ END prc_insertIRAC08A1;
     这里注释掉 改为批量调用 单个的过程prc_UpdateAc01k8  by whm 20190809 end;
     */
 
-    -- 调用单个的
+    -- 调用单个的更新Ac01k8
      prc_UpdateAc01k8 (
         v_aab001    ,--申报单位
         v_aac001    ,--个人编号
@@ -10219,7 +10230,7 @@ BEGIN
                into v_proportions
                from DUAL;
               if v_proportions <= v_proportions_constant then
-                 v_proportions_msg:='01险种'||v_minaae041||'基数降低比例低于'||v_proportions_constant;
+                 v_proportions_msg:='01险种'||v_minaae041||'基数降低比例过高';
                  GOTO leb_next;
               end if;
           --非单养老单位处理 4险
@@ -10288,7 +10299,7 @@ BEGIN
               into v_proportions
               from DUAL;
               if v_proportions <= v_proportions_constant then
-                 v_proportions_msg:=ab02_rec.aae140||'险种'||v_minaae041||'基数降低比例低于'||v_proportions_constant;
+                 v_proportions_msg:=ab02_rec.aae140||'险种'||v_minaae041||'基数降低比例过高';
                  GOTO leb_next;
               end if;
           end loop;
@@ -10311,7 +10322,7 @@ BEGIN
               into v_proportions
               from DUAL;
               if v_proportions <= v_proportions_constant then
-                 v_proportions_msg:='01险种'||v_minaae041||'基数降低比例低于'||v_proportions_constant;
+                 v_proportions_msg:='01险种'||v_minaae041||'基数降低比例过高';
               end if;
           end if;
 

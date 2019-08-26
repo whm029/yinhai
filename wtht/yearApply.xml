@@ -858,10 +858,12 @@
     	       aae140
     	  FROM xasi2.aa02a3 a WHERE AAE001 = #aae001#
     </select>
+
 	<!-- 农民工失业基数补差查询 -->
 	<select id="getSYBC_01" parameterClass="map" resultClass="dto">
      	select wsjb.FUN_GETNMGJSC(#aab001#,#aae001#) AS SYBC from dual
      </select>
+
 	<!-- 补差总和 -->
 	<select id="getJSZC" parameterClass="map" resultClass="dto">
 	    SELECT P.AAE140 AS AAE140,
@@ -1143,6 +1145,7 @@
 		 where aab001 = #aab001#
 		   and yae517 = 'H01'
 	</select>
+
 	<select id="getEmpJS" parameterClass="map" resultClass="dto">
 				SELECT ROWNUM AS SN, X.*
 				  FROM (SELECT B.AAC003 AS AAC003,
@@ -1204,7 +1207,8 @@
 				                                  NULL
 				                               END AS YAE510
 				                          FROM xasi2.ac01k8 A
-				                         WHERE A.YAB019 = '1')) C
+				                         WHERE A.YAB019 = '1'
+										  AND (A.AAE013 is null or A.AAE013 ='1' or A.AAE013 ='2' or A.AAE013 ='22' ))) C
 				         WHERE A.AAC001 = B.AAC001
 				           AND A.AAC001 = C.AAC001
 				           AND A.AAB001 = C.AAB001
@@ -1212,6 +1216,7 @@
 				           AND A.YAB019 = '1'
 				           AND A.AAB001 = #aab001#
 				           AND A.AAE001 = #aae001#
+						   AND (A.AAE013 is null or A.AAE013 ='1' or A.AAE013 ='2' or A.AAE013 ='22' )
 				        UNION ALL
 				        SELECT B.AAC003 AS AAC003,
 				               B.AAC002 AS AAC002,
@@ -1239,9 +1244,8 @@
 				           AND B.aae120=0
 				           ORDER BY AAE110 ASC, AAC003
 				           ) X
-
-
     </select>
+
 	<select id="getEmpJSYL" parameterClass="map" resultClass="dto">
 				SELECT ROWNUM AS SN, A.* FROM(
 				  SELECT *
@@ -1304,7 +1308,8 @@
 				                                  NULL
 				                               END AS YAE510
 				                          FROM xasi2.ac01k8 A
-				                         WHERE A.YAB019 = '1')) C
+				                         WHERE A.YAB019 = '1'
+										  AND (A.AAE013 is null or A.AAE013 ='1' or A.AAE013 ='2' or A.AAE013 ='22' ))) C
 				         WHERE A.AAC001 = B.AAC001
 				           AND A.AAC001 = C.AAC001
 				           AND A.AAB001 = C.AAB001
@@ -1312,6 +1317,7 @@
 				           AND A.YAB019 = '1'
 				           AND A.AAB001 = #aab001#
 				           AND A.AAE001 = #aae001#
+						   AND (A.AAE013 is null or A.AAE013 ='1' or A.AAE013 ='2' or A.AAE013 ='22' )
 				        UNION ALL
 				        SELECT A.AAC003 AS AAC003,
 				               A.AAC002 AS AAC002,
@@ -1338,8 +1344,8 @@
 				           AND A.AAB001 = #aab001#
 				           AND A.AAE110 IN ('备案')) X
 				 ORDER BY X.AAE110 ASC, X.AAC003) A
-
     </select>
+
 	<select id="getEmpJS_2" parameterClass="map" resultClass="dto">
     	select rownum as sn,x.* from
     	(SELECT b.AAC003 AS AAC003,
@@ -1381,15 +1387,16 @@
 		    AND a.aab001 = #aab001#
 		    AND a.aae001 = #aae001#
 		  ORDER BY a.YAE110 DESC , a.YAE310 DESC ,a.YAE210 DESC,a.YAE410 DESC,a.YAE510 DESC,a.aac003) x
-
     </select>
 
 	<select id="ab02Count" parameterClass="map" resultClass="java.util.HashMap">
   		SELECT to_char(COUNT(1)) as ab02count FROM XASI2.AB02 WHERE aab001 = #aab001# AND aab051 = '1'
     </select>
+
 	<select id="irad51a1Count" parameterClass="map" resultClass="java.lang.Integer">
   		SELECT COUNT(1) as n FROM wsjb.irad51a1 WHERE aab001 = #aab001# AND substr(aae041,1,4) = #aae001# and yae031 ='1'
     </select>
+
 	<select id="tmp_ac42Ba" parameterClass="map" resultClass="java.util.HashMap">
   		SELECT NVL(SUM(YAC401) + SUM(YAC402) + SUM(YAC403) + SUM(YAC404) +
            SUM(YAC405) + SUM(YAC406) + SUM(YAC407) + SUM(YAC408) +
