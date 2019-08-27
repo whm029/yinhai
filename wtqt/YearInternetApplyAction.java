@@ -842,6 +842,24 @@ public class YearInternetApplyAction extends NetHallBaseAction {
 
 
 
+  public String printConfirm() throws Exception {
+    Map ab01 = new HashMap();
+    ab01.put("yae092", getDto().getUserInfo().getUserId());
+    String ab01Xml = baseCommService.getAb01ByYae092(XmlConverUtil.map2Xml(ab01));
+    ab01 = XmlConverUtil.xml2Map(ab01Xml);
+    String aab001 = (String) ab01.get("aab001");
+    String aae001 = request.getParameter("aae001");
+    //润乾报表名称
+    String raq = "YearApplyConfirm";
+    Map map = new HashMap();
+    map.put("aab001", aab001);
+    map.put("aae001", aae001);
+    RqReportUtil.setReport(raq, map, request);
+    return "printhmc";
+  }
+
+
+
   /**
    * 信息清除
    *
