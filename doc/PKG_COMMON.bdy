@@ -609,8 +609,8 @@ create or replace package body PKG_COMMON as
          
          IF substr(prm_aae002,1,4) >= 2019 THEN -- 19年后养老基数是社平的50%到300%
             IF prm_aae140 = PKG_Constant.AAE140_YL THEN
-                IF num_aac040 > ROUND(num_spgz/12) THEN
-                    prm_Yac004 := ROUND(num_spgz/12);
+                IF num_aac040 > n_Yaa006 THEN
+                    prm_Yac004 := n_Yaa006;
                 ELSIF num_aac040 < TRUNC(num_spgz/24)+1 THEN
                     prm_Yac004 := TRUNC(num_spgz/24)+1;
                 ELSE

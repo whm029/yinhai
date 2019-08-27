@@ -6,13 +6,13 @@
 004459  111111  1月在市本级,2月在高新
 */
 
- 
+--   比例补差  基数补差 补差欠费  限制年审
  
 -- 原缴费工资和基数是从 AC02取的 取不到再去irac01取, 但是如果提前结算的人转出去了 ac02 取不到 irac01取的是 减少的那一天工资是0
      
 wsjb.pkg_P_Validate.prc_p_checkInfoByYear
 
-select * from xasi2.ac01k8 where aab001='855555' and aae001='2019' --for update 
+select * from xasi2.ac01k8 where aab001='855905' and aae001='2019' --for update 
 select * from wsjb.irad51 where aab001='855555' 
 select * from wsjb.yearapply_confirm --for update 
 
@@ -21,7 +21,8 @@ select * from xasi2.ac01k8 where aab001='855555' and aae001='2019' and aac001='9
 select * from xasi2.ac01k8 where aab001='855555' and aae001='2019' and (aae013 is null or aae013 ='1')
 
 
-select * from irad54 where aab001='855555'-- for update 
+select * from irad54 where aab001='855905'-- for update 
+select * from irad53 where aab001='855905'-- for update 
 
 select * from  wsjb.irad51a1 for update 
 select * from  wsjb.irad51a2 for update 

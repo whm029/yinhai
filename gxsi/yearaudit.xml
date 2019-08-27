@@ -1,0 +1,2268 @@
+<?xml version="1.0" encoding="GB2312" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+	<!--
+		年审
+	-->
+<sqlMap namespace="yearaudit">
+
+    <select id="getSEQ_IAB001" parameterClass="map" resultClass="java.lang.String">
+		SELECT WSJB.SEQ_IAB001.NEXTVAL FROM DUAL
+	</select>
+	<!-- 是否是机关事业单位 -->
+	<select id="isJGDW" parameterClass="map" resultClass="java.lang.Integer">
+		SELECT to_char(COUNT(1)) as k FROM xasi2.ab01 WHERE aab001 = #aab001# AND aab019 = '60'
+	</select>
+	<!-- 是否是重点审核单位 -->
+	<select id="getIrad54Count" parameterClass="map" resultClass="java.lang.Integer">
+		SELECT COUNT(1) as k FROM wsjb.irad54 WHERE aab001 = #aab001# AND iaa011 = 'A05' and aae001 = #aae001#
+	</select>
+	<!-- 是否是重点审核单位 -->
+	<select id="getIrad54Count_1" parameterClass="map" resultClass="java.lang.Integer">
+		SELECT COUNT(1) as k FROM wsjb.irad54 WHERE aab001 = #aab001# AND iaa011 = 'A05-1' and aae001 = #aae001#
+	</select>
+	<!-- 判断单位是否存在错误人员数据 -->
+   <select id="queryTmp_ac02_yanglid" parameterClass="map" resultClass="java.lang.Integer">
+  		SELECT count(1) AS i FROM wsjb.tmp_ac02_yanglid WHERE AAB001 = #aab001#
+   </select>
+   <!-- 判断单位是否存在养老对账单位 -->
+   <select id="queryTmp_ab01" parameterClass="map" resultClass="java.lang.Integer">
+  		SELECT count(1) AS k FROM wsjb.tmp_ab01 WHERE AAB001 = #aab001#
+   </select>
+   <!-- 查询单位错误人员数据 -->
+   <select id="getTmp_ac02_yanglid" parameterClass="map" resultClass="java.util.HashMap">
+  		SELECT * FROM wsjb.tmp_ac02_yanglid WHERE AAB001 = #aab001# order by aac003
+   </select>
+   
+   <select id="ab02Count" parameterClass="map" resultClass="java.util.HashMap">
+  		SELECT to_char(COUNT(1)) as ab02count FROM xasi2.ab02 WHERE aab001 = #aab001# AND aab051 = '1'
+   </select>
+   <!-- 查询是否有年申报记录 -->
+   <select id="get51count" parameterClass="map" resultClass="java.lang.Integer">
+  		SELECT COUNT(1) as i FROM wsjb.irad51 WHERE aab001 = #aab001# AND aae001 = #aae001# and iaa002 = '1' and iaa011 = 'A05'
+   </select>
+   <!-- 查询是否有审核通过记录 -->
+   <select id="get51count_1" parameterClass="map" resultClass="java.lang.Integer">
+  		SELECT COUNT(1) as i FROM wsjb.irad51 WHERE aab001 = #aab001# AND aae001 = #aae001# and iaa002 = '2' and iaa006 = '1' and iaa011 = 'A05'
+   </select>
+   <select id="getCount" parameterClass="map" resultClass="java.util.HashMap">
+  		SELECT to_char(COUNT(1)) as ab05a1count FROM xasi2.ac01k8 WHERE aab001 = #aab001# and aae001 = #aae001# and yab019 = '1'
+   </select>
+   <select id="queryIrad51" parameterClass="map" resultClass="java.util.HashMap">
+   		SELECT * FROM wsjb.irad51 
+   		WHERE aab001 = #aab001# 
+   		and aae001 = #aae001# 
+   		and iaa011 = 'A05' 
+   	<![CDATA[	and iaa002<>'3' ]]>
+   </select>
+   <select id="queryIrad51_1" parameterClass="map" resultClass="java.util.HashMap">
+   		SELECT * FROM wsjb.irad51 
+   			WHERE aab001 = #aab001# 
+   			and aae001 = #aae001# 
+   			and iaa011 = #iaa011#
+  <![CDATA[	and iaa002<>'3' ]]>
+   </select>
+   
+   <!-- 获取最大做账期的下个月 -->
+   <select id="getNextMonth" parameterClass="map"  resultClass="java.lang.String">
+   		SELECT TO_CHAR(ADD_MONTHS(TO_DATE(MAX(YAE097), 'yyyyMM'), 1), 'yyyyMM') AS AAE003 FROM xasi2.ab02 WHERE aab001 = #aab001# and aab051 = '1'
+   </select>
+   
+   <!-- 获取最大做账期的下个月(单养老) -->
+   <select id="getNextMonth_1" parameterClass="map"  resultClass="java.lang.String">
+   		SELECT TO_CHAR(ADD_MONTHS(TO_DATE(MAX(AAE003), 'yyyyMM'), 1), 'yyyyMM') AS AAE003 FROM wsjb.irab08 WHERE aab001 = #aab001# and yae517 = 'H01'
+   </select>
+   <!-- 获取年审月度 -->
+   <select id="getNSYD" parameterClass="map"  resultClass="java.lang.String">
+		 SELECT TO_CHAR(AAE003) as aae003
+         FROM wsjb.IRAD51
+        WHERE AAB001 = #aab001#
+          AND AAE001 = #aae001#
+          AND IAA002 = '2'
+          AND IAA006 = '1'
+          AND IAA011 = 'A05'
+   </select>
+   
+   <!-- 是否已经做过补差操作 -->
+   <select id="getBCCount" parameterClass="map"  resultClass="java.lang.Integer">
+   SELECT count(1) as i FROM wsjb.irad51 WHERE aab001 = #aab001# and aae001 = #aae001# AND iaa006 = '1' and iaa011 = 'A05'
+   </select>
+   <!-- 根据做帐期号查询单位的补差信息 -->
+	<select id="getInsPayInfo" parameterClass="map" resultClass="java.util.HashMap">
+		SELECT P.AAE140,
+              MAX(P.YAB538) AS YAB538,
+              SUM(P.AAB121) AS AAB121,
+              SUM(P.AAB120) AS AAB120,
+              SUM(P.AAB156) AS AAB156,
+              (SELECT COUNT(1)
+                 FROM wsjb.TMP_AC42 A
+                WHERE A.AAB001 = #aab001#
+                  AND A.AAE001 = #aae001#
+                  AND A.AAE140 = P.AAE140
+                  AND (A.YAC401 + A.YAC402 + A.YAC403 + A.YAC404 + A.YAC405 +
+                      A.YAC406 + A.YAC407 + A.YAC408 + A.YAC409 + A.YAC410 +
+<![CDATA[             A.YAC411 + A.YAC412) <> 0) AS YAE231, ]]>
+              SUM(P.PAY_U) AS PAY_U,
+              SUM(P.PAY_P) AS PAY_P,
+              SUM(P.PAY_A) AS PAY_A,
+              MAX(P.AAE076) AS AAE076
+         FROM (SELECT A.AAE140,
+                      A.YAB538,
+                      NVL(A.AAB121, 0.0) AS AAB121,
+                      NVL(A.AAB120, 0.0) AS AAB120,
+                      NVL(A.AAB156, 0.0) AS AAB156,
+                      NVL(A.YAE231, 0) AS YAE231,
+                      (NVL(A.AAB151, 0.0) + NVL(A.AAB152, 0.0)) AS PAY_U,
+                      (NVL(A.AAB150, 0.0) + NVL(A.YAB031, 0.0)) AS PAY_P,
+                      (NVL(A.AAB151, 0.0) + NVL(A.AAB152, 0.0) +
+                      NVL(A.AAB150, 0.0) + NVL(A.YAB031, 0.0)) AS PAY_A,
+                      A.AAE076
+                 FROM xasi2.AB08 A
+                WHERE AAB001 = #aab001#
+                  AND (A.YAB538 = '1' OR A.AAE140 != '03')
+                  <isNotEmpty prepend="AND" property="yae010">
+				   a.yae010 = #yae010#
+				 </isNotEmpty>
+                  AND A.YAE517 = 'H12'
+  <![CDATA[       AND A.YAB222 <> '100000000001' ]]> 
+                  AND A.AAE003 = #aae003#
+               UNION
+               SELECT A.AAE140,
+                      A.YAB538,
+                      NVL(A.AAB121, 0.0) AS AAB121,
+                      NVL(A.AAB120, 0.0) AS AAB120,
+                      NVL(A.AAB156, 0.0) AS AAB156,
+                      NVL(A.YAE231, 0) AS YAE231,
+                      (NVL(A.AAB151, 0.0) + NVL(A.AAB152, 0.0)) AS PAY_U,
+                      (NVL(A.AAB150, 0.0) + NVL(A.YAB031, 0.0)) AS PAY_P,
+                      (NVL(A.AAB151, 0.0) + NVL(A.AAB152, 0.0) +
+                      NVL(A.AAB150, 0.0) + NVL(A.YAB031, 0.0)) AS PAY_A,
+                      '' AS AAE076
+                 FROM xasi2.AB08A8 A
+                WHERE AAB001 = #aab001#
+                  AND (A.YAB538 = '1' OR A.AAE140 != '03')
+                  <isNotEmpty prepend="AND" property="yae010">
+				   a.yae010 = #yae010#
+				  </isNotEmpty>
+                  AND A.YAE517 in ('H17','H12')
+  <![CDATA[       AND A.YAB222 <> '100000000001' ]]>
+                  AND A.AAE003 = #aae003#) P
+      <![CDATA[   WHERE P.AAE140 <> '06']]>
+                  GROUP BY P.AAE140
+		   
+	</select>
+	<!-- 养老补差 -->
+	<select id="getYLInsInfo" parameterClass="map" resultClass="java.util.HashMap">
+		  SELECT A.AAE140,
+         (SELECT COUNT(1)
+            FROM wsjb.TMP_AC42 B
+           WHERE B.AAB001 = #aab001#
+             AND B.AAE001 = #aae001#
+             AND B.AAE140 = A.AAE140
+             AND (B.YAC401 + B.YAC402 + B.YAC403 + B.YAC404 + B.YAC405 +
+                 B.YAC406 + B.YAC407 + B.YAC408 + B.YAC409 + B.YAC410 +
+<![CDATA[        B.YAC411 + B.YAC412) <> 0) AS YAE231,]]>
+		         SUM(A.AAB120) AS AAB120,
+		         SUM(A.AAB121) AS AAB121,
+		         MAX(A.AAE076) AS AAE076,
+		         MAX(A.YAB538) AS YAB538,
+		         SUM(A.AAB150) AS PAY_P,
+		         SUM(A.AAB152) AS PAY_U,
+		         SUM((A.AAB150 + A.AAB152)) AS PAY_A,
+		         SUM(A.AAB156) AS AAB156
+		    FROM wsjb.IRAB08 A
+		   WHERE AAE140 = '01'  
+		    <isNotEmpty prepend="AND" property="yae010">
+				 a.yae010 = #yae010#
+			</isNotEmpty> 
+		     AND A.AAB001 = #aab001#
+		     AND A.AAE003 = #aae003#
+		     AND A.YAE517 IN ('H12', 'H17')
+		   GROUP BY A.AAE140
+	</select>
+	<!-- 查询一批数据的查询 -->
+	<select id="getAla080" parameterClass="map" resultClass="java.util.HashMap" >
+		SELECT to_char((aab152/AAB121)*100,'0.99')||'%' AS ala080
+		  FROM xasi2.AB08
+		 WHERE AAE140 = '04'
+		   AND AAE003 = #iaa100#
+		   AND YAE517 = 'H12'
+<![CDATA[  AND YAB222 <> '100000000001' ]]>
+		   AND AAB001 = #aab001#
+		UNION
+		SELECT to_char((aab152/AAB121)*100,'0.99')||'%' AS ala080
+		  FROM xasi2.AB08A8
+		 WHERE AAE140 = '04'
+		   AND AAE003 = #iaa100#
+		   AND YAE517 = 'H17'
+<![CDATA[  AND YAB222 <> '100000000001' ]]>
+		   AND AAB001 = #aab001#
+	</select>
+   <!-- 查询单位人员年审原基数-->
+	<parameterMap id="prc_queryjishuMap"  class="java.util.Map"> 
+	    <parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+        <parameter property="prm_yae092" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+        <parameter property="prm_aae001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+        <parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" /> 
+        <parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  /> 
+    </parameterMap>
+    <procedure id="yearApply_prc_queryjishu" parameterMap="prc_queryjishuMap">{call wsjb.pkg_YEARAPPLY.prc_queryjishu(?,?,?,?,?)} </procedure>
+    
+     <!-- 查询单养老单位人员年审原基数-->
+	<parameterMap id="prc_YLqueryjishuMap"  class="java.util.Map"> 
+	    <parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+        <parameter property="prm_yae092" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="prm_aae001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+        <parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" /> 
+        <parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  /> 
+    </parameterMap>
+    <procedure id="yearApply_prc_YLqueryjishu" parameterMap="prc_YLqueryjishuMap">{call wsjb.pkg_YEARAPPLY.prc_YLqueryjishu(?,?,?,?,?)} </procedure>
+	
+	<select id="getAb05a1" parameterClass="map" resultClass="java.util.HashMap">
+		 SELECT B.YAB029 AS YAB029,
+		        A.AAC001 AS AAC001,
+		        A.AAB001 AS AAB001,
+		        A.AAC002 AS AAC002,
+		        A.AAC003 AS AAC003,
+		        A.AAC009 AS AAC009,
+		        A.YAC506 AS YAC506,
+		        A.YAC507 AS YAC507,
+		        A.YAC508 AS YAC508,
+		        A.AAC040 AS AAC040,
+		        A.YAC004 AS YAC004,
+		        A.YAA333 AS YAA333,
+		        A.AAE110 AS AAE110,
+		        A.AAE210 AS AAE210,
+		        A.AAE310 AS AAE310,
+		        A.AAE410 AS AAE410,
+		        A.AAE510 AS AAE510,
+		        A.AAE311 AS AAE311,
+		        A.AAE001 AS AAE001,
+		        A.YAC503 AS YAC503,
+		        A.YAC005 AS YAC005,
+		        A.YAE092 AS YAE092,
+		        A.AAE035 AS AAE035,
+		        A.AAE011 AS AAE011,
+		        A.AAE036 AS AAE036,
+		        A.IAA002 AS IAA002,
+		        A.YAE099 AS YAE099,
+		        A.YAE110 AS YAE110,
+		        A.YAE310 AS YAE310,
+		        A.YAE210 AS YAE210,
+		        A.YAE410 AS YAE410,
+		        A.YAE510 AS YAE510,
+		        A.YAE001 AS YAE001,
+		        A.YAB019 AS YAB019
+		   FROM xasi2.ac01k8 A, xasi2.AC01A1 B ,xasi2.AC01 C
+		  WHERE A.AAC001 = B.AAC001(+)
+		    AND A.AAC001 = C.AAC001(+)
+		    AND A.AAB001 = #aab001#
+		    AND A.AAE001 = #aae001#
+		    AND A.YAB019 = '1'
+		  ORDER BY A.YAE110 DESC,
+		           A.YAE310 DESC,
+		           A.YAE210 DESC,
+		           A.YAE410 DESC,
+		           A.YAE510 DESC,
+		           A.AAC003
+   	</select>
+   	<!-- 审核界面人员信息查询 -->
+	<select id="getAb05a1_1" parameterClass="map" resultClass="java.util.HashMap">
+		 SELECT B.YAB029 AS YAB029,
+				a.aac001 AS AAC001,
+		        A.AAB001 AS AAB001,
+<![CDATA[		CASE WHEN yaa333<yac508 OR yac004<yac507 THEN '<font color=red >'||C.AAC002||'</font>' ELSE a.aac002 END AS AAC002,]]>
+		        a.AAC003 AS AAC003,
+		        C.AAC009 AS AAC009,
+		        A.YAC506 AS YAC506,
+		        A.YAC507 AS YAC507,
+		        A.YAC508 AS YAC508,
+		        A.AAC040 AS AAC040,
+		        A.YAC004 AS YAC004,
+		        A.YAA333 AS YAA333,
+		        A.AAE110 AS AAE110,
+		        A.AAE210 AS AAE210,
+		        A.AAE310 AS AAE310,
+		        A.AAE410 AS AAE410,
+		        A.AAE510 AS AAE510,
+		        A.AAE311 AS AAE311,
+		        A.AAE001 AS AAE001,
+		        A.YAC503 AS YAC503,
+		        A.YAC005 AS YAC005,
+		        A.YAE092 AS YAE092,
+		        A.AAE035 AS AAE035,
+		        A.AAE011 AS AAE011,
+		        A.AAE036 AS AAE036,
+		        A.IAA002 AS IAA002,
+		        A.YAE099 AS YAE099,
+		        A.YAE110 AS YAE110,
+		        A.YAE310 AS YAE310,
+		        A.YAE210 AS YAE210,
+		        A.YAE410 AS YAE410,
+		        A.YAE510 AS YAE510,
+		        A.YAE001 AS YAE001,
+		        A.YAB019 AS YAB019
+		   FROM xasi2.ac01k8 A, xasi2.AC01A1 B,xasi2.AC01 C
+		  WHERE A.AAC001 = B.AAC001(+)
+		    AND A.AAC001 = C.AAC001(+)
+		    AND A.AAB001 = #aab001#
+		    AND A.AAE001 = #aae001#
+		    AND A.YAB019 = #yab019#
+		  ORDER BY A.YAE110 DESC,
+		           A.YAE310 DESC,
+		           A.YAE210 DESC,
+		           A.YAE410 DESC,
+		           A.YAE510 DESC,
+		           A.AAC003
+   	</select>
+   		<!-- 基数降低人员信息 -->
+	<select id="getAb05a1_6" parameterClass="map" resultClass="java.util.HashMap">
+		 SELECT B.YAB029 AS YAB029,
+				a.aac001 AS AAC001,
+		        A.AAB001 AS AAB001,
+	            C.AAC002 AS AAC002,
+		        C.AAC003 AS AAC003,
+		        C.AAC009 AS AAC009,
+		        A.YAC506 AS YAC506,
+		        A.YAC507 AS YAC507,
+		        A.YAC508 AS YAC508,
+		        A.AAC040 AS AAC040,
+		        A.YAC004 AS YAC004,
+		        A.YAA333 AS YAA333,
+		        A.AAE110 AS AAE110,
+		        A.AAE210 AS AAE210,
+		        A.AAE310 AS AAE310,
+		        A.AAE410 AS AAE410,
+		        A.AAE510 AS AAE510,
+		        A.AAE311 AS AAE311,
+		        A.AAE001 AS AAE001,
+		        A.YAC503 AS YAC503,
+		        A.YAC005 AS YAC005,
+		        A.YAE092 AS YAE092,
+		        A.AAE035 AS AAE035,
+		        A.AAE011 AS AAE011,
+		        A.AAE036 AS AAE036,
+		        A.IAA002 AS IAA002,
+		        A.YAE099 AS YAE099,
+		        A.YAE110 AS YAE110,
+		        A.YAE310 AS YAE310,
+		        A.YAE210 AS YAE210,
+		        A.YAE410 AS YAE410,
+		        A.YAE510 AS YAE510,
+		        A.YAE001 AS YAE001,
+		        A.YAB019 AS YAB019
+		   FROM xasi2.ac01k8 A, xasi2.AC01A1 B,xasi2.AC01 C
+		  WHERE A.AAC001 = B.AAC001(+)
+		    AND A.AAC001 = C.AAC001(+)
+		    AND A.AAB001 = #aab001#
+		    AND A.AAE001 = #aae001#
+		    AND A.YAB019 = #yab019#
+  <![CDATA[ AND (a.yaa333<a.yac508 OR a.yac004<a.yac507) ]]>
+		  ORDER BY A.YAE110 DESC,
+		           A.YAE310 DESC,
+		           A.YAE210 DESC,
+		           A.YAE410 DESC,
+		           A.YAE510 DESC,
+		           A.AAC003
+   	</select>
+   	<!-- 查询养老编号为空的人员列表 -->
+   	<select id="getac01a1" parameterClass="map" resultClass="java.util.HashMap">
+   		SELECT  B.YAB029 AS YAB029,
+				a.aac001 AS AAC001,
+		        A.AAB001 AS AAB001,
+		        D.AAB004 AS AAB004,
+				c.aac002 as AAC002,
+		        C.AAC003 AS AAC003,
+		        C.AAC009 AS AAC009,
+		        A.YAC506 AS YAC506,
+		        A.YAC507 AS YAC507,
+		        A.YAC508 AS YAC508,
+		        A.AAC040 AS AAC040,
+		        A.YAC004 AS YAC004,
+		        A.YAA333 AS YAA333,
+		        A.AAE110 AS AAE110,
+		        A.AAE210 AS AAE210,
+		        A.AAE310 AS AAE310,
+		        A.AAE410 AS AAE410,
+		        A.AAE510 AS AAE510,
+		        A.AAE311 AS AAE311,
+		        A.AAE001 AS AAE001,
+		        A.YAC503 AS YAC503,
+		        A.YAC005 AS YAC005,
+		        A.YAE092 AS YAE092,
+		        A.AAE035 AS AAE035,
+		        A.AAE011 AS AAE011,
+		        A.AAE036 AS AAE036,
+		        A.IAA002 AS IAA002,
+		        A.YAE099 AS YAE099,
+		        A.YAE110 AS YAE110,
+		        A.YAE310 AS YAE310,
+		        A.YAE210 AS YAE210,
+		        A.YAE410 AS YAE410,
+		        A.YAE510 AS YAE510,
+		        A.YAE001 AS YAE001,
+		        A.YAB019 AS YAB019
+		   FROM xasi2.ac01k8 A, xasi2.AC01A1 B,xasi2.AC01 C,xasi2.AB01 D
+		  WHERE A.AAC001 = B.AAC001(+)
+		    AND A.AAC001 = C.AAC001(+)
+		    AND a.aab001 = D.AAB001
+		    AND A.AAB001 = #aab001#
+		    AND A.AAE001 = #aae001#
+		    AND A.YAB019 = #yab019#
+		    AND EXISTS (select 1 
+		                  from wsjb.irac08a1
+		                 where aac001 = b.aac001 )
+		    AND B.YAB029 IS NULL
+		  ORDER BY A.YAE110 DESC,
+		           A.YAE310 DESC,
+		           A.YAE210 DESC,
+		           A.YAE410 DESC,
+		           A.YAE510 DESC,
+		           A.AAC003
+   	</select>
+   	<!-- 查询新基数小于原基数的人数 -->
+	<select id="getAb05a1_2" parameterClass="map" resultClass="java.lang.Integer">
+		SELECT COUNT(1) AS RS
+          FROM xasi2.ac01k8
+         WHERE AAB001 = #aab001#
+           AND AAE001 = #aae001#
+           AND yab019 = #yab019#
+<![CDATA[  AND (YAA333 < YAC508 OR yac004<yac507)]]>
+	</select>
+	<update id="updateAb05a1" parameterClass="map">
+		update xasi2.ac01k8 
+		   set aac040 = #aac040#,
+		       yac004 = #yac004#,
+		       yaa333 = #yaa333#,
+		       yaa444 = wsjb.pkg_common.fun_p_getcontributionbase(null,#aab001#,TRUNC(#aac040#,0),'0','04','1','1','999912',#yab003#)
+		 where aab001 = #aab001#
+		   and aac001 = #aac001#
+		   and aae001 = #aae001#
+		   AND YAB019 = '1'		   
+	</update>
+	
+	 <!-- 年审申报-->
+	<parameterMap id="prc_yearInternetApplyMap"  class="java.util.Map"> 
+	    <parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+        <parameter property="prm_yae092" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="prm_aae001" jdbcType="NUMBER" javaType="java.lang.Integer" mode="IN"  />
+        <parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" /> 
+        <parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  /> 
+    </parameterMap>
+    <procedure id="yearApply_prc_yearInternetApply" parameterMap="prc_yearInternetApplyMap">{call wsjb.pkg_YEARAPPLY.prc_YearInternetApply(?,?,?,?,?)} </procedure>
+    
+     <!-- 撤销年审申报-->
+	<parameterMap id="prc_RByearInternetApplyMap"  class="java.util.Map"> 
+	    <parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+        <parameter property="prm_yae092" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="prm_aae001" jdbcType="NUMBER" javaType="java.lang.Integer" mode="IN"  />
+        <parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" /> 
+        <parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  /> 
+    </parameterMap>
+    <procedure id="yearApply_prc_RByearInternetApply" parameterMap="prc_RByearInternetApplyMap">{call wsjb.pkg_YEARAPPLY.prc_RBYearInternetApply(?,?,?,?,?)} </procedure>
+	
+	 <!-- 年审申报补差-->
+	<parameterMap id="prc_YearSalaryAdjustPadedMap"  class="java.util.Map"> 
+	    <parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+	    <parameter property="prm_aac001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+	    <parameter property="prm_aac040" jdbcType="NUMBER" javaType="java.math.BigDecimal" mode="IN"/>
+	    <parameter property="prm_aae001" jdbcType="NUMBER" javaType="java.lang.Integer" mode="IN" />
+	    <parameter property="prm_aae011" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+        <parameter property="prm_yab139" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="prm_yab019" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" /> 
+        <parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  /> 
+    </parameterMap>
+    <procedure id="yearApply_prc_YearSalaryAdjustPaded" parameterMap="prc_YearSalaryAdjustPadedMap">{call wsjb.pkg_YEARAPPLY.prc_YearSalaryAdjustPaded(?,?,?,?,?,?,?,?,?)} </procedure>
+	<!-- 个人补差信息 -->
+	<select id="getTMP_ac42" parameterClass="map" resultClass="java.util.HashMap">
+		<isEqual property="yab019" compareValue="1">
+		select (A.YAC401 + A.YAC402 + A.YAC403 + A.YAC404 + A.YAC405 + A.YAC406 +
+                A.YAC407 + A.YAC408 + A.YAC409 + A.YAC410 + A.YAC411 + A.YAC412) AS JSZC,
+		       a.aab001,
+		       a.aac001,
+		       a.aae140,
+		       a.yac401,
+		       a.yac402,
+		       a.yac403,
+		       a.yac404,
+		       a.yac405,
+		       a.yac406,
+		       a.yac407,
+		       a.yac408,
+		       a.yac409,
+		       a.yac410,
+		       a.yac411,
+		       a.yac412,
+		       a.aae013,
+		       b.aac002,
+               b.aac003 
+		from wsjb.tmp_ac42 a,xasi2.ac01 b  
+		where a.aac001 = b.aac001
+		and a.aab001 = #aab001# 
+		and a.aac001 = #aac001#
+		and a.aae001 = #aae001#
+<![CDATA[and a.aae140 <> '06']]>
+		ORDER BY A.aae140 
+		</isEqual>
+		<isEqual property="yab019" compareValue="2">
+		select (A.YAC401 + A.YAC402 + A.YAC403 + A.YAC404 + A.YAC405 + A.YAC406 +
+                A.YAC407 + A.YAC408 + A.YAC409 + A.YAC410 + A.YAC411 + A.YAC412) AS JSZC,
+		       a.aab001,
+		       a.aac001,
+		       a.aae140,
+		       a.yac401,
+		       a.yac402,
+		       a.yac403,
+		       a.yac404,
+		       a.yac405,
+		       a.yac406,
+		       a.yac407,
+		       a.yac408,
+		       a.yac409,
+		       a.yac410,
+		       a.yac411,
+		       a.yac412,
+		       a.aae013,
+		       b.aac002,
+               b.aac003 
+		from wsjb.tmp_ac42 a,xasi2.ac01 b  
+		where a.aac001 = b.aac001
+		and a.aab001 = #aab001# 
+		and a.aac001 = #aac001#
+		and a.aae001 = #aae001#
+<![CDATA[and a.aae140 = '06']]>
+		ORDER BY A.aae140 
+		</isEqual>
+	</select>
+	
+	<!-- 单位补差信息 -->
+	<select id="getTMP_ac42_1" parameterClass="map" resultClass="java.util.HashMap">
+		<isEqual property="yab019" compareValue="1">
+		   select MAX(aab001) as aab001,
+		           aae140 as aae140,
+		       (sum(yac401) + sum(yac402) + sum(yac403) + sum(yac404) + sum(yac405) + sum(yac406) +
+           sum(yac407) + sum(yac408) + sum(yac409) + sum(yac410) + sum(yac411) + sum(yac412)) AS JSZC,
+		           sum(yac401) AS yac401,
+		           sum(yac402) AS yac402,
+		           sum(yac403) AS yac403,
+		           sum(yac404) AS yac404,
+		           sum(yac405) AS yac405,
+		           sum(yac406) AS yac406,
+		           sum(yac407) AS yac407,
+		           sum(yac408) AS yac408,
+		           sum(yac409) AS yac409,
+		           sum(yac410) AS yac410,
+		           sum(yac411) AS yac411,
+		           sum(yac412) AS yac412
+		     from wsjb.tmp_ac42 
+		    where aab001 = #aab001# 
+		      and aae001 = #aae001#
+     <![CDATA[and aae140 <> '06']]> 
+		    GROUP BY aae140 
+		    ORDER BY aae140 
+		</isEqual>
+		<isEqual property="yab019" compareValue="2">
+			select MAX(aab001) as aab001,
+		           aae140 as aae140,
+		       (sum(yac401) + sum(yac402) + sum(yac403) + sum(yac404) + sum(yac405) + sum(yac406) +
+           sum(yac407) + sum(yac408) + sum(yac409) + sum(yac410) + sum(yac411) + sum(yac412)) AS JSZC,
+		           sum(yac401) AS yac401,
+		           sum(yac402) AS yac402,
+		           sum(yac403) AS yac403,
+		           sum(yac404) AS yac404,
+		           sum(yac405) AS yac405,
+		           sum(yac406) AS yac406,
+		           sum(yac407) AS yac407,
+		           sum(yac408) AS yac408,
+		           sum(yac409) AS yac409,
+		           sum(yac410) AS yac410,
+		           sum(yac411) AS yac411,
+		           sum(yac412) AS yac412
+		     from wsjb.tmp_ac42 
+		    where aab001 = #aab001# 
+		      and aae001 = #aae001#
+              and aae140 = '06'
+		    GROUP BY aae140 
+		    ORDER BY aae140 
+		</isEqual>
+	</select>
+	
+	<select id="getExportData" parameterClass="map" resultClass="java.util.HashMap">
+		select a.aab001 as aab001,
+			   a.aac001 as aac001,
+			   b.yab029 as yab029,
+			   a.aac002 as aac002,
+			   a.aac003 as aac003,
+			   c.aac009 as aac009,
+			   a.yac507 as yac507,
+			   a.yac508 as yac508,
+			   a.aac040 as aac040			   
+		  from xasi2.ac01k8 a,xasi2.ac01a1 b,xasi2.ac01 c  
+		 where a.aac001 = b.aac001(+)
+		   and a.aac001 = c.aac001(+)
+		   and a.aab001 = #aab001#
+		   and a.aae001 = #aae001#
+		   and A.YAB019 = '1'
+		  ORDER BY A.YAE110 DESC,
+		           A.YAE310 DESC,
+		           A.YAE210 DESC,
+		           A.YAE410 DESC,
+		           A.YAE510 DESC,
+		           A.AAC003
+	</select>
+	
+	<!-- 查询一批数据的查询 -->
+	<select id="getAuditInfo" parameterClass="map" resultClass="java.util.HashMap">
+		SELECT a.aab001 AS aab001,
+		       b.aab004 AS aab004,
+		       a.iaa002 AS iaa002,
+		       a.iaz051 AS iaz051,
+		       a.aae011 AS yae092,
+		       a.iaa011 as iaa011,
+		       (select count(1) from wsjb.irad53 where aab001 = a.aab001 and aae001 = #aae001# and iaa011 = 'A05' ) as irad54c,
+		       (select aac003 from wsjb.ad53a4 where yae092 = a.aae011) as aab016,
+		       a.aae035 AS aae035,
+		       a.aae001 AS aae001,
+		       c.aae035 AS aae036,
+		       d.aaa165 as aaa165,
+		        decode( d.aaa156,'001','中心','002','咖啡街区','003','唐延路')as aaa156,
+
+		       CASE
+				WHEN (SELECT NAME FROM XAGXSI.TAUSER WHERE USERID = c.aee011) IS NULL THEN
+				     (SELECT AAC003 FROM WSJB.AD53A4 WHERE YAE092 =c.aee011)
+				ELSE
+				     (SELECT NAME FROM XAGXSI.TAUSER WHERE USERID =c.aee011)
+				END AS aee011,
+		     <!--  (SELECT aac003 FROM wsjb.ad53a4 WHERE yae092 = c.aee011) AS aee011,--> 
+<![CDATA[      DECODE(iaa002,'1','<font color=red style=''cursor:pointer;text-decoration:underline;''>待审核</font>','2','<font color=green style=''cursor:pointer;text-decoration:underline;''>已通过</font>','3','<font color=red style=''cursor:pointer;text-decoration:underline;''>未通过</font>') AS sh,
+		       CASE WHEN iaa002 IN ('1','3') AND iaa006 = '0' THEN '<font color=red style=''cursor:pointer;text-decoration:underline;''>禁止补差</font>'
+		            WHEN iaa002 = '2' AND iaa006 = '0' THEN '<font color=red style=''cursor:pointer;text-decoration:underline;''>可以补差</font>'
+		            WHEN iaa002 = '2' AND iaa006 = '1' THEN  '<font color=green style=''cursor:pointer;text-decoration:underline;''>已经补差</font>' END AS bc ]]>
+		FROM wsjb.irad51 a ,xasi2.ab01 b ,wsjb.irad52 c ,wsjb.iraa16 d
+		WHERE a.aab001 = b.aab001
+		  and a.iaz004 = d.iaz004(+)
+		  and a.iaz004 = c.iaz004(+)
+		  and a.iaa002 = #iaa002#
+		  and a.aae001 = #aae001#
+	 <isNotEmpty prepend="AND" property="aab001">   <!-- 单位编号     -->
+		  a.aab001 = #aab001:VARCHAR#              
+	 </isNotEmpty>
+		 order by a.iaa006,a.aae035 desc
+	</select>
+	
+	<!-- 查询一批数据的查询 -->
+	<select id="getAuditInfo_1" parameterClass="map" resultClass="java.util.HashMap">
+		SELECT a.aab001 AS aab001,
+		       b.aab004 AS aab004,
+		       a.iaa002 AS iaa002,
+		       a.iaz051 AS iaz051,
+		       CASE
+				WHEN (SELECT NAME FROM XAGXSI.TAUSER WHERE USERID = a.aae011) IS NULL THEN
+				     (SELECT AAC003 FROM WSJB.AD53A4 WHERE YAE092 = a.aae011)
+				ELSE
+				     (SELECT NAME FROM XAGXSI.TAUSER WHERE USERID = a.aae011)
+				END AS yae092_,
+				a.aae011 as yae092,
+		       a.iaa011 as iaa011,
+ 		       (select aac003 from wsjb.ad53a4 where yae092 = a.aae011) as aab016, 
+		       a.aae035 AS aae035,
+		       a.aae001 AS aae001,
+		       c.aae035 AS aae036,
+		       CASE
+				WHEN (SELECT NAME FROM XAGXSI.TAUSER WHERE USERID = c.aee011) IS NULL THEN
+				     (SELECT AAC003 FROM WSJB.AD53A4 WHERE YAE092 =c.aee011)
+				ELSE
+				     (SELECT NAME FROM XAGXSI.TAUSER WHERE USERID =c.aee011)
+				END AS aee011,
+<!-- 		      (SELECT aac003 FROM wsjb.ad53a4 WHERE yae092 = c.aee011) AS aee011, -->
+<![CDATA[      DECODE(iaa002,'1','<font color=red style=''cursor:pointer;text-decoration:underline;''>待审核</font>','2','<font color=green style=''cursor:pointer;text-decoration:underline;''>已通过</font>','3','<font color=red style=''cursor:pointer;text-decoration:underline;''>未通过</font>') AS sh,
+		       CASE WHEN iaa002 IN ('1','3') AND iaa006 = '0' THEN '<font color=red style=''cursor:pointer;text-decoration:underline;''>禁止补差</font>'
+		            WHEN iaa002 = '2' AND iaa006 = '0' THEN '<font color=red style=''cursor:pointer;text-decoration:underline;''>可以补差</font>'
+		            WHEN iaa002 = '2' AND iaa006 = '1' THEN  '<font color=green style=''cursor:pointer;text-decoration:underline;''>已经补差</font>' END AS bc ]]>
+		FROM wsjb.irad51 a ,xasi2.ab01 b ,wsjb.irad52 c
+		WHERE a.aab001 = b.aab001
+		  and a.iaz004 = c.iaz004(+)
+		  and a.iaa002 = #iaa002#
+		  and a.aae001 = #aae001#
+		  and a.iaa011 = #iaa011#
+	 <isNotEmpty prepend="AND" property="aab001">   <!-- 单位编号     -->
+		  a.aab001 = #aab001:VARCHAR#              
+	 </isNotEmpty>
+	 <isNotEmpty prepend="AND" property="aae036_s">   <!-- 核定时间     -->
+		  a.aae036 >= #aae036_s#         
+	 </isNotEmpty>
+	 <isNotEmpty prepend="AND" property="aae036_e">   <!-- 核定时间     -->
+<![CDATA[ a.aae036 <= #aae036_e#+1  ]]>       
+	 </isNotEmpty>
+		 order by a.iaa006,a.aae035 desc
+	</select>
+	
+	<select id="getUnapplyInfo" parameterClass="map" resultClass="java.util.HashMap">
+	  SELECT AAB001,AAB004,'A05' as iaa011,#aae001# as aae001
+	    FROM xasi2.ab01 
+	   WHERE AAB001 IN ( SELECT DISTINCT A.AAB001
+				           FROM wsjb.IRAD01 A
+				          WHERE A.IAA011 = 'A04'
+				            AND A.IAA100 >= to_number(#aae001#||'01')
+				            AND NOT EXISTS (SELECT AAB001
+				                              FROM wsjb.IRAD51 B
+				                             WHERE A.AAB001 = B.AAB001
+				                               AND B.AAE001 = #aae001#)
+				        )
+	</select>
+	
+	<update id="updateTmp_ac42" parameterClass="map" >
+		update wsjb.tmp_ac42 
+		   set yac401 = #yac401#,
+		   	   yac402 = #yac402#,
+		   	   yac403 = #yac403#,
+		   	   yac404 = #yac404#,
+		   	   yac405 = #yac405#,
+		   	   yac406 = #yac406#,
+		   	   yac407 = #yac407#,
+		   	   yac408 = #yac408#,
+		   	   yac409 = #yac409#,
+		   	   yac410 = #yac410#,
+		   	   yac411 = #yac411#,
+		   	   yac412 = #yac412#
+		 where aab001 = #aab001# 
+		   and aac001 = #aac001#
+		   and aae140 = #aae140#
+		   and aae001 = #aae001#
+	</update>
+	
+	<update id="updateYae001" parameterClass="map" >
+		update xasi2.ac01k8 
+		   set yae001 = '是'
+		 where aab001 = #aab001# 
+		   and aac001 = #aac001#
+		   and aae001 = #aae001#
+		   and yab019 = '1'
+	</update>
+	
+	<!-- 年申报审核-->
+	<parameterMap id="prc_YearInternetAuditMap"  class="java.util.Map"> 
+	    <parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+        <parameter property="prm_aae001" jdbcType="NUMBER" javaType="java.lang.Integer" mode="IN" />
+        <parameter property="prm_iaa018" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+        <parameter property="prm_yae092" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="prm_iaa011" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="prm_yab019" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" /> 
+        <parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  /> 
+    </parameterMap>
+    <procedure id="yearApply_prc_YearInternetAudit" parameterMap="prc_YearInternetAuditMap">{call wsjb.pkg_YEARAPPLY.prc_YearInternetAudit(?,?,?,?,?,?,?,?)} </procedure>
+    
+    <!-- 年申报审核回退 -->
+    <parameterMap id="prc_YearInternetAuditRBMap"  class="java.util.Map"> 
+	    <parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+        <parameter property="prm_aae001" jdbcType="NUMBER" javaType="java.lang.Integer" mode="IN" />
+        <parameter property="prm_iaa011" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="prm_yab019" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" /> 
+        <parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  /> 
+    </parameterMap>
+    <procedure id="yearApply_prc_YearInternetAuditRB" parameterMap="prc_YearInternetAuditRBMap">{call wsjb.pkg_YEARAPPLY.prc_YearInternetAuditRB(?,?,?,?,?,?)} </procedure>
+    
+	
+	<!-- 年申报补差-->
+	<parameterMap id="prc_YearInternetBCMap"  class="java.util.Map"> 
+	    <parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+        <parameter property="prm_aae001" jdbcType="NUMBER" javaType="java.lang.Integer" mode="IN" />
+        <parameter property="prm_yae092" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="prm_iaa011" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="prm_yab019" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" /> 
+        <parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  /> 
+    </parameterMap>
+    <procedure id="yearApply_prc_YearInternetBC" parameterMap="prc_YearInternetBCMap">{call wsjb.pkg_YEARAPPLY.prc_YearInternetBC(?,?,?,?,?,?,?)} </procedure>
+    
+	<!-- 年申报补差(新)-->
+	<parameterMap id="prc_YearSalaryBCBeginMap"  class="java.util.Map"> 
+	    <parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+        <parameter property="prm_aae001" jdbcType="NUMBER" javaType="java.lang.Integer" mode="IN" />
+        <parameter property="prm_type" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="prm_aae011" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="prm_yab139" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" /> 
+        <parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  /> 
+    </parameterMap>
+    <procedure id="yearApply_prc_YearSalaryBCBegin" parameterMap="prc_YearSalaryBCBeginMap">{call wsjb.pkg_YEARAPPLY.prc_YearSalaryBCBegin(?,?,?,?,?,?,?)} </procedure>
+    
+    <!-- 插入临时表数据 -->
+    <insert id="insertAc40" parameterClass="java.util.Map">
+    	INSERT INTO wsjb.tmp_ac40(
+    						 aaz002,
+    						 aab001,
+    						 aac001,
+    						 aac002,
+    						 aac003,
+    						 aac040)values(
+    						 #aaz002#,
+    						 #aab001#,
+    						 #aac001#,
+    						 #aac002#,
+    						 #aac003#,
+    						 #aac040#
+    						 )   		  
+    </insert>
+    
+    <!-- 批量修改基数-->
+	<parameterMap id="prc_UpdateAb05a1Map"  class="java.util.Map"> 
+	    <parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+        <parameter property="prm_aaz002" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+        <parameter property="prm_yae092" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="prm_aae001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="prm_iaa011" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="prm_yab019" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" /> 
+        <parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  /> 
+    </parameterMap>
+    <procedure id="yearApply_prc_UpdateAb05a1" parameterMap="prc_UpdateAb05a1Map">{call wsjb.pkg_YEARAPPLY.prc_UpdateAb05a1(?,?,?,?,?,?,?,?)} </procedure>
+    <!-- 单位相关信息 -->
+    <select id="queryUnitInfo" parameterClass="map" resultClass="java.util.HashMap">
+    	SELECT B.AAB001 as aab001,
+    		   A.AAB004 as aab004,
+		       B.AAB016 as aab016,
+		       B.AAB018 as aab018,
+		       B.YAB390 as yab390,
+		       TO_CHAR(SYSDATE, 'yyyy-MM-dd') AS AAE035
+		  FROM xasi2.AB01 A, wsjb.IRAA01 B
+		 WHERE A.AAB001 = B.AAB001
+		   AND B.YAE092 = #yae092#
+    </select>
+    
+    <!-- 单位专管员相关信息 -->
+    <select id="queryUnitInfo_1" parameterClass="map" resultClass="java.util.HashMap">
+    	SELECT B.AAB001 as aab001,
+    		   A.AAB004 as aab004,
+		       B.AAB016 as name,
+		       B.AAB018 as aab018,
+		       B.YAB390 as tel,
+		       TO_CHAR(SYSDATE, 'yyyy-MM-dd') AS time
+		  FROM xasi2.AB01 A, wsjb.IRAA01 B
+		 WHERE A.AAB001 = B.AAB001
+		   AND B.YAE092 = #yae092#
+    </select>
+    
+    <!-- 单位相关信息 -->
+    <select id="queryUnitInfo_2" parameterClass="map" resultClass="java.util.HashMap">
+    	 SELECT A.AAB001 AS AAB001,
+                A.AAB004 AS AAB004,
+                A.AAB019 AS AAB019,
+                a.aab013 as aab013,
+                a.aab003 as aab003,
+                xasi2.pkg_comm.fun_getAaa103('AAB020',A.AAB020) AS AAB020,
+                A.AAE006 AS AAE006,
+                TO_CHAR(A.AAE007) AS AAE007,
+                B.AAB016 AS AAB016,
+                B.YAB390 AS YAB390
+           FROM wsjb.IRAB01 A, wsjb.IRAA01 B
+          WHERE A.AAB001 = B.AAB001
+            AND A.IAB001 = A.AAB001
+            AND B.AAE100 = '1'
+		    AND B.YAE092 = #yae092#
+    </select>
+    
+     <!-- 单位相关信息 -->
+    <select id="queryUnitInfo_4" parameterClass="map" resultClass="java.util.HashMap">
+    	 SELECT A.AAB001 AS AAB001,
+                A.AAB004 AS AAB004,
+                A.AAB019 AS AAB019,
+                a.aab013 as aab013,
+                a.aab003 as aab003,
+                xasi2.pkg_comm.fun_getAaa103('AAB020',A.AAB020) AS AAB020,
+                A.AAE006 AS AAE006,
+                TO_CHAR(A.AAE007) AS AAE007,
+                a.AAB016 AS AAB016,
+                a.YAB390 AS YAB390
+           FROM wsjb.IRAB01 A
+          WHERE A.AAB001 = #aab001#
+            AND A.IAB001 = A.AAB001
+            AND a.iaa002 = '2'
+    </select>
+    
+    <select id="queryUnitInfo_3" parameterClass="map" resultClass="java.util.HashMap">
+    	 SELECT A.AAB001 AS AAB001,
+                A.AAB004 AS AAB004,
+                a.aab013 as aab013,
+                a.aab003 as aab003,
+                xasi2.pkg_comm.fun_getAaa103('AAB020',A.AAB020) AS AAB020,
+                A.AAE006 AS AAE006,
+                TO_CHAR(A.AAE007) AS AAE007,
+                B.AAB016 AS AAB016,
+                B.YAB390 AS YAB390
+           FROM wsjb.IRAB01 A, wsjb.IRAA01 B
+          WHERE A.AAB001 = B.AAB001
+            AND A.IAB001 = A.AAB001
+		    AND B.YAE092 = (SELECT aae011 FROM wsjb.irad51 WHERE aab001 = #aab001# AND aae001 = #aae001# and iaa011 = #iaa011#)
+    </select>
+    
+    <!-- 单位所有人员交过费的人员 -->
+    <select id="queryab05a1" parameterClass="map" resultClass="java.util.HashMap">
+    	<isEqual property="aae140" compareValue="01">
+	        SELECT C.YAB029 AS AAB001,
+			       B.YAB029 AS AAC001,
+			       A.AAC002 AS AAC002,
+			       A.AAC003 AS AAC003,
+			       xasi2.pkg_comm.fun_getAaa103('AAC009',D.AAC009) AS AAC009,
+			       A.YAC507 AS YAC507,
+			       A.YAC004 AS YAC004,
+			       A.YAE110 AS AAE013
+			  FROM xasi2.ac01k8 A, xasi2.AC01A1 B, xasi2.AB01A2 C,xasi2.ac01 D
+			 WHERE A.AAB001 = C.YAB021
+			   AND A.AAC001 = B.AAC001(+)
+			   AND A.AAC001 = D.AAC001
+			   AND A.AAB001 = #aab001#
+			   AND A.AAE001 = #aae001#
+			   AND A.YAB019 = '1'
+			   AND A.AAE110 IS NOT NULL
+			     and not exists (select 1 from wsjb.irac01c1 b
+		       				 where b.aab001 = a.aab001
+		       				   and substr(b.iaa100,1,4) = a.aae001
+		       				   and a.aac002 = b.aac002
+		       				   and b.yae031 = '1')
+			 ORDER BY A.YAE110 DESC, A.AAC003
+    	</isEqual>
+    	<isEqual property="aae140" compareValue="03">
+    		 SELECT A.AAB001 AS aab001,
+			        A.AAC001 AS aac001,
+			        A.AAC002 AS aac002,
+			        A.AAC003 AS aac003,
+			        xasi2.pkg_comm.fun_getAaa103('AAC009',B.AAC009) AS AAC009,
+			        A.YAC508 AS yac507,
+			        A.YAA333 AS yac004,
+			        A.yae310 AS aae013
+			  FROM xasi2.ac01k8 A,xasi2.AC01 B
+			 WHERE A.AAC001 = B.AAC001
+			   AND A.aab001 = #aab001#
+			   AND A.aae001 = #aae001#
+			   AND A.YAB019 = '1'
+			   AND A.aae310 is not null
+			   ORDER BY A.YAE310 DESC,A.aac003
+    	</isEqual>  
+    	<isEqual property="aae140" compareValue="05">
+    		 SELECT A.AAB001 AS aab001,
+			        A.AAC001 AS aac001,
+			        A.AAC002 AS aac002,
+			        A.AAC003 AS aac003,
+			       xasi2.pkg_comm.fun_getAaa103('AAC009',B.AAC009) AS AAC009,
+			        A.YAC508 AS yac507,
+			        A.YAA333 AS yac004,
+			        A.yae510 AS aae013
+			  FROM xasi2.ac01k8 A,xasi2.AC01 B
+			 WHERE A.AAC001 = B.AAC001
+			   AND A.aab001 = #aab001#
+			   AND A.aae001 = #aae001#
+			   AND A.YAB019 = '1'
+			   AND A.aae510 is not null
+			   ORDER BY A.YAE510 DESC,A.aac003
+    	</isEqual>
+    	<isEqual property="aae140" compareValue="02">
+    		 SELECT A.AAB001 AS aab001,
+			        A.AAC001 AS aac001,
+			        A.AAC002 AS aac002,
+			        A.AAC003 AS aac003,
+			        xasi2.pkg_comm.fun_getAaa103('AAC009',B.AAC009) AS AAC009,
+			        A.YAC508 AS yac507,
+			        A.YAA333 AS yac004,
+			        A.yae210 AS aae013
+			  FROM xasi2.ac01k8 A,xasi2.AC01 B
+			 WHERE A.AAC001 = B.AAC001
+			   AND A.aab001 = #aab001#
+			   AND A.aae001 = #aae001#
+			   AND A.YAB019 = '1'
+			   AND A.aae210 is not null
+			   ORDER BY A.YAE210 DESC,A.aac003
+    	</isEqual>
+    	<isEqual property="aae140" compareValue="04">
+    		 SELECT A.AAB001 AS aab001,
+			        A.AAC001 AS aac001,
+			        A.AAC002 AS aac002,
+			        A.AAC003 AS aac003,
+			        xasi2.pkg_comm.fun_getAaa103('AAC009',B.AAC009) AS AAC009,
+			        A.YAC005 AS yac507,
+			        A.YAA444 AS yac004,
+			        A.yae410 AS aae013
+			  FROM xasi2.ac01k8 A,xasi2.AC01 B
+			 WHERE A.AAC001 = B.AAC001
+			   AND A.aab001 = #aab001#
+			   AND A.aae001 = #aae001#
+			   AND A.YAB019 = '1'
+			   AND A.aae410 is not null
+			   ORDER BY A.YAE410 DESC,A.aac003
+    	</isEqual>
+    	<isEqual property="aae140" compareValue="06">
+    		 SELECT A.AAB001 AS aab001,
+			        A.AAC001 AS aac001,
+			        A.AAC002 AS aac002,
+			        A.AAC003 AS aac003,
+			        xasi2.pkg_comm.fun_getAaa103('AAC009',B.AAC009) AS AAC009,
+			        A.YAC508 AS yac507,
+			        A.YAA333 AS yac004,
+			        A.yae110 AS aae013
+			  FROM xasi2.ac01k8 A,xasi2.AC01 B
+			 WHERE A.AAC001 = B.AAC001
+			   AND A.aab001 = #aab001#
+			   AND A.aae001 = #aae001#
+			   AND A.YAB019 = '2'
+			   AND A.aae110 is not null
+			   ORDER BY A.YAE110 DESC,A.aac003			   
+    	</isEqual>
+    </select>
+    <!-- 单位每个月缴费汇总(养老) -->
+    <select id="queryUnitJS" parameterClass="map" resultClass="java.util.HashMap">
+		    select   g.yae231,
+                         g.aab121,
+                         g.xjsh,
+                         g.jsc,
+                         g.bajs,
+                         g.bars,
+                         g.tqrs,
+                         g.tqjs,
+                         sum(g.yae231-g.bars-g.tqrs) as szrs,
+                        sum(g.xjsh-g.bajs- g.tqjs) as szjs,
+                         g.aab001,
+                         g.iaa100
+                         from 
+             ( select  COUNT(1) AS yae231,
+             SUM(f.AAE180) AS aab121,
+             SUM(f.YAC004) AS xjsh,
+             SUM(f.YAC004 - f.AAE180) AS JSC,
+             sum(f.yac004_yb) as bajs,
+            
+             f.aab001,
+           ( select count(1) from  wsjb.irac01c1  where aab001=f.aab001 and iaa100=f.aae002) as bars,
+              ( select  count(b.aac001)
+                   from   wsjb.irad51a1 a,wsjb.irad51a2  b 
+                   where  a.yae518=b.yae518 and  a.aab001=f.aab001   and b.aae002=f.aae002 ) as tqrs,
+                     ( select  decode(sum(b.yaa333),'',0,sum(b.yaa333))<!--取原来工资 yaa333 不取yaa334  -->
+                   from   wsjb.irad51a1 a,wsjb.irad51a2  b 
+                   where  a.yae518=b.yae518 and  a.aab001=f.aab001   and b.aae002=f.aae002 ) as tqjs,
+             to_char(f.AAE002) AS IAA100
+              from (          
+ select 
+  t.AAE180,t.YAC004,t.AAE002,t.aac002,t.aab001,
+   decode(t.bars,0,0,1,t.yac004) as yac004_yb
+ from 
+ (
+  select    A.AAE180,B.YAC004,A.AAE002,b.aac002,a.aab001,
+       (select   count(c.aac002)  from wsjb.irac01c1 c where c.aac002=b.aac002 and c.aab001=b.aab001 and c.iaa100=a.aae002 and yae031='1' ) as  bars
+      
+        FROM wsjb.IRAC08a1 A, xasi2.ac01k8 B
+       WHERE A.AAB001 = B.AAB001(+)
+         AND A.AAC001 = B.AAC001(+)
+          AND A.aae143 = '01'
+			   AND A.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE   aae140 = '01'  AND aae001 = #aae001#)
+    <![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = '01'   AND aae001 = #aae001#)
+               and a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#)]]>
+			   AND A.AAB001 = #aab001#
+			   AND B.AAE001 = #aae001#
+         AND B.YAB019 = '1' ) t)f group by f.aae002 ,f.aab001) g  group by g.yae231,g.aab121,g.xjsh,g.jsc,g.bajs,g.bars,  g.tqrs,g.tqjs,g.aab001,g.iaa100
+         order by g.iaa100
+    </select>
+    <!-- 单位月基数总和(养老) -->
+    <select id="querySumJS" parameterClass="map" resultClass="java.util.HashMap">
+		    SELECT sum(p.aab121) as jszh,
+		    	   sum(p.xjsh) as xjszh,
+		    	   sum(p.jsc) as jszc
+		    FROM (SELECT COUNT(1) AS yae231,
+			       SUM(A.AAE180) AS aab121,
+			       SUM(B.YAC004) AS xjsh,
+			       SUM(B.YAC004 - A.AAE180) AS JSC,
+			       A.aae002 AS IAA100
+			  FROM wsjb.IRAC08A1 A, xasi2.ac01k8 B
+			 WHERE A.AAB001 = B.AAB001(+)
+			   AND A.AAC001 = B.AAC001(+)
+			   AND A.aae143 = '01'
+			   AND A.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = '01'   AND aae001 = #aae001#)
+    <![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = '01'   AND aae001 = #aae001#)
+                 ]]>
+			   AND A.AAB001 = #aab001#
+			   AND B.AAE001 = #aae001#
+			   AND B.YAB019 = '1'
+			   GROUP BY a.aae002) p
+			 
+    </select>
+    <!-- 单位每个月缴费汇总(其他险种) -->
+    <select id="queryUnitJS_1" parameterClass="map" resultClass="java.util.HashMap"> 	
+    	<isNotEqual property="aae140" compareValue="04">
+    	 SELECT COUNT(1) AS yae231,    
+		        sum(a.aae180) AS aab121,
+		        sum(b.yaa333) AS xjsh,
+		        SUM(b.yaa333-a.aae180) AS jsc,
+		        to_char(a.aae002) AS iaa100        
+		  FROM xasi2.AC08A1 A, xasi2.ac01k8 B
+		 WHERE A.AAB001 = B.AAB001(+)
+		   AND A.AAC001 = B.AAC001(+)
+		   AND a.aae140 = #aae140#
+		   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140#    AND  aae001 = #aae001#)
+<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140#    AND aae001 = #aae001#)
+           and a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#)  ]]>
+		   AND a.aae143 = '01'
+		   AND a.akc021 = '11'
+		   AND B.YAB019 = '1'
+		   AND a.aab001 = #aab001#
+		   AND b.aae001 = #aae001#
+		    GROUP BY a.aae002
+		UNION   
+		 SELECT COUNT(1) AS yae231,    
+		        sum(a.aae180) AS aab121,
+		        sum(b.yaa333) AS xjsh,
+		        SUM(b.yaa333-a.aae180) AS jsc,
+		        to_char(a.aae002) AS iaa100        
+		  FROM xasi2.AC08 A, xasi2.ac01k8 B
+		 WHERE A.AAB001 = B.AAB001(+)
+		   AND A.AAC001 = B.AAC001(+)
+		   AND a.aae140 = #aae140#
+		   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140#    AND aae001 = #aae001#)
+<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140#    AND   aae001 = #aae001#)
+           and a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#)]]>
+		   AND a.aae143 = '01'
+		   AND a.akc021 = '11'
+		   AND B.YAB019 = '1'
+		   AND a.aab001 = #aab001#
+		   AND b.aae001 = #aae001#
+		   GROUP BY a.aae002
+		   ORDER BY iaa100
+		</isNotEqual>
+		<isEqual property="aae140" compareValue="04">
+    	 SELECT COUNT(1) AS yae231,    
+		        sum(a.aae180) AS aab121,
+		        sum(b.yaa444) AS xjsh,
+		        SUM(b.yaa444-a.aae180) AS jsc,
+		        to_char(a.aae002) AS iaa100        
+		  FROM xasi2.AC08A1 A, xasi2.ac01k8 B
+		 WHERE A.AAB001 = B.AAB001(+)
+		   AND A.AAC001 = B.AAC001(+)
+		   AND a.aae140 = #aae140#
+		   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+           and a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#) ]]>
+		   AND a.aae143 = '01'
+		   AND B.YAB019 = '1'
+		   AND a.aab001 = #aab001#
+		   AND b.aae001 = #aae001#
+		    GROUP BY a.aae002
+		UNION   
+		 SELECT COUNT(1) AS yae231,    
+		        sum(a.aae180) AS aab121,
+		        sum(b.yaa444) AS xjsh,
+		        SUM(b.yaa444-a.aae180) AS jsc,
+		        to_char(a.aae002) AS iaa100        
+		  FROM xasi2.AC08 A, xasi2.ac01k8 B
+		 WHERE A.AAB001 = B.AAB001(+)
+		   AND A.AAC001 = B.AAC001(+)
+		   AND a.aae140 = #aae140#
+		   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+            and a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#) ]]>
+		   AND a.aae143 = '01'
+		   AND B.YAB019 = '1'
+		   AND a.aab001 = #aab001#
+		   AND b.aae001 = #aae001#
+		   GROUP BY a.aae002
+		   ORDER BY iaa100
+		</isEqual>
+    </select>
+    <!-- 单位每个月缴费汇总(机关养老险种) -->
+    <select id="queryUnitJS_2" parameterClass="map" resultClass="java.util.HashMap"> 	
+    	 SELECT COUNT(1) AS yae231,    
+		        sum(a.aae180) AS aab121,
+		        sum(b.yac004) AS xjsh,
+		        SUM(b.yac004-a.aae180) AS jsc,
+		        to_char(a.aae002) AS iaa100        
+		  FROM xasi2.AC08A1 A, xasi2.ac01k8 B
+		 WHERE A.AAB001 = B.AAB001(+)
+		   AND A.AAC001 = B.AAC001(+)
+		   AND a.aae140 = #aae140#
+		   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+           and a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#) ]]>
+		   AND a.aae143 = '01'
+		   AND a.akc021 = '11'
+		   AND B.YAB019 = '2'
+		   AND a.aab001 = #aab001#
+		   AND b.aae001 = #aae001#
+		    GROUP BY a.aae002
+		UNION   
+		 SELECT COUNT(1) AS yae231,    
+		        sum(a.aae180) AS aab121,
+		        sum(b.yac004) AS xjsh,
+		        SUM(b.yac004-a.aae180) AS jsc,
+		        to_char(a.aae002) AS iaa100        
+		  FROM xasi2.AC08 A, xasi2.ac01k8 B
+		 WHERE A.AAB001 = B.AAB001(+)
+		   AND A.AAC001 = B.AAC001(+)
+		   AND a.aae140 = #aae140#
+		   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+           and a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#) ]]>
+		   AND a.aae143 = '01'
+		   AND a.akc021 = '11'
+		   AND B.YAB019 = '2'
+		   AND a.aab001 = #aab001#
+		   AND b.aae001 = #aae001#
+		   GROUP BY a.aae002
+		   ORDER BY iaa100			
+    </select>
+    
+    <!-- 单位月基数总和(其他险种) -->
+    <select id="querySumJS_1" parameterClass="map" resultClass="java.util.HashMap">
+    	<isNotEqual property="aae140" compareValue="04">
+		    SELECT sum(p.aab121) as jszh,
+		    	   sum(p.xjsh) as xjszh,
+		    	   sum(p.jsc) as jszc
+		    FROM (SELECT COUNT(1) AS yae231,    
+				        sum(a.aae180) AS aab121,
+				        sum(b.yaa333) AS xjsh,
+				        SUM(b.yaa333-a.aae180) AS jsc,
+				        a.aae002 AS iaa100        
+				  FROM xasi2.AC08A1 A, xasi2.ac01k8 B
+				 WHERE A.AAB001 = B.AAB001(+)
+				   AND A.AAC001 = B.AAC001(+)
+				   AND a.aae140 = #aae140#
+				   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+<![CDATA[          AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)]]>
+				   AND aae143 = '01'
+				   AND a.akc021 = '11'
+				   AND B.YAB019 = '1'
+				   AND a.aab001 = #aab001#
+				   AND b.aae001 = #aae001#
+				    GROUP BY a.aae002
+				UNION   
+				 SELECT COUNT(1) AS yae231,    
+				        sum(a.aae180) AS aab121,
+				        sum(b.yaa333) AS xjsh,
+				        SUM(b.yaa333-a.aae180) AS jsc,
+				        a.aae002 AS iaa100        
+				  FROM xasi2.AC08 A, xasi2.ac01k8 B
+				 WHERE A.AAB001 = B.AAB001(+)
+				   AND A.AAC001 = B.AAC001(+)
+				   AND a.aae140 = #aae140#
+				   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+<![CDATA[          AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)]]>
+				   AND aae143 = '01'
+				   AND a.akc021 = '11'
+				   AND B.YAB019 = '1'
+				   AND a.aab001 = #aab001#
+				   AND b.aae001 = #aae001#
+				   GROUP BY a.aae002) p
+		</isNotEqual>
+		<isEqual property="aae140" compareValue="04">
+			SELECT sum(p.aab121) as jszh,
+		    	   sum(p.xjsh) as xjszh,
+		    	   sum(p.jsc) as jszc
+		    FROM (SELECT COUNT(1) AS yae231,    
+				        sum(a.aae180) AS aab121,
+				        sum(b.yaa444) AS xjsh,
+				        SUM(b.yaa444-a.aae180) AS jsc,
+				        a.aae002 AS iaa100        
+				  FROM xasi2.AC08A1 A, xasi2.ac01k8 B
+				 WHERE A.AAB001 = B.AAB001(+)
+				   AND A.AAC001 = B.AAC001(+)
+				   AND a.aae140 = #aae140#
+				   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+		<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)]]>
+				   AND aae143 = '01'
+				   AND a.akc021 = '11'
+				   AND B.YAB019 = '1'
+				   AND a.aab001 = #aab001#
+				   AND b.aae001 = #aae001#
+				    GROUP BY a.aae002
+				UNION   
+				 SELECT COUNT(1) AS yae231,    
+				        sum(a.aae180) AS aab121,
+				        sum(b.yaa444) AS xjsh,
+				        SUM(b.yaa444-a.aae180) AS jsc,
+				        a.aae002 AS iaa100        
+				  FROM xasi2.AC08 A, xasi2.ac01k8 B
+				 WHERE A.AAB001 = B.AAB001(+)
+				   AND A.AAC001 = B.AAC001(+)
+				   AND a.aae140 = #aae140#
+				   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+		<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)]]>
+				   AND aae143 = '01'
+				   AND a.akc021 = '11'
+				   AND B.YAB019 = '1'
+				   AND a.aab001 = #aab001#
+				   AND b.aae001 = #aae001#
+				   GROUP BY a.aae002) p
+		</isEqual>			 
+    </select>
+    <!-- 单位每月人员缴费基数(养老) -->
+    <select id="getIrac01" parameterClass="map" resultClass="java.util.HashMap">
+    	<isEqual property="aae140" compareValue="01">
+		     SELECT D.YAB029 AS AAB001,
+                    C.YAB029 AS AAC001,
+			        A.AAB001 AS AAB001,
+			        E.AAC002 AS AAC002,
+			        E.AAC003 AS AAC003,
+			        A.AAE180 AS YAC507,
+			        B.YAC004 AS YAC004,
+			        (B.YAC004 - A.AAE180) AS JSC,
+			        A.AAE002 AS IAA100,
+			         DECODE((SELECT COUNT(1)
+                          FROM WSJB.IRAC01C1 F
+                        WHERE F.AAC002 = E.AAC002
+                          AND F.IAA100 = A.AAE002
+                          AND F.AAB001 = A.AAB001),
+                            '0',
+                            '',
+                            '备案') AS AAE013
+			  FROM wsjb.IRAC08A1 A, xasi2.ac01k8 B,xasi2.AC01A1 C, xasi2.AB01A2 D,xasi2.AC01 E
+			 WHERE A.AAB001 = B.AAB001(+)
+			   AND A.AAC001 = B.AAC001(+)
+			   AND A.AAB001 = D.YAB021
+               AND A.AAC001 = C.AAC001(+)
+               AND A.AAC001 = E.AAC001
+			   AND a.aae140 = #aae140#
+			   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = '01' AND aae001 = #aae001#)
+    <![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = '01' AND aae001 = #aae001#)
+              and a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#) ]]>
+			   AND aae143 = '01'
+			   AND B.YAB019 = '1'
+			   AND a.aab001 = #aab001#
+			   AND b.aae001 = #aae001#
+			 ORDER BY A.AAE002			 
+    	</isEqual>
+    </select>
+     <!-- 单位每月人员缴费基数(其他险种) -->
+    <select id="getAc08" parameterClass="map" resultClass="java.util.HashMap">    
+    	<isNotEqual property="aae140" compareValue="04">
+    		 SELECT a.aab001 AS aab001,
+			        c.aac001 AS aac001,
+			        c.aac002 AS aac002,
+			        c.aac003 AS aac003,       
+			        a.aae180 AS YAC507,
+			        b.yaa333 AS yac004,
+			        (b.yaa333-a.aae180) AS jsc,
+			        a.aae002 AS iaa100 ,
+			        CASE WHEN a.aac008='2' AND a.akc021 = '21'THEN '已退休' ELSE '' END AS aae013       
+			  FROM xasi2.AC08A1 A, xasi2.ac01k8 B, xasi2.AC01 C
+			 WHERE A.AAB001 = B.AAB001(+)
+			   AND A.AAC001 = B.AAC001(+)
+			   AND a.aac001 = c.aac001(+)
+			   AND a.aae140 = #aae140#
+			   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+	<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)]]>
+			   AND aae143 = '01'
+			   AND B.YAB019 = '1'
+			   AND a.aab001 = #aab001#
+			   AND b.aae001 = #aae001#
+			UNION   
+			   SELECT a.aab001 AS aab001,
+			        c.aac001 AS aac001,
+			        c.aac002 AS aac002,
+			        c.aac003 AS aac003,        
+			        a.aae180 AS YAC508,
+			        b.yaa333 AS yaa333,
+			        (b.yaa333-a.aae180) AS jsc,
+			        a.aae002 AS iaa100 ,
+			       CASE WHEN a.aac008='2' AND a.akc021 = '21'THEN '已退休' ELSE '' END AS aae013       
+			  FROM xasi2.AC08 A, xasi2.ac01k8 B, xasi2.AC01 C
+			 WHERE A.AAB001 = B.AAB001(+)
+			   AND A.AAC001 = B.AAC001(+)
+			   AND a.aac001 = c.aac001(+)
+			   AND a.aae140 = #aae140#
+			   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+    <![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)]]>
+			   AND aae143 = '01'
+			   AND B.YAB019 = '1'
+			   AND a.aab001 = #aab001#
+			   AND b.aae001 = #aae001#
+			   ORDER BY iaa100
+		</isNotEqual>
+		<isEqual property="aae140" compareValue="04">
+			SELECT a.aab001 AS aab001,
+			        c.aac001 AS aac001,
+			        c.aac002 AS aac002,
+			        c.aac003 AS aac003,       
+			        a.aae180 AS YAC507,
+			        b.yaa444 AS yac004,
+			        (b.yaa444-a.aae180) AS jsc,
+			        a.aae002 AS iaa100 ,
+			        CASE WHEN a.aac008='2' AND a.akc021 = '21'THEN '已退休' ELSE '' END AS aae013       
+			  FROM xasi2.AC08A1 A, xasi2.ac01k8 B, xasi2.AC01 C
+			 WHERE A.AAB001 = B.AAB001(+)
+			   AND A.AAC001 = B.AAC001(+)
+			   AND a.aac001 = c.aac001(+)
+			   AND a.aae140 = #aae140#
+			   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+	<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)]]>
+			   AND aae143 = '01'
+			   AND B.YAB019 = '1'
+			   AND a.aab001 = #aab001#
+			   AND b.aae001 = #aae001#
+			UNION   
+			   SELECT a.aab001 AS aab001,
+			        c.aac001 AS aac001,
+			        c.aac002 AS aac002,
+			        c.aac003 AS aac003,        
+			        a.aae180 AS YAC508,
+			        b.yaa444 AS yaa333,
+			        (b.yaa444-a.aae180) AS jsc,
+			        a.aae002 AS iaa100 ,
+			       CASE WHEN a.aac008='2' AND a.akc021 = '21'THEN '已退休' ELSE '' END AS aae013       
+			  FROM xasi2.AC08 A, xasi2.ac01k8 B, xasi2.AC01 C
+			 WHERE A.AAB001 = B.AAB001(+)
+			   AND A.AAC001 = B.AAC001(+)
+			   AND a.aac001 = c.aac001(+)
+			   AND a.aae140 = #aae140#
+			   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+    <![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)]]>
+			   AND aae143 = '01'
+			   AND B.YAB019 = '1'
+			   AND a.aab001 = #aab001#
+			   AND b.aae001 = #aae001#
+			   ORDER BY iaa100
+		</isEqual>
+    </select>
+    
+    <select id="getEmpJS" parameterClass="map" resultClass="java.util.HashMap">
+    	SELECT b.AAC003 AS AAC003,
+		       b.AAC002 AS AAC002,
+		       xasi2.pkg_comm.fun_getAaa103('AAC005',b.AAC005) AS AAC005,
+		       SUBSTR(xasi2.pkg_comm.fun_getAaa103('AAC009',b.AAC009),0,2) AS AAC009,
+		       xasi2.pkg_comm.fun_getAaa103('AAC012',b.AAC012) AS AAC012,
+		       a.yac004 AS yac004,
+		       a.yaa333 AS yac005,
+		       DECODE(a.aae110,'2','√','21','√','') AS aae110,
+		       DECODE(a.aae210,'2','√','21','√','') AS aae210,
+		       DECODE(a.aae310,'2','√','21','√','') AS aae310,
+		       DECODE(a.aae410,'2','√','21','√','') AS aae410,
+		       DECODE(a.aae510,'2','√','21','√','') AS aae510,
+		       DECODE(a.aae311,'2','√','21','√','') AS aae311,
+		       c.yae499 AS yae499
+		  FROM xasi2.ac01k8 a, xasi2.ac01 b,
+		  (SELECT aab001,aac001,aae001,yae110||yae310||yae210||yae410||yae510 AS yae499 FROM (   
+            SELECT a.aab001,a.aac001,a.aae001,
+                     CASE WHEN yae110 IS NOT NULL 
+                   THEN  '养老:'||a.yae110 ELSE NULL END AS yae110,
+                     CASE WHEN yae310 IS NOT NULL 
+                   THEN  '医疗:'||a.yae310 ELSE NULL END AS yae310,
+                     CASE WHEN yae210 IS NOT NULL 
+                   THEN  '失业:'||a.yae210 ELSE NULL END AS yae210,
+                     CASE WHEN yae410 IS NOT NULL 
+                   THEN  '工伤:'||a.yae410 ELSE NULL END AS yae410,
+                     CASE WHEN yae510 IS NOT NULL 
+                   THEN  '生育:'||a.yae510 ELSE NULL END AS yae510
+             FROM xasi2.ac01k8 a where a.yab019 = '1')) c
+		  WHERE a.aac001 =  b.aac001
+		    AND a.aac001 = c.aac001
+	        AND a.aab001 = c.AAB001
+	        AND a.aae001 = c.aae001
+	        AND a.YAB019 = '1'
+		    AND a.aab001 = #aab001#
+		    AND a.aae001 = #aae001#
+		  ORDER BY a.YAE110 DESC , a.YAE310 DESC ,a.YAE210 DESC,a.YAE410 DESC,a.YAE510 DESC,a.aac003
+		    
+    </select>
+    <!-- 获取最大做账期的申报情况 -->
+    <select id="getIrab08" parameterClass="map" resultClass="java.util.HashMap">
+        SELECT aae140,YAE231, AAB121
+		  FROM wsjb.IRAB08
+		 WHERE AAB001 = #aab001#
+		   AND YAE517 = 'H01'
+		   AND AAE003 = (SELECT MAX(aae003) FROM irab08 WHERE AAB001 = #aab001# AND YAE517 = 'H01')
+    
+    </select>
+    <!-- 获取最大做账期的申报情况 -->
+    <select id="getAb08_1" parameterClass="map" resultClass="java.util.HashMap">
+    	<isEqual property="yab019" compareValue="1">
+	    	SELECT aab001,aae140,YAE231, AAB121
+			  FROM xasi2.AB08
+			 WHERE AAB001 = #aab001#
+			   AND YAE517 = 'H01'
+			   AND YAB538 = '1'
+  	<![CDATA[  AND AAE140 <> '06'
+	           AND AAE140 <> '07' 
+			   AND AAE003 = (SELECT MAX(yae097) FROM xasi2.AB02 WHERE AAB001 = #aab001# AND aab051 = '1' AND AAE140 <> '06') ]]>
+			UNION
+			SELECT aab001,aae140,YAE231, AAB121
+			  FROM xasi2.AB08a8
+			 WHERE AAB001 = #aab001#
+			   AND YAE517 = 'H01'
+			   AND YAB538 = '1'
+	<![CDATA[  AND AAE140 <> '06'
+	           AND AAE140 <> '07' 
+			   AND AAE003 = (SELECT MAX(yae097) FROM xasi2.AB02 WHERE AAB001 = #aab001# AND aab051 = '1'AND AAE140 <> '06') ]]>
+			UNION
+			SELECT aab001,aae140,YAE231, AAB121
+			  FROM wsjb.IRAB08
+			 WHERE AAB001 = #aab001#
+			   AND YAE517 = 'H01'
+			   AND AAE003 = (SELECT MAX(aae003) FROM wsjb.irab08 WHERE AAB001 = #aab001# AND YAE517 = 'H01')
+   		</isEqual>
+   		<isEqual property="yab019" compareValue="2">
+   			SELECT aab001,aae140,YAE231, AAB121
+			  FROM xasi2.AB08
+			 WHERE AAB001 = #aab001#
+			   AND YAE517 = 'H01'
+			   AND YAB538 = '1'
+	           AND AAE140 = '06'
+			   AND AAE003 = (SELECT MAX(yae097) FROM xasi2.AB02 WHERE AAB001 = #aab001# AND aab051 = '1' AND AAE140 = '06')
+			UNION
+			SELECT aab001,aae140,YAE231, AAB121
+			  FROM xasi2.AB08a8
+			 WHERE AAB001 = #aab001#
+			   AND YAE517 = 'H01'
+			   AND YAB538 = '1'
+	           AND AAE140 = '06' 
+			   AND AAE003 = (SELECT MAX(yae097) FROM xasi2.AB02 WHERE AAB001 = #aab001# AND aab051 = '1' AND AAE140 = '06')
+   		</isEqual>
+    </select>
+    <!-- 补差总和 -->
+    <select id="getJSZC" parameterClass="map" resultClass="java.util.HashMap">
+	    SELECT P.AAE140 AS AAE140,
+	       (P.YAC401 + P.YAC402 + P.YAC403 + P.YAC404 + P.YAC405 + P.YAC406 +
+	       P.YAC407 + P.YAC408 + P.YAC409 + P.YAC410 + P.YAC411 + P.YAC412) AS JSBC
+		  FROM (SELECT MAX(AAB001) AS AAB001,
+		               AAE140 AS AAE140,
+		               SUM(YAC401) AS YAC401,
+		               SUM(YAC402) AS YAC402,
+		               SUM(YAC403) AS YAC403,
+		               SUM(YAC404) AS YAC404,
+		               SUM(YAC405) AS YAC405,
+		               SUM(YAC406) AS YAC406,
+		               SUM(YAC407) AS YAC407,
+		               SUM(YAC408) AS YAC408,
+		               SUM(YAC409) AS YAC409,
+		               SUM(YAC410) AS YAC410,
+		               SUM(YAC411) AS YAC411,
+		               SUM(YAC412) AS YAC412
+		          FROM wsjb.TMP_AC42
+		         WHERE AAB001 = #aab001#
+		           AND AAE001 = #aae001#
+		         GROUP BY AAE140) P
+    </select>
+    <!-- 补差开始月度 -->
+    <select id="getaa02a3" parameterClass="map" resultClass="java.util.HashMap">
+    	SELECT substr(to_char(aae041),5) as aae041,
+    	       substr(to_char(aae042),5) as aae042,
+    	       aae140
+    	  FROM xasi2.aa02a3 WHERE AAE001 = #aae001#
+    </select>
+    
+    <select id="getYae097_1" parameterClass="map" resultClass="java.lang.String">
+    	SELECT substr(to_char(MAX(aae003)),5) as yae097 FROM wsjb.irab08 WHERE AAB001 = #aab001# AND YAE517 = 'H01'
+    </select>
+    <select id="getYae097" parameterClass="map" resultClass="java.lang.String">
+<![CDATA[SELECT substr(to_char(MAX(yae097)),5) as yae097 
+           FROM xasi2.AB02 
+          WHERE AAB001 = #aab001# AND aab051 = '1' AND aae140 <> '06']]>
+    </select>
+    <!-- 做账期号 -->
+    <select id="getAae003_1" parameterClass="map" resultClass="java.lang.String">
+    	SELECT to_char(MAX(aae003)) as yae097 FROM wsjb.irab08 WHERE AAB001 = #aab001# AND YAE517 = 'H01'
+    </select>
+    <!-- 做账期号 -->
+    <select id="getAae003" parameterClass="map" resultClass="java.lang.String">
+    	SELECT to_char(MAX(yae097)) as yae097 FROM xasi2.AB02 WHERE AAB001 = #aab001# AND aab051 = '1'
+    </select>
+    <!-- 年审做账期号 -->
+    <select id="getAae002" parameterClass="map" resultClass="java.util.HashMap">
+		SELECT to_char(YAE097) as yae097,
+       TO_CHAR(ADD_MONTHS(TO_DATE(TO_CHAR(YAE097), 'yyyyMM'), 1), 'yyyyMM') AS AAE002
+		  FROM xasi2.AA35
+		 WHERE AAE001 = #aae001#
+    </select>
+    
+    <!--参保人数  -->
+    <select id="getCbrs" parameterClass="map" resultClass="java.lang.String">
+    	SELECT TO_CHAR(MAX(P.YAE231)) AS YAE231 
+    	FROM 
+    	(SELECT aae140,sum(YAE231) AS YAE231
+		  FROM xasi2.AB08
+		 WHERE AAB001 = #aab001#
+		   AND YAE517 = 'H01'
+		   AND AAE003 = #aae001#||'01'
+		   GROUP BY aae140
+		UNION
+		SELECT aae140,sum(YAE231) AS YAE231
+		  FROM xasi2.AB08a8
+		 WHERE AAB001 = #aab001#
+		   AND YAE517 = 'H01'
+		   AND AAE003 = #aae001#||'01'
+		   GROUP BY aae140
+		UNION
+		SELECT aae140, YAE231
+		  FROM wsjb.IRAB08
+		 WHERE AAB001 = #aab001#
+		   AND YAE517 = 'H01'
+		   AND AAE003 = #aae001#||'01') P
+    </select>
+     <!--参保人数（单养老）  -->
+    <select id="getCbrs_1" parameterClass="map" resultClass="java.lang.String">
+    	SELECT TO_CHAR(MAX(P.YAE231)) AS YAE231
+    	FROM
+    	(SELECT aae140,YAE231, AAB121
+		  FROM wsjb.IRAB08
+		 WHERE AAB001 = #aab001#
+		   AND YAE517 = 'H01'
+		   AND AAE003 = #aae001#||'01') P
+    </select>
+    <!-- 农民工失业补差 -->
+    <select id="getSYBC" parameterClass="map" resultClass="java.util.HashMap">
+	    SELECT P.AAE140 AS AAE140,
+	       (P.YAC401 + P.YAC402 + P.YAC403 + P.YAC404 + P.YAC405 + P.YAC406 +
+	       P.YAC407 + P.YAC408 + P.YAC409 + P.YAC410 + P.YAC411 + P.YAC412) AS SYBC
+		  FROM (SELECT MAX(AAB001) AS AAB001,
+		               MAX(AAE140) AS AAE140,
+		               SUM(YAC401) AS YAC401,
+		               SUM(YAC402) AS YAC402,
+		               SUM(YAC403) AS YAC403,
+		               SUM(YAC404) AS YAC404,
+		               SUM(YAC405) AS YAC405,
+		               SUM(YAC406) AS YAC406,
+		               SUM(YAC407) AS YAC407,
+		               SUM(YAC408) AS YAC408,
+		               SUM(YAC409) AS YAC409,
+		               SUM(YAC410) AS YAC410,
+		               SUM(YAC411) AS YAC411,
+		               SUM(YAC412) AS YAC412
+		          FROM wsjb.TMP_AC42 A,xasi2.AC01 B
+		         WHERE A.AAC001 = B.AAC001
+		           AND B.AAC009 = '20'
+		           AND AAE140 = '02'
+		           AND AAB001 = #aab001#
+		           AND AAE001 = #aae001#) P
+    </select>
+    <!-- 农民工失业基数补差查询 -->
+     <select id="getSYBC_01" parameterClass="map" resultClass="java.util.HashMap">
+     	select wsjb.FUN_GETNMGJSC(#aab001#,#aae001#) AS SYBC from dual
+     </select>
+    <!-- 获取基数降低list --> 
+    <select id="getJSJD" parameterClass="map" resultClass="java.util.HashMap">
+    	select aac001,
+    	       aab001,
+    	       yac508,
+    	       yaa333 
+    	  from xasi2.ac01k8 
+    	 where aab001 = #aab001# 
+    	   and aae001 = #aae001# 
+    	   AND YAB019 = '1'
+    	   and yac508 > yaa333
+    </select>
+    <!-- 批量更yae001 -->
+    <update id="updateYae001_1" parameterClass="map" >
+		update xasi2.ac01k8 
+		   set yae001 = '是',
+		       aae036 = sysdate
+		 where aab001 = #aab001# 
+		   and aae001 = #aae001#
+		   AND YAB019 = '1'
+		   and yac508 > yaa333
+	</update>
+	<!-- 批量将基数差为负数的补差记录更新为0 -->
+	<update id="updateTmpac42" parameterClass="map" >
+		update wsjb.tmp_ac42
+		   set yac401 = 0,
+		       yac402 = 0,
+		       yac403 = 0,
+		       yac404 = 0,
+		       yac405 = 0,
+		       yac406 = 0,
+		       yac407 = 0,
+		       yac408 = 0,
+		       yac409 = 0,
+		       yac410 = 0,
+		       yac411 = 0,
+		       yac412 = 0
+<![CDATA[where aae140 not in ('01','06')
+           and aab001 = #aab001#
+           and aac001 in (select aac001
+    	                    from xasi2.ac01k8 
+    	                   where aab001 = #aab001# 
+    	                     and aae001 = #aae001# 
+    	                     AND YAB019 = '1'
+    	                     and yac508 > yaa333) ]]>
+
+	</update>
+    <!-- 年审补差明细 -->
+    <select id="zcmx" parameterClass="map" resultClass="java.util.HashMap">
+    	<isEqual property="aae140" compareValue="01">
+    		 SELECT
+		           B.AAC002 AS aac002,
+		           B.AAC003 AS aac003,
+		           A.AAC001 AS aac001,
+		           A.AAB001 AS aab001,
+		           A.AAE002 AS aae002,
+		           DECODE(YAC505, '021', '农业', '020', '城镇') AS aac009,
+		           A.AAE180 AS aae180,
+		           (A.YAB157 + A.YAB158) AS grjf,
+		           (A.AAB212 + A.AAB213) AS dwjf,
+		           (A.YAB157 + A.YAB158+A.AAB212 + A.AAB213) AS jfzh
+		      FROM wsjb.IRAC08a1 A, xasi2.AC01 B
+		     WHERE A.AAC001 = B.AAC001
+		       AND A.AAB001 = #aab001#
+		       AND AAE140 = '01'
+		       AND AAE002 >= to_number(#aae001#||'01')
+<![CDATA[      AND AAE002 <= to_number(#aae001#||'12') ]]>
+		       AND AAE143 = '05'
+		       ORDER BY aae002,aac003
+    	</isEqual>
+    	<isNotEqual property="aae140" compareValue="01">
+    		SELECT
+		           B.AAC002 AS aac002,
+		           B.AAC003 AS aac003,
+		           A.AAC001 AS aac001,
+		           A.AAB001 AS aab001,
+		           A.AAE002 AS aae002,
+		           DECODE(YAC505, '021', '农业', '020', '城镇') AS aac009,
+		           A.AAE180 AS aae180,
+		           (A.YAB157 + A.YAB158) AS grjf,
+		           (A.AAB212 + A.AAB213) AS dwjf,
+		           (A.YAB157 + A.YAB158+A.AAB212 + A.AAB213) AS jfzh
+		      FROM xasi2.AC08 A, xasi2.AC01 B
+		     WHERE A.AAC001 = B.AAC001
+		       AND A.AAB001 = #aab001#
+		       AND AAE140 = #aae140#
+		       AND AAE002 >= to_number(#aae001#||'01')
+<![CDATA[      AND AAE002 <= to_number(#aae001#||'12') ]]>
+		       AND AAE143 = '05'
+		     UNION 
+		    SELECT
+		           B.AAC002 AS aac002,
+		           B.AAC003 AS aac003,
+		           A.AAC001 AS aac001,
+		           A.AAB001 AS aab001,
+		           A.AAE002 AS aae002,
+		           DECODE(YAC505, '021', '农业', '020', '城镇') AS aac009,
+		           A.AAE180 AS 缴费基数,
+		           (A.YAB157 + A.YAB158) AS grjf,
+		           (A.AAB212 + A.AAB213) AS dwjf,
+		           (A.YAB157 + A.YAB158+A.AAB212 + A.AAB213) AS jfzh
+		      FROM xasi2.AC08a1 A, xasi2.AC01 B
+		     WHERE A.AAC001 = B.AAC001
+		       AND A.AAB001 = #aab001#
+		       AND AAE140 = #aae140#
+		       AND AAE002 >= to_number(#aae001#||'01')
+<![CDATA[      AND AAE002 <= to_number(#aae001#||'12') ]]>
+		       AND AAE143 = '05'
+		       ORDER BY aae002,aac003
+    	</isNotEqual>
+    </select>
+    <!-- 养老台帐查询 -->
+    <select id="getIrac08a2List" parameterClass="map" resultClass="java.util.HashMap">
+       select aab001,
+			  aac001,
+			  aac003,
+			  aae001,
+			  akc085,
+			  aae180,
+			  yab157,
+			  aab212
+	     from wsjb.irac08a2
+	    where aab001 = #aab001# 
+    </select>
+    <!-- 查询养老缴费明细 -->
+    <select id="queryIrac08a1" parameterClass="map" resultClass="java.util.HashMap">
+    	SELECT A.YAE202,
+		       A.AAC001,
+		       B.AAC002,
+		       B.AAC003,
+		       B.AAC004,
+		       A.AAB001,
+		       A.AAE140,
+		       A.AAE003,
+		       A.AAE002,
+		       A.AAE143,
+		       A.YAE010,
+		       A.YAC505,
+		       A.YAC503,
+		       A.AAC040,
+		       A.YAA333,
+		       A.AAE180,
+		       A.YAB157,
+		       A.YAB158,
+		       A.AAB212,
+		       A.AAB213,
+		       A.AAB162,
+		       A.YAE518,
+		       A.AAE076,
+		       A.AAE011,
+		       A.AAE036,
+		       A.YAB003,
+		       A.YAB139,
+		       A.AAE114
+		  FROM wsjb.IRAC08A1 A, xasi2.AC01 B
+		 WHERE A.AAC001 = B.AAC001
+		   AND A.AAB001 = #aab001#
+		   AND A.AAE002 = #aae002#
+		   AND A.AAE143 = '01'
+    </select>
+    <!-- 清空表irac01_01 -->
+    <delete id="deleteIrac01_01">
+    	delete wsjb.irac01_01
+    </delete>
+    <!-- 插入临时表irac01_01 -->
+    <insert id="insertIrac01_01" parameterClass="map" >
+     insert into wsjb.irac01_01 (iac001,
+		                    aab001,
+		                    aac002,
+		                    aac003,
+		                    yac004,
+		                    aae002
+		                    )values(
+		                    #iac001#,
+		                    #aab001#,
+		                    #aac002#,
+		                    #aac003#,
+		                    #yac004#,
+		                    #iaa100#)
+    </insert>
+    <!-- 获取流水号yae99 -->
+    <select id="getYae099" resultClass="java.lang.String">
+    	SELECT xasi2.seq_yae099.nextval FROM dual
+    </select>
+     <!-- 养老缴费记录导入检查-->
+	<parameterMap id="prc_checkInsertIrac08a1Map"  class="java.util.Map"> 
+        <parameter property="prm_yae099" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+        <parameter property="prm_aae011" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" /> 
+        <parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  /> 
+    </parameterMap>
+    <procedure id="prc_checkInsertIrac08a1" parameterMap="prc_checkInsertIrac08a1Map">{call wsjb.pkg_YEARAPPLY.prc_checkInsertIrac08a1(?,?,?,?,?)} </procedure>
+    <!--查询导入成功信息  -->
+    <select id="getAe16a1List_1" parameterClass="map" resultClass="java.util.HashMap">
+    	SELECT YAE099,
+		       YAE202,
+		       YAE235,
+		       AAD053 AS AAB001,
+		       AAD055 AS AAC002,
+		       AAD057 AS AAC003,
+		       EXTRACTVALUE(YAE400, 'employeeInsuranceVO/yac004') AS YAC004,
+		       YAE238
+		  FROM xasi2.AE16A1
+		 WHERE YAE099 = #yae099#
+		   AND YAE235 = '1'
+    </select>
+     <!--查询导入失败信息  -->
+    <select id="getAe16a1List_2" parameterClass="map" resultClass="java.util.HashMap">
+    	SELECT YAE099,
+		       YAE202,
+		       YAE235,
+		       AAD053 AS AAB001,
+		       AAD055 AS AAC002,
+		       AAD057 AS AAC003,
+		       EXTRACTVALUE(YAE400, 'employeeInsuranceVO/yac004') AS YAC004,
+		       YAE238
+		  FROM xasi2.AE16A1
+		 WHERE YAE099 = #yae099#
+		   AND YAE235 = '2'
+    </select>
+    <!-- 保存养老缴费记录-->
+	<parameterMap id="prc_insertIrac08a1Map"  class="java.util.Map"> 
+        <parameter property="prm_yae099" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+        <parameter property="prm_aae002" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+        <parameter property="prm_aae011" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" /> 
+        <parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  /> 
+    </parameterMap>
+    <procedure id="prc_insertIrac08a1" parameterMap="prc_insertIrac08a1Map">{call wsjb.pkg_YEARAPPLY.prc_insertIrac08a1(?,?,?,?,?,?)} </procedure>
+    <!-- 查询irad53 -->
+    <select id="getIrad53Count" parameterClass="map" resultClass="java.lang.Integer">
+      select count(1) from wsjb.irad53 where aab001 = #aab001# and aae001 = #aae001# and iaa011 = #iaa011#
+    </select>
+    <!-- 插入irad53 -->
+    <insert id="insertIrad53" parameterClass="map">
+    	insert into wsjb.irad53 (aab001,
+    	                    iaa011,
+						    aee011,
+						    aae035,
+						    yab003,
+						    aae001,
+						    aae013,
+						    iab001 )values(
+						    #aab001#,
+						    #iaa011#,
+						    #aee011#,
+						    sysdate,
+						    #yab003#,
+						    #aae001#,
+						    #aae013#,
+						    #iab001#)
+    </insert>
+    <select id="queryIrad53" parameterClass="map" resultClass="java.util.HashMap">
+    	select aab001,
+    	       iaa011,
+			   CASE
+				WHEN (SELECT NAME FROM XAGXSI.TAUSER WHERE USERID = a.aee011) IS NULL THEN
+				     (SELECT AAC003 FROM WSJB.AD53A4 WHERE YAE092 =a.aee011)
+				ELSE
+				     (SELECT NAME FROM XAGXSI.TAUSER WHERE USERID =a.aee011)
+				END AS aee011,
+			   aae035,
+			   yab003,
+			   aae001,
+			   aae013,
+			   iab001
+		  from wsjb.irad53 a
+		  where a.aab001 = #aab001_1#
+		    and a.aae001 = #aae001_1#
+    </select>
+    <!-- 更新irad53 -->
+    <update id="updateIrad53" parameterClass="map">
+    	update wsjb.irad53 
+    	   set aae013 = #aae013#,
+    	       aee011 = #aee011#,
+    	       aae035 = sysdate
+    	 where aab001 = #aab001#
+    	   and iaa011 = #iaa011#
+    	   and aae001 = #aae001#
+    </update>
+    <!-- 删除irad53 -->
+    <delete id="deleteIrad53" parameterClass="map">
+    	delete wsjb.irad53 where iab001 = #iab001#
+    </delete>
+    <select id="queryAb05a1" parameterClass="map" resultClass="java.util.HashMap">
+    	select a.aab001,
+    	       a.aae001,
+			   a.aac001,
+			   a.aac002,
+			   a.aac003,
+			   a.yac004    <!-- 新养老缴费基数 -->
+		  from xasi2.ac01k8 a 
+		  where a.aab001 = #aab001#
+		    and a.aae001 = #aae001#
+		     and a.YAB019 = '1'
+		    and a.aae110 in ('2','21')
+		    and not exists (select 1 from wsjb.irac01c1 b
+		       				 where b.aab001 = a.aab001
+		       				   and substr(b.iaa100,1,4) = a.aae001
+		       				   and a.aac002 = b.aac002
+		       				   and b.yae031 = '1')
+    </select>
+    <!-- 检查人员信息是否写入年审养老接口 -->
+	<select id="checkYLServiceResult" parameterClass="map" resultClass="java.lang.Integer">
+		    select count(1) 
+		     from wsjb.yljkqq
+		    where iac001 = #aac001#
+		    and ywlx='011'
+		      and jybs = '0'
+          AND  substr(iaa100,0,4)=#aae001#
+	</select>
+	<!-- 检查人员信息是否写入年审养老接口 -->
+	<select id="queryirad51a1" parameterClass="map" resultClass="java.util.HashMap">
+		   select * 
+		     from wsjb.irad51a1
+		    where aac001=#aac001#
+		    and aab001=#aab001#
+		     and yae031=#yae031#
+		     and aae041=#aae041#
+	</select>
+	<select id="getdwbh" parameterClass="string" resultClass="java.lang.String">
+		   select  distinct yab029 from xasi2.ab01a2 where yab021=#aab001#
+		   	</select>
+	<select id="getgrbh" parameterClass="string" resultClass="java.lang.String">
+		  select distinct yab029 from xasi2.ac01a1 where aac001=#aac001#
+	</select>
+	<select id="getIrad51a1" parameterClass="map" resultClass="java.util.HashMap">
+		   select a.aac001 ,
+		          a.aab001,
+		          a.aae041,
+		          a.aae042,
+		          (select aac002 from ac01 where aac001=a.aac001) as aac002,
+		         (select aac003 from ac01 where aac001=a.aac001) as aac003,
+		         CASE
+				WHEN (SELECT NAME FROM XAGXSI.TAUSER WHERE USERID = a.aae011) IS NULL THEN
+				     (SELECT AAC003 FROM WSJB.AD53A4 WHERE YAE092 =a.aae011)
+				ELSE
+				     (SELECT NAME FROM XAGXSI.TAUSER WHERE USERID =a.aae011)
+				END AS aae011,
+		         aae036
+		     from wsjb.irad51a1 a
+		    where  a.aab001=#aab001#
+		     and a.yae031=#yae031#
+		     and a.aae041=#aae041#
+	</select>
+	<select id="irad51a1Count" parameterClass="map" resultClass="java.lang.Integer">
+  		SELECT COUNT(1) as n FROM wsjb.irad51a1 WHERE aab001 = #aab001# AND substr(aae041,1,4) = #aae001# and yae031 ='1'
+    </select>
+    <select id="tmp_ac42Ba" parameterClass="map" resultClass="java.util.HashMap">
+  		SELECT NVL(SUM(YAC401) + SUM(YAC402) + SUM(YAC403) + SUM(YAC404) +
+           SUM(YAC405) + SUM(YAC406) + SUM(YAC407) + SUM(YAC408) +
+           SUM(YAC409) + SUM(YAC410) + SUM(YAC411) + SUM(YAC412),
+           0) AS BAJSZC01
+			  FROM WSJB.TMP_AC42 A
+			 WHERE A.AAE001 = #aae001#
+			   AND A.AAB001 = #aab001#
+			   AND A.AAE140 = '01'
+			   AND EXISTS (SELECT 1
+			          FROM xasi2.ac01k8 B
+			         WHERE B.AAB001 = A.AAB001
+			           AND B.AAE001 = A.AAE001
+			           AND B.AAC001 = A.AAC001
+			           AND B.AAE110 IN ('备案'))
+    </select>
+	<select id="query201708" parameterClass="map" resultClass="java.util.HashMap">
+		   select a.aac001 ,
+		          a.aab001,
+		          a.aac002,
+		          a.aac003,
+		          a.yac004
+		     from wsjb.irac01 a
+		   where  aae110 in('1','10')
+		    and  iaa002='2' 
+		    and  iaa100=201708
+	</select>
+	<update id="updateIrac01d1" parameterClass="map">
+		update wsjb.irac01d1 
+		   set yae031 = '1',
+		       aae012 = #aae012#,
+		       aae035 = sysdate
+		 where yae099=#yae099#		   
+	</update>
+	  <select id="getAb05a1Info" parameterClass="map" resultClass="java.util.HashMap">
+      select      
+		B.yab029 yab029,  
+		A.aac001 aac001,
+		A.aab001 aab001,
+		A.aac003 aac003,
+		A.aac002 aac002,
+		A.aac040 aac040,
+		A.yac004 yac004,
+		A.yaa333 yaa333,
+		A.yac506 yac506,
+		A.yac507 yac507,
+		A.yac508 yac508,
+		A.aae110 aae110,
+		A.aae210 aae210,
+		A.aae310 aae310,
+		A.aae410 aae410,
+		A.aae510 aae510,
+		A.aae311 aae311,
+		A.yae110 yae110,
+		A.yae310 yae310,
+		A.yae210 yae210,
+		A.yae410 yae410,
+		A.yae510 yae510,
+		A.yab019 yab019
+		from xasi2.ac01k8 A, xasi2.ac01a1 B
+		where A.aac001 = b.aac001 
+		      and A.aae001 = #aae001#
+        and A.aab001 = #aab001#
+        and A.iaa002 = '0'
+    </select>
+    
+    <!-- 删除ab05a1 -->
+    <delete id="delAb05a1" parameterClass="map">
+        delete xasi2.ac01k8 
+         where aab001 = #aab001#
+           and aae001 = #aae001#
+           and iaa002 = '0'
+    </delete>
+    
+    <!-- 插入"删除ab05a1"的操作记录 -->
+    <insert id="InsertAb05a1Memo" parameterClass="map">
+        insert into wsjb.irad51_back (  aab001,
+			                            aae001,
+			                            aae011, <!-- 经办人 -->
+			                            aae036, <!-- 经办时间 -->
+			                            aae013  <!-- 备注 -->
+			                           )values(
+			                            #aab001#,
+			                            #aae001#,
+			                            #aae011#,
+			                            sysdate,
+			                            #aae013#)
+    </insert>
+    <select id="queryIrac01c1" parameterClass="map" resultClass="dto">
+              SELECT C.YAB029 AS AAB001,
+		             A.AAC001 AS AAC001,
+		             A.AAC002 AS AAC002,
+		             A.AAC003 AS AAC003,
+		             xasi2.pkg_comm.fun_getAaa103('AAC009',A.AAC009) AS AAC009,
+		             A.YAC507 AS YAC507,
+		             A.YAC004 AS YAC004,
+		            ( select   to_char(replace(wm_concat(yae110),',','')) from  xasi2.ac01k8 where aac002=a.aac002 and  aab001=a.aab001 and aae001=a.aae001)
+                       AS AAE013
+                       
+			        FROM xasi2.ac01k8 A,xasi2.ab01a2 C
+			       WHERE A.AAB001 = C.YAB021 
+			         AND A.AAB001 = #aab001#
+			         AND A.AAE001 = #aae001#
+			         AND A.YAB019 = '1'
+			         AND A.AAE110 = '备案'
+						   AND A.AAE110 IS NOT NULL
+				 ORDER BY A.YAE110 DESC, A.AAC003
+    </select>
+    <select id="getaa02a3_new" parameterClass="map" resultClass="java.util.HashMap">
+    	<!--  
+    	SELECT substr(to_char(aae041),5) as aae041,
+    	       substr((case when a.aae140 = '01' then 
+    	       (select max(aae003) from wsjb.irab08 where aab001 = #aab001# and aae140 = a.aae140 and yae517 = 'H01') 
+    	        else
+    	         (select yae097 from wsjb.ab02 where aab001 = #aab001# and aae140 = a.aae140) end)
+    	         ,5) as aae042,
+    	       aae140
+    	  FROM xasi2.aa02a3 a WHERE AAE001 = #aae001#-->
+    	  
+	      select substr(to_char(aae041), 5) as aae041,
+		         substr((case
+		                  when a.aae140 = '01' then
+		                   (select max(aae003)
+		                      from wsjb.irab08
+		                     where aab001 = #aab001#
+		                       and aae140 = a.aae140
+		                       and yae517 = 'H01'
+		              <![CDATA[and aae036 < (select nvl(max(aae036),to_date('3000-01-01','yyyy-mm-dd'))]]>
+		                                       from ab05a1
+		                                      where aab001 = #aab001#
+		                                        and aae001 = #aae001#))
+		                  else
+		                   (select max(iaa100)
+		                      from wsjb.irad01
+		                     where aab001 = #aab001#
+		                       and iaa011 = 'A04'
+		             <![CDATA[ and aae035 < (select nvl(max(aae036),to_date('3000-01-01','yyyy-mm-dd'))]]>
+		                                       from ab05a1
+		                                      where aab001 = #aab001#
+		                                        and aae001 = #aae001#))
+		                end),
+		                5) as aae042,
+		           aae140
+		    from xasi2.aa02a3 a
+		   where aae001 = #aae001#
+    </select>
+     <!-- 单位每月人员缴费基数(养老) -->
+    <select id="getIrac01_ubajs" parameterClass="map" resultClass="java.util.HashMap">
+    	<isEqual property="aae140" compareValue="01">
+		     SELECT D.YAB029 AS AAB001,
+                    C.YAB029 AS AAC001,
+			        A.AAB001 AS AAB001,
+			        E.AAC002 AS AAC002,
+			        E.AAC003 AS AAC003,
+			        A.AAE180 AS YAC507,
+			        B.YAC004 AS YAC004,
+			        (B.YAC004 - A.AAE180) AS JSC,
+			        A.AAE002 AS IAA100,
+			         DECODE((SELECT COUNT(1)
+                          FROM WSJB.IRAC01C1 F
+                        WHERE F.AAC002 = E.AAC002
+                          AND F.IAA100 = A.AAE002
+                          AND F.AAB001 = A.AAB001),
+                            '0',
+                            '',
+                            '备案') AS AAE013
+			  FROM wsjb.IRAC08A1 A, xasi2.ac01k8 B,xasi2.AC01A1 C, xasi2.AB01A2 D,xasi2.AC01 E
+			 WHERE A.AAB001 = B.AAB001(+)
+			   AND A.AAC001 = B.AAC001(+)
+			   AND A.AAB001 = D.YAB021
+               AND A.AAC001 = C.AAC001(+)
+               AND A.AAC001 = E.AAC001
+                and  not exists(
+               select aac001 from  wsjb.irac01c1 where  aac002=b.aac002 and yae031='1' and aab001=a.aab001 and iaa100=a.aae002
+               )
+               and not exists (
+                select aac001 from  wsjb.irad51a2 where  aac001=a.aac001   and aae002=a.aae002
+               )
+			   AND a.aae140 = #aae140#
+			   AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = '01' AND aae001 = #aae001#)
+    <![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = '01' AND aae001 = #aae001#)
+              and a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#) ]]>
+			   AND aae143 = '01'
+			   AND B.YAB019 = '1'
+			   AND a.aab001 = #aab001#
+			   AND b.aae001 = #aae001#
+			 ORDER BY A.AAE002			 
+    	</isEqual>
+    </select>
+    
+    <select id="getSecondUnapplyInfo" parameterClass="map" resultClass="java.util.HashMap">
+	  SELECT a.aab001,
+	  		 a.aab004,
+	  		 a.aae001,
+	  		 b.iaa006,
+	  		 b.aae036 
+	  FROM (
+		    SELECT aab001,
+		           (select aab004 from xasi2.ab01 b where a.aab001 = b.aab001) as aab004,
+		           aae001
+		      FROM wsjb.irad51 a
+		     WHERE aae001 = #aae001#
+		       AND iaa011 = 'A05'
+		       AND yab003 = #yab139#
+		       AND iaa002 = '2'
+		       AND iaa006 = '1'
+		       AND EXISTS (SELECT 1
+		                     FROM xasi2.ab05 b
+		                    WHERE a.aab001 = b.aab001
+		                      AND b.aae001 = #aae001#
+		                      AND yab007 = '03')
+		    UNION								<!--新开户单位 -->
+		    SELECT aab001,
+		    	   aab004,
+		    	   #aae001# as aae001        
+		      FROM xasi2.ab01 a
+		     WHERE aae036 > to_date(#beginDate#)
+		       AND EXISTS (SELECT 1
+		              FROM xasi2.ab05 b
+		             WHERE a.aab001 = b.aab001
+		               and b.aae001 = #aae001#
+		               and b.yab007 = '03')
+		       AND EXISTS (SELECT 1 
+		        			 FROM WSJB.irad01 c
+		        			WHERE a.aab001 = c.aab001
+		        			  AND c.iaa011 = 'A04'
+		        			  AND c.iaa100 >= #aae001#||'01')
+		       
+	    ) a left join (select * from wsjb.irad51a4 where aae001 = #aae001#) b
+      	  on a.aab001 = b.aab001
+	    where 1=1
+	    <isNotEmpty prepend="AND" property="aab001">
+			a.aab001 = #aab001#
+		</isNotEmpty>
+		<isEqual property="audit" compareValue="0" prepend="and">
+		    iaa006 is null
+		</isEqual>
+		<isEqual property="audit" compareValue="1" prepend="and">
+			iaa006 is not null
+		</isEqual>
+	</select>
+	
+	<!-- 二次补差 -->
+	<parameterMap id="prc_YearSecondBCMap"  class="java.util.Map"> 
+        <parameter property="prm_aae001" jdbcType="NUMBER" javaType="java.lang.Integer" mode="IN" />
+        <parameter property="prm_type" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="prm_aae011" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="prm_yab139" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"  />
+        <parameter property="AppCode"    jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue="" /> 
+        <parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  /> 
+    </parameterMap>
+    <procedure id="yearApply_prc_YearSecondInternetBC" parameterMap="prc_YearSecondBCMap">{call wsjb.pkg_YEARAPPLY.prc_YearSalaryBCControl(?,?,?,?,?,?)} </procedure>
+    
+    
+    
+    <select id="queryIrac08a12nd" parameterClass="map" resultClass="dto">
+     	SELECT 
+     	   	A.AAC001 AS aac001,
+           	A.AAE002 AS aae002,
+           	A.AAE003 AS aae003,
+           	A.AAE180 AS aae180,
+           	A.YAB157 AS yab157,
+           	A.AAB213 AS aab213,
+           	B.AAC003 AS aac003,
+           	C.YAB029 AS yab029,
+        	A.AAB001 AS aab001,
+        	(A.YAB157+A.AAB213) AS aab111
+     	FROM 
+     		WSJB.IRAC08A1 A,
+     	 	AC01 B, 
+     	 	AC01A1 C
+     	WHERE 1 = 1
+       		AND A.AAC001 = B.AAC001
+       		AND B.AAC001 = C.AAC001(+)
+       		AND A.AAE036 
+       		BETWEEN TO_DATE('2018-06-28', 'yyyy-mm-dd') 
+       		AND TO_DATE('2018-07-01', 'yyyy-mm-dd')
+        	<isNotEmpty prepend="AND" property="aab001">
+        		aab001=#aab001#
+        	</isNotEmpty>
+    </select>
+    
+</sqlMap>

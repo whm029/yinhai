@@ -349,16 +349,16 @@ PROCEDURE prc_YearSalaryAdjustPaded(prm_aab001       IN     irab01.aab001%TYPE,-
                              
                               --判断个体工商户(2019年以前工伤险是社平)
                               IF var_aab019 = '60' and prm_aae001<2019 THEN
-                               --获取社平工资
-                               num_spgz := xasi2.pkg_comm.fun_GetAvgSalary(var_aae140,'16',num_aae002_max,PKG_Constant.YAB003_JBFZX);
-                               --如果险种为工伤 缴费工资和缴费基数为社平工资
-                               IF var_aae140 = xasi2.pkg_comm.AAE140_GS THEN
-                                  num_yac004 := ROUND(num_spgz/12);
-                                ELSE
-                                  IF num_aac040 > ROUND(num_spgz/12) THEN
-                                     num_yac004 := ROUND(num_spgz/12);
-                                  END  IF;
-                                END IF;
+                                  --获取社平工资
+                                  num_spgz := xasi2.pkg_comm.fun_GetAvgSalary(var_aae140,'16',num_aae002_max,PKG_Constant.YAB003_JBFZX);
+                                  --如果险种为工伤 缴费工资和缴费基数为社平工资
+                                   IF var_aae140 = xasi2.pkg_comm.AAE140_GS THEN
+                                       num_yac004 := ROUND(num_spgz/12);
+                                   ELSE
+                                      IF num_aac040 > ROUND(num_spgz/12) THEN
+                                       num_yac004 := ROUND(num_spgz/12);
+                                      END  IF;
+                                   END IF;
                              END IF;  
                              
                              IF var_yac503 = xasi2.pkg_comm.YAC503_LRYLJ THEN
@@ -705,10 +705,12 @@ PROCEDURE prc_YearSalaryAdjustPaded(prm_aab001       IN     irab01.aab001%TYPE,-
                      WHERE yaa001 = '16'
                        AND aae140 = var_aae140
                        AND aae001 = prm_aae001;
+                       
+                      /*
                      xasi2.pkg_P_Comm_CZ.prc_P_getContributionBase(var_aac001,                --个人编码
                                                                       prm_aab001,                --单位编码
                                                                       num_aac040,                --缴费工资
-                                                                      xasi2.pkg_comm.YAC503_SB,                --工资类别
+                                                                      xasi2.pkg_comm.YAC503_SB,--工资类别
                                                                       var_aae140,                --险种类型
                                                                       '010',                --缴费人员类别
                                                                       var_yab136,                --单位管理类型（区别独立缴费人员）
@@ -717,10 +719,26 @@ PROCEDURE prc_YearSalaryAdjustPaded(prm_aab001       IN     irab01.aab001%TYPE,-
                                                                       num_yac004,                --缴费基数
                                                                       prm_AppCode,              --错误代码
                                                                       prm_ErrorMsg);            --错误内容
+                     
+                                                                                        
                       IF prm_AppCode <> xasi2.pkg_comm.gn_def_OK THEN
                          RETURN;
                       END IF;
-
+                      */   
+               -- 使用高新保底封顶 (养老个体工商已处理)     
+               SELECT pkg_common.fun_p_getcontributionbase(
+                                                    null,                                        --个人编码 aac001
+                                                    prm_aab001,                          --单位编码 aab001
+                                                    ROUND(num_aac040),          --缴费工资 aac040
+                                                    '0',                                          --工资类别 yac503
+                                                    var_aae140,                            --险种类型 aae140
+                                                    '1',                                          --缴费人员类别 yac505
+                                                    var_yab136,                            --单位管理类型（区别独立缴费人员） yab136
+                                                    num_aae002_max,                  --费款所属期 aae002
+                                                    prm_yab139)                          --参保分中心 yab139
+                  INTO num_yac004
+               FROM dual;
+                         
                       --当年社平未公布
                       SELECT count(1)
                         INTO num_count
@@ -741,27 +759,17 @@ PROCEDURE prc_YearSalaryAdjustPaded(prm_aab001       IN     irab01.aab001%TYPE,-
                          END IF;
                       END IF;
                       
-                      --判断个体工商户(2019年以前养老险是社平的40% 2019年后是50%)
-                      IF var_aab019 = '60'THEN
+                      --判断个体工商户(2019年以前养老险是社平的40%)
+                      IF var_aab019 = '60' and  prm_aae001<2019 THEN
                          --获取社平工资
                          num_spgz := xasi2.pkg_comm.fun_GetAvgSalary(var_aae140,'16',num_aae002_max,PKG_Constant.YAB003_JBFZX);
                          num_yac004 := num_aac040;
-                         
-                         if prm_aae001<2019 then 
                             IF num_aac040 < TRUNC(num_spgz/12*0.4)+1 THEN
                                num_yac004 := TRUNC(num_spgz/12*0.4)+1;
                             END IF;
                             IF num_aac040 > ROUND(num_spgz/12) THEN
                                num_yac004 := ROUND(num_spgz/12);
                             END  IF;
-                         else
-                            IF num_aac040 < TRUNC(num_spgz/12*0.5)+1 THEN
-                               num_yac004 := TRUNC(num_spgz/12*0.5)+1;
-                            END IF;
-                            IF num_aac040 > ROUND(num_spgz/12) THEN
-                               num_yac004 := ROUND(num_spgz/12);
-                            END  IF;
-                         end if;
                        END IF;
                        
                      DELETE xasi2.tmp_grbs01;
@@ -4652,14 +4660,14 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                   sysdate,
                   sysdate
                  );
-
+/*
           -- 计算基数变化比例
           prc_YearApplyJSProportions (prm_aab001,--单位编号
                        prm_aae001,--年审年度
                        prm_yae092, --经办人
                        prm_AppCode,
                        prm_ErrorMsg);
-
+*/
 
    EXCEPTION
       -- WHEN NO_DATA_FOUND THEN
@@ -10174,7 +10182,7 @@ BEGIN
 /*初始化变量*/
       prm_AppCode  := gn_def_OK;
       prm_ErrorMsg := '';
-      v_proportions_constant := -35;
+      v_proportions_constant := -1;
       v_proportions_msg := '';
 
         -- 单位是否有4险

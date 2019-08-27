@@ -9,7 +9,99 @@
 
 	<!-- 单位月基数总和(其他险种) -->
 	<select id="querySumJS_1" parameterClass="map" resultClass="dto">
-		<isNotEqual property="aae140" compareValue="04">
+		<isEqual property="aae140" compareValue="02">
+			SELECT sum(p.aab121) as jszh,
+			sum(p.xjsh) as xjszh,
+			sum(p.jsc) as jszc
+			FROM (SELECT COUNT(1) AS yae231,
+			sum(a.aae180) AS aab121,
+			sum(b.yaa444) AS xjsh,
+			SUM(b.yaa444-a.aae180) AS jsc,
+			a.aae002 AS iaa100
+			FROM xasi2.AC08A1 A, xasi2.ac01k8 B
+			WHERE A.AAB001 = B.AAB001(+)
+			AND A.AAC001 = B.AAC001(+)
+			AND a.aae140 = #aae140#
+			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			<![CDATA[   AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#) ]]>
+			<!--
+            AND a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#)
+            -->
+			AND aae143 = '01'
+			AND a.akc021 = '11'
+			AND B.YAB019 = '1'
+			AND a.aab001 = #aab001#
+			AND b.aae001 = #aae001#
+			GROUP BY a.aae002
+			UNION
+			SELECT COUNT(1) AS yae231,
+			sum(a.aae180) AS aab121,
+			sum(b.yaa444) AS xjsh,
+			SUM(b.yaa444-a.aae180) AS jsc,
+			a.aae002 AS iaa100
+			FROM xasi2.AC08 A, xasi2.ac01k8 B
+			WHERE A.AAB001 = B.AAB001(+)
+			AND A.AAC001 = B.AAC001(+)
+			AND a.aae140 = #aae140#
+			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#) ]]>
+			<!--
+            AND a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#)
+            -->
+			AND aae143 = '01'
+			AND a.akc021 = '11'
+			AND B.YAB019 = '1'
+			AND a.aab001 = #aab001#
+			AND b.aae001 = #aae001#
+			GROUP BY a.aae002) p
+		</isEqual>
+		<isEqual property="aae140" compareValue="04">
+			SELECT sum(p.aab121) as jszh,
+			sum(p.xjsh) as xjszh,
+			sum(p.jsc) as jszc
+			FROM (SELECT COUNT(1) AS yae231,
+			sum(a.aae180) AS aab121,
+			sum(b.yaa444) AS xjsh,
+			SUM(b.yaa444-a.aae180) AS jsc,
+			a.aae002 AS iaa100
+			FROM xasi2.AC08A1 A, xasi2.ac01k8 B
+			WHERE A.AAB001 = B.AAB001(+)
+			AND A.AAC001 = B.AAC001(+)
+			AND a.aae140 = #aae140#
+			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			<![CDATA[   AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#) ]]>
+			<!--
+            AND a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#)
+            -->
+			AND aae143 = '01'
+			AND a.akc021 = '11'
+			AND B.YAB019 = '1'
+			AND a.aab001 = #aab001#
+			AND b.aae001 = #aae001#
+			GROUP BY a.aae002
+			UNION
+			SELECT COUNT(1) AS yae231,
+			sum(a.aae180) AS aab121,
+			sum(b.yaa444) AS xjsh,
+			SUM(b.yaa444-a.aae180) AS jsc,
+			a.aae002 AS iaa100
+			FROM xasi2.AC08 A, xasi2.ac01k8 B
+			WHERE A.AAB001 = B.AAB001(+)
+			AND A.AAC001 = B.AAC001(+)
+			AND a.aae140 = #aae140#
+			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#) ]]>
+			<!--
+            AND a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#)
+            -->
+			AND aae143 = '01'
+			AND a.akc021 = '11'
+			AND B.YAB019 = '1'
+			AND a.aab001 = #aab001#
+			AND b.aae001 = #aae001#
+			GROUP BY a.aae002) p
+		</isEqual>
+		<isEqual property="aae140" compareValue="03">
 			SELECT sum(p.aab121) as jszh,
 			sum(p.xjsh) as xjszh,
 			sum(p.jsc) as jszc
@@ -54,25 +146,25 @@
 			AND a.aab001 = #aab001#
 			AND b.aae001 = #aae001#
 			GROUP BY a.aae002) p
-		</isNotEqual>
-		<isEqual property="aae140" compareValue="04">
+		</isEqual>
+		<isEqual property="aae140" compareValue="05">
 			SELECT sum(p.aab121) as jszh,
 			sum(p.xjsh) as xjszh,
 			sum(p.jsc) as jszc
 			FROM (SELECT COUNT(1) AS yae231,
 			sum(a.aae180) AS aab121,
-			sum(b.yaa444) AS xjsh,
-			SUM(b.yaa444-a.aae180) AS jsc,
+			sum(b.yaa333) AS xjsh,
+			SUM(b.yaa333-a.aae180) AS jsc,
 			a.aae002 AS iaa100
 			FROM xasi2.AC08A1 A, xasi2.ac01k8 B
 			WHERE A.AAB001 = B.AAB001(+)
 			AND A.AAC001 = B.AAC001(+)
 			AND a.aae140 = #aae140#
 			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
-<![CDATA[   AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#) ]]>
-		    <!--
-		    AND a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#)
-			-->
+			<![CDATA[AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)]]>
+			<!--
+            AND a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#)
+           -->
 			AND aae143 = '01'
 			AND a.akc021 = '11'
 			AND B.YAB019 = '1'
@@ -82,16 +174,16 @@
 			UNION
 			SELECT COUNT(1) AS yae231,
 			sum(a.aae180) AS aab121,
-			sum(b.yaa444) AS xjsh,
-			SUM(b.yaa444-a.aae180) AS jsc,
+			sum(b.yaa333) AS xjsh,
+			SUM(b.yaa333-a.aae180) AS jsc,
 			a.aae002 AS iaa100
 			FROM xasi2.AC08 A, xasi2.ac01k8 B
 			WHERE A.AAB001 = B.AAB001(+)
 			AND A.AAC001 = B.AAC001(+)
 			AND a.aae140 = #aae140#
 			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
- <![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#) ]]>
-            <!--
+			<![CDATA[   AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#) ]]>
+			<!--
             AND a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#)
             -->
 			AND aae143 = '01'
@@ -105,55 +197,7 @@
 
 	<!-- 单位每月人员缴费基数(其他险种) -->
 	<select id="getAc08" parameterClass="map" resultClass="dto">
-		<isNotEqual property="aae140" compareValue="04">
-			SELECT a.aab001 AS aab001,
-			c.aac001 AS aac001,
-			c.aac002 AS aac002,
-			c.aac003 AS aac003,
-			a.aae180 AS YAC507,
-			b.yaa333 AS yac004,
-			(b.yaa333-a.aae180) AS jsc,
-			a.aae002 AS iaa100 ,
-			CASE WHEN a.aac008='2' AND a.akc021 = '21'THEN '已退休' ELSE '' END AS aae013
-			FROM xasi2.AC08A1 A, xasi2.ac01k8 B, XASI2.AC01 C
-			WHERE A.AAB001 = B.AAB001(+)
-			AND A.AAC001 = B.AAC001(+)
-			AND a.aac001 = c.aac001(+)
-			AND a.aae140 = #aae140#
-			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
-			<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#) ]]>
-			AND aae143 in ('01','14')
-			AND B.YAB019 = '1'
-			AND a.aab001 = #aab001#
-			AND b.aae001 = #aae001#
-			AND (B.AAE013 is null or B.AAE013 ='1'  or B.AAE013 ='2'  or B.AAE013 ='22' )
-
-			UNION
-
-			SELECT a.aab001 AS aab001,
-			c.aac001 AS aac001,
-			c.aac002 AS aac002,
-			c.aac003 AS aac003,
-			a.aae180 AS YAC508,
-			b.yaa333 AS yaa333,
-			(b.yaa333-a.aae180) AS jsc,
-			a.aae002 AS iaa100 ,
-			CASE WHEN a.aac008='2' AND a.akc021 = '21'THEN '已退休' ELSE '' END AS aae013
-			FROM xasi2.AC08 A, xasi2.ac01k8 B, XASI2.AC01 C
-			WHERE A.AAB001 = B.AAB001(+)
-			AND A.AAC001 = B.AAC001(+)
-			AND a.aac001 = c.aac001(+)
-			AND a.aae140 = #aae140#
-			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
- <![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)]]>
-			AND aae143 in('01','14')
-			AND B.YAB019 = '1'
-			AND a.aab001 = #aab001#
-			AND b.aae001 = #aae001#
-			AND (B.AAE013 is null or B.AAE013 ='1'  or B.AAE013 ='2'  or B.AAE013 ='22' )
-			ORDER BY iaa100
-		</isNotEqual>
-		<isEqual property="aae140" compareValue="04">
+		<isEqual property="aae140" compareValue="02">
 			SELECT a.aab001 AS aab001,
 			c.aac001 AS aac001,
 			c.aac002 AS aac002,
@@ -169,11 +213,12 @@
 			AND a.aac001 = c.aac001(+)
 			AND a.aae140 = #aae140#
 			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
- <![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)]]>
+			<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)]]>
 			AND aae143 = '01'
 			AND B.YAB019 = '1'
 			AND a.aab001 = #aab001#
 			AND b.aae001 = #aae001#
+			AND a.yab139='610127'
 			AND (B.AAE013 is null or B.AAE013 ='1'  or B.AAE013 ='2'  or B.AAE013 ='22' )
 			UNION
 			SELECT a.aab001 AS aab001,
@@ -191,13 +236,162 @@
 			AND a.aac001 = c.aac001(+)
 			AND a.aae140 = #aae140#
 			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
-<![CDATA[   AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)]]>
+			<![CDATA[   AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)]]>
 			AND aae143 = '01'
 			AND B.YAB019 = '1'
 			AND a.aab001 = #aab001#
 			AND b.aae001 = #aae001#
+			AND a.yab139='610127'
 			AND (B.AAE013 is null or B.AAE013 ='1'  or B.AAE013 ='2'  or B.AAE013 ='22' )
 			ORDER BY iaa100
+		</isEqual>
+		<isEqual property="aae140" compareValue="04">
+			SELECT a.aab001 AS aab001,
+			c.aac001 AS aac001,
+			c.aac002 AS aac002,
+			c.aac003 AS aac003,
+			a.aae180 AS YAC507,
+			b.yaa444 AS yac004,
+			(b.yaa444-a.aae180) AS jsc,
+			a.aae002 AS iaa100 ,
+			CASE WHEN a.aac008='2' AND a.akc021 = '21'THEN '已退休' ELSE '' END AS aae013
+			FROM xasi2.AC08A1 A, xasi2.ac01k8 B, XASI2.AC01 C
+			WHERE A.AAB001 = B.AAB001(+)
+			AND A.AAC001 = B.AAC001(+)
+			AND a.aac001 = c.aac001(+)
+			AND a.aae140 = #aae140#
+			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)]]>
+			AND aae143 = '01'
+			AND B.YAB019 = '1'
+			AND a.aab001 = #aab001#
+			AND b.aae001 = #aae001#
+			AND a.yab139='610127'
+			AND (B.AAE013 is null or B.AAE013 ='1'  or B.AAE013 ='2'  or B.AAE013 ='22' )
+			UNION
+			SELECT a.aab001 AS aab001,
+			c.aac001 AS aac001,
+			c.aac002 AS aac002,
+			c.aac003 AS aac003,
+			a.aae180 AS YAC508,
+			b.yaa444 AS yaa333,
+			(b.yaa444-a.aae180) AS jsc,
+			a.aae002 AS iaa100 ,
+			CASE WHEN a.aac008='2' AND a.akc021 = '21'THEN '已退休' ELSE '' END AS aae013
+			FROM xasi2.AC08 A, xasi2.ac01k8 B, XASI2.AC01 C
+			WHERE A.AAB001 = B.AAB001(+)
+			AND A.AAC001 = B.AAC001(+)
+			AND a.aac001 = c.aac001(+)
+			AND a.aae140 = #aae140#
+			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			<![CDATA[   AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)]]>
+			AND aae143 = '01'
+			AND B.YAB019 = '1'
+			AND a.aab001 = #aab001#
+			AND b.aae001 = #aae001#
+			AND a.yab139='610127'
+			AND (B.AAE013 is null or B.AAE013 ='1'  or B.AAE013 ='2'  or B.AAE013 ='22' )
+			ORDER BY iaa100
+		</isEqual>
+		<isEqual property="aae140" compareValue="03">
+		SELECT a.aab001 AS aab001,
+		c.aac001 AS aac001,
+		c.aac002 AS aac002,
+		c.aac003 AS aac003,
+		a.aae180 AS YAC507,
+		b.yaa333 AS yac004,
+		(b.yaa333-a.aae180) AS jsc,
+		a.aae002 AS iaa100 ,
+		CASE WHEN a.aac008='2' AND a.akc021 = '21'THEN '已退休' ELSE '' END AS aae013
+		FROM xasi2.AC08A1 A, xasi2.ac01k8 B, XASI2.AC01 C
+		WHERE A.AAB001 = B.AAB001(+)
+		AND A.AAC001 = B.AAC001(+)
+		AND a.aac001 = c.aac001(+)
+		AND a.aae140 = #aae140#
+		AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+		<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#) ]]>
+		AND aae143 in ('01','14')
+		AND B.YAB019 = '1'
+		AND a.aab001 = #aab001#
+		AND b.aae001 = #aae001#
+		AND a.yab139='610127'
+		AND (B.AAE013 is null or B.AAE013 ='1'  or B.AAE013 ='2'  or B.AAE013 ='22' )
+
+		UNION
+
+		SELECT a.aab001 AS aab001,
+		c.aac001 AS aac001,
+		c.aac002 AS aac002,
+		c.aac003 AS aac003,
+		a.aae180 AS YAC508,
+		b.yaa333 AS yaa333,
+		(b.yaa333-a.aae180) AS jsc,
+		a.aae002 AS iaa100 ,
+		CASE WHEN a.aac008='2' AND a.akc021 = '21'THEN '已退休' ELSE '' END AS aae013
+		FROM xasi2.AC08 A, xasi2.ac01k8 B, XASI2.AC01 C
+		WHERE A.AAB001 = B.AAB001(+)
+		AND A.AAC001 = B.AAC001(+)
+		AND a.aac001 = c.aac001(+)
+		AND a.aae140 = #aae140#
+		AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+		<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)]]>
+		AND aae143 in('01','14')
+		AND B.YAB019 = '1'
+		AND a.aab001 = #aab001#
+		AND b.aae001 = #aae001#
+		AND a.yab139='610127'
+		AND (B.AAE013 is null or B.AAE013 ='1'  or B.AAE013 ='2'  or B.AAE013 ='22' )
+		ORDER BY iaa100
+		</isEqual>
+		<isEqual property="aae140" compareValue="05">
+		SELECT a.aab001 AS aab001,
+		c.aac001 AS aac001,
+		c.aac002 AS aac002,
+		c.aac003 AS aac003,
+		a.aae180 AS YAC507,
+		b.yaa333 AS yac004,
+		(b.yaa333-a.aae180) AS jsc,
+		a.aae002 AS iaa100 ,
+		CASE WHEN a.aac008='2' AND a.akc021 = '21'THEN '已退休' ELSE '' END AS aae013
+		FROM xasi2.AC08A1 A, xasi2.ac01k8 B, XASI2.AC01 C
+		WHERE A.AAB001 = B.AAB001(+)
+		AND A.AAC001 = B.AAC001(+)
+		AND a.aac001 = c.aac001(+)
+		AND a.aae140 = #aae140#
+		AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+		<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#) ]]>
+		AND aae143 in ('01','14')
+		AND B.YAB019 = '1'
+		AND a.aab001 = #aab001#
+		AND b.aae001 = #aae001#
+		AND a.yab139='610127'
+		AND (B.AAE013 is null or B.AAE013 ='1'  or B.AAE013 ='2'  or B.AAE013 ='22' )
+
+		UNION
+
+		SELECT a.aab001 AS aab001,
+		c.aac001 AS aac001,
+		c.aac002 AS aac002,
+		c.aac003 AS aac003,
+		a.aae180 AS YAC508,
+		b.yaa333 AS yaa333,
+		(b.yaa333-a.aae180) AS jsc,
+		a.aae002 AS iaa100 ,
+		CASE WHEN a.aac008='2' AND a.akc021 = '21'THEN '已退休' ELSE '' END AS aae013
+		FROM xasi2.AC08 A, xasi2.ac01k8 B, XASI2.AC01 C
+		WHERE A.AAB001 = B.AAB001(+)
+		AND A.AAC001 = B.AAC001(+)
+		AND a.aac001 = c.aac001(+)
+		AND a.aae140 = #aae140#
+		AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+		<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)]]>
+		AND aae143 in('01','14')
+		AND B.YAB019 = '1'
+		AND a.aab001 = #aab001#
+		AND b.aae001 = #aae001#
+		AND (B.AAE013 is null or B.AAE013 ='1'  or B.AAE013 ='2'  or B.AAE013 ='22' )
+		AND a.yab139='610127'
+		ORDER BY iaa100
 		</isEqual>
 	</select>
 
@@ -301,8 +495,8 @@
              A.aae002 AS IAA100
         FROM wsjb.IRAC08A1 A, xasi2.ac01k8 B
        WHERE A.AAB001 = B.AAB001(+)
-         AND A.AAC001 = B.AAC001(+)
-         AND A.aae143 = '01'
+          AND A.AAC001 = B.AAC001(+)
+          AND A.aae143 = '01'
           AND A.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = '01' AND aae001 = #aae001#)
  <![CDATA[AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = '01' AND aae001 = #aae001#)]]>
  		<!--
@@ -553,6 +747,42 @@
 			AND E.aab001 = a.aab001)
 			ORDER BY A.YAE110 DESC, A.AAC003
 		</isEqual>
+		<isEqual property="aae140" compareValue="02">
+			SELECT A.AAB001 AS aab001,
+			A.AAC001 AS aac001,
+			A.AAC002 AS aac002,
+			A.AAC003 AS aac003,
+			xasi2.pkg_comm.fun_getAaa103('AAC009',B.AAC009) AS AAC009,
+			A.YAC508 AS yac507,
+			A.YAA444 AS yac004,
+			A.yae210 AS aae013
+			FROM xasi2.ac01k8 A,XASI2.AC01 B
+			WHERE A.AAC001 = B.AAC001
+			AND A.aab001 = #aab001#
+			AND A.aae001 = #aae001#
+			AND A.YAB019 = '1'
+			AND A.aae210 is not null
+			AND (A.AAE013 is null or A.AAE013 ='1'  or A.AAE013 ='2'  or A.AAE013 ='22' )
+			ORDER BY A.YAE210 DESC,A.aac003
+		</isEqual>
+		<isEqual property="aae140" compareValue="04">
+			SELECT A.AAB001 AS aab001,
+			A.AAC001 AS aac001,
+			A.AAC002 AS aac002,
+			A.AAC003 AS aac003,
+			xasi2.pkg_comm.fun_getAaa103('AAC009',B.AAC009) AS AAC009,
+			A.YAC005 AS yac507,
+			A.YAA444 AS yac004,
+			A.yae410 AS aae013
+			FROM xasi2.ac01k8 A,XASI2.AC01 B
+			WHERE A.AAC001 = B.AAC001
+			AND A.aab001 = #aab001#
+			AND A.aae001 = #aae001#
+			AND A.YAB019 = '1'
+			AND A.aae410 is not null
+			AND (A.AAE013 is null or A.AAE013 ='1'  or A.AAE013 ='2'  or A.AAE013 ='22' )
+			ORDER BY A.YAE410 DESC,A.aac003
+		</isEqual>
 		<isEqual property="aae140" compareValue="03">
 			SELECT A.AAB001 AS aab001,
 			A.AAC001 AS aac001,
@@ -588,42 +818,6 @@
 			AND A.aae510 is not null
 			AND (A.AAE013 is null or A.AAE013 ='1'  or A.AAE013 ='2'  or A.AAE013 ='22' )
 			ORDER BY A.YAE510 DESC,A.aac003
-		</isEqual>
-		<isEqual property="aae140" compareValue="02">
-			SELECT A.AAB001 AS aab001,
-			A.AAC001 AS aac001,
-			A.AAC002 AS aac002,
-			A.AAC003 AS aac003,
-			xasi2.pkg_comm.fun_getAaa103('AAC009',B.AAC009) AS AAC009,
-			A.YAC508 AS yac507,
-			A.YAA333 AS yac004,
-			A.yae210 AS aae013
-			FROM xasi2.ac01k8 A,XASI2.AC01 B
-			WHERE A.AAC001 = B.AAC001
-			AND A.aab001 = #aab001#
-			AND A.aae001 = #aae001#
-			AND A.YAB019 = '1'
-			AND A.aae210 is not null
-			AND (A.AAE013 is null or A.AAE013 ='1'  or A.AAE013 ='2'  or A.AAE013 ='22' )
-			ORDER BY A.YAE210 DESC,A.aac003
-		</isEqual>
-		<isEqual property="aae140" compareValue="04">
-			SELECT A.AAB001 AS aab001,
-			A.AAC001 AS aac001,
-			A.AAC002 AS aac002,
-			A.AAC003 AS aac003,
-			xasi2.pkg_comm.fun_getAaa103('AAC009',B.AAC009) AS AAC009,
-			A.YAC005 AS yac507,
-			A.YAA444 AS yac004,
-			A.yae410 AS aae013
-			FROM xasi2.ac01k8 A,XASI2.AC01 B
-			WHERE A.AAC001 = B.AAC001
-			AND A.aab001 = #aab001#
-			AND A.aae001 = #aae001#
-			AND A.YAB019 = '1'
-			AND A.aae410 is not null
-			AND (A.AAE013 is null or A.AAE013 ='1'  or A.AAE013 ='2'  or A.AAE013 ='22' )
-			ORDER BY A.YAE410 DESC,A.aac003
 		</isEqual>
 		<isEqual property="aae140" compareValue="06">
 			SELECT A.AAB001 AS aab001,
@@ -891,11 +1085,11 @@
 
 	<!-- 单位每个月缴费汇总(其他险种) -->
 	<select id="queryUnitJS_1" parameterClass="map" resultClass="dto">
-		<isNotEqual property="aae140" compareValue="04">
+		<isEqual property="aae140" compareValue="02">
 			SELECT COUNT(1) AS yae231,
 			sum(a.aae180) AS aab121,
-			sum(b.yaa333) AS xjsh,
-			SUM(b.yaa333-a.aae180) AS jsc,
+			sum(b.yaa444) AS xjsh,
+			SUM(b.yaa444-a.aae180) AS jsc,
 			to_char(a.aae002) AS iaa100
 			FROM xasi2.AC08A1 A, xasi2.ac01k8 B
 			WHERE A.AAB001 = B.AAB001(+)
@@ -903,18 +1097,17 @@
 			AND a.aae140 = #aae140#
 			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
 			<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)]]>
-			AND a.aae143 in ('01','14')
-			AND a.akc021 = '11'
+			AND a.aae143 = '01'
 			AND B.YAB019 = '1'
 			AND a.aab001 = #aab001#
 			AND b.aae001 = #aae001#
-			AND (B.AAE013 is null or B.AAE013 ='1'  or B.AAE013 ='2' or B.AAE013 ='22')
+			AND a.yab139='610127'
 			GROUP BY a.aae002
 			UNION
 			SELECT COUNT(1) AS yae231,
 			sum(a.aae180) AS aab121,
-			sum(b.yaa333) AS xjsh,
-			SUM(b.yaa333-a.aae180) AS jsc,
+			sum(b.yaa444) AS xjsh,
+			SUM(b.yaa444-a.aae180) AS jsc,
 			to_char(a.aae002) AS iaa100
 			FROM xasi2.AC08 A, xasi2.ac01k8 B
 			WHERE A.AAB001 = B.AAB001(+)
@@ -922,15 +1115,14 @@
 			AND a.aae140 = #aae140#
 			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
 			<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)]]>
-			AND a.aae143 in ('01','14')
-			AND a.akc021 = '11'
+			AND a.aae143 = '01'
 			AND B.YAB019 = '1'
 			AND a.aab001 = #aab001#
 			AND b.aae001 = #aae001#
-			AND (B.AAE013 is null or B.AAE013 ='1'  or B.AAE013 ='2' or B.AAE013 ='22')
+			AND a.yab139='610127'
 			GROUP BY a.aae002
 			ORDER BY iaa100
-		</isNotEqual>
+		</isEqual>
 		<isEqual property="aae140" compareValue="04">
 			SELECT COUNT(1) AS yae231,
 			sum(a.aae180) AS aab121,
@@ -947,6 +1139,7 @@
 			AND B.YAB019 = '1'
 			AND a.aab001 = #aab001#
 			AND b.aae001 = #aae001#
+			AND a.yab139='610127'
 			GROUP BY a.aae002
 			UNION
 			SELECT COUNT(1) AS yae231,
@@ -964,6 +1157,91 @@
 			AND B.YAB019 = '1'
 			AND a.aab001 = #aab001#
 			AND b.aae001 = #aae001#
+			AND a.yab139='610127'
+			GROUP BY a.aae002
+			ORDER BY iaa100
+		</isEqual>
+		<isEqual property="aae140" compareValue="03">
+			SELECT COUNT(1) AS yae231,
+			sum(a.aae180) AS aab121,
+			sum(b.yaa333) AS xjsh,
+			SUM(b.yaa333-a.aae180) AS jsc,
+			to_char(a.aae002) AS iaa100
+			FROM xasi2.AC08A1 A, xasi2.ac01k8 B
+			WHERE A.AAB001 = B.AAB001(+)
+			AND A.AAC001 = B.AAC001(+)
+			AND a.aae140 = #aae140#
+			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)]]>
+			AND a.aae143 in ('01','14')
+			AND a.akc021 = '11'
+			AND B.YAB019 = '1'
+			AND a.aab001 = #aab001#
+			AND b.aae001 = #aae001#
+			AND (B.AAE013 is null or B.AAE013 ='1'  or B.AAE013 ='2' or B.AAE013 ='22')
+			AND a.yab139='610127'
+			GROUP BY a.aae002
+			UNION
+			SELECT COUNT(1) AS yae231,
+			sum(a.aae180) AS aab121,
+			sum(b.yaa333) AS xjsh,
+			SUM(b.yaa333-a.aae180) AS jsc,
+			to_char(a.aae002) AS iaa100
+			FROM xasi2.AC08 A, xasi2.ac01k8 B
+			WHERE A.AAB001 = B.AAB001(+)
+			AND A.AAC001 = B.AAC001(+)
+			AND a.aae140 = #aae140#
+			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)]]>
+			AND a.aae143 in ('01','14')
+			AND a.akc021 = '11'
+			AND B.YAB019 = '1'
+			AND a.aab001 = #aab001#
+			AND b.aae001 = #aae001#
+			AND (B.AAE013 is null or B.AAE013 ='1'  or B.AAE013 ='2' or B.AAE013 ='22')
+			AND a.yab139='610127'
+			GROUP BY a.aae002
+			ORDER BY iaa100
+		</isEqual>
+		<isEqual property="aae140" compareValue="05">
+			SELECT COUNT(1) AS yae231,
+			sum(a.aae180) AS aab121,
+			sum(b.yaa333) AS xjsh,
+			SUM(b.yaa333-a.aae180) AS jsc,
+			to_char(a.aae002) AS iaa100
+			FROM xasi2.AC08A1 A, xasi2.ac01k8 B
+			WHERE A.AAB001 = B.AAB001(+)
+			AND A.AAC001 = B.AAC001(+)
+			AND a.aae140 = #aae140#
+			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)]]>
+			AND a.aae143 in ('01','14')
+			AND a.akc021 = '11'
+			AND B.YAB019 = '1'
+			AND a.aab001 = #aab001#
+			AND b.aae001 = #aae001#
+			AND (B.AAE013 is null or B.AAE013 ='1'  or B.AAE013 ='2' or B.AAE013 ='22')
+			AND a.yab139='610127'
+			GROUP BY a.aae002
+			UNION
+			SELECT COUNT(1) AS yae231,
+			sum(a.aae180) AS aab121,
+			sum(b.yaa333) AS xjsh,
+			SUM(b.yaa333-a.aae180) AS jsc,
+			to_char(a.aae002) AS iaa100
+			FROM xasi2.AC08 A, xasi2.ac01k8 B
+			WHERE A.AAB001 = B.AAB001(+)
+			AND A.AAC001 = B.AAC001(+)
+			AND a.aae140 = #aae140#
+			AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
+			<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)]]>
+			AND a.aae143 in ('01','14')
+			AND a.akc021 = '11'
+			AND B.YAB019 = '1'
+			AND a.aab001 = #aab001#
+			AND b.aae001 = #aae001#
+			AND (B.AAE013 is null or B.AAE013 ='1'  or B.AAE013 ='2' or B.AAE013 ='22')
+			AND a.yab139='610127'
 			GROUP BY a.aae002
 			ORDER BY iaa100
 		</isEqual>
@@ -1240,6 +1518,7 @@
 				          FROM xasi2.ac01k8 A, xasi2.ac01 B
 				         WHERE A.AAC002 = B.AAC002
 				           AND A.AAB001 = #aab001#
+						   AND A.AAE001 = #aae001#
 				           AND A.AAE110 IN ('备案')
 				           AND B.aae120=0
 				           ORDER BY AAE110 ASC, AAC003
@@ -1342,6 +1621,7 @@
 				               XASI2.AC01 B
 				         WHERE A.AAC002 = B.AAC002
 				           AND A.AAB001 = #aab001#
+						   AND A.AAE001 = #aae001#
 				           AND A.AAE110 IN ('备案')) X
 				 ORDER BY X.AAE110 ASC, X.AAC003) A
     </select>
