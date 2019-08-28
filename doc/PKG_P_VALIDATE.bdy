@@ -10442,7 +10442,8 @@ PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
     var_iaa006 irad51.iaa006%TYPE;
     dat_aae036 DATE;
     num_aae002 NUMBER(6);
-    var_aab019  xasi2.ab01.aab019%TYPE;     --单位性质
+    var_aab019 xasi2.ab01.aab019%TYPE;     --单位性质
+    var_aae013 irad54.aae013%TYPE;
 
   BEGIN
     prm_AppCode := xasi2.pkg_comm.gn_def_OK ;
@@ -10520,9 +10521,9 @@ PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
        FROM wsjb.irad54
       WHERE aab001 = prm_aab001
         AND aae001 = num_aae001
-        AND iaa011 = 'A05-1';
+        AND iaa011 = 'A05-1'; --基数降低超标的标记
      IF num_count > 0 THEN
-        prm_msg :='请进行年审业务预约，并打印相关报表、携带相关资料，到社保中心审核！如发现有误，可自行撤销提交，修改正确后再次提交。';
+        prm_msg :='基数降低过高，请进行年审业务预约，并打印相关报表、携带相关资料，到社保中心审核！';
         prm_disabledBtn :='exportBtn,importBtn,retainBtn,applyBtn,printBtn3,printBtn4,printBtn5,delBtn';
         GOTO leb_over;
      END IF;
@@ -10548,17 +10549,36 @@ PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
 
         IF var_iaa002 = '1' THEN
            --prm_msg :='已提交年审信息，请打印相关报表，到社保中心审核！如发现有误，可自行撤销提交，修改正确后再次提交。';
-           prm_msg :='已提交年审信息，请等待社保中心审核！如发现有误，可自行撤销提交，修改正确后再次提交。';
+           prm_msg :='已提交年审信息，请等待社保中心审核！';
            prm_disabledBtn :='exportBtn,importBtn,retainBtn,applyBtn,printBtn3,printBtn4,printBtn5,delBtn';
            GOTO leb_over;
         END IF;
+        
         IF var_iaa002 = '2' AND var_iaa006 ='0' THEN
            prm_msg :='年申报信息正在审核当中...';
            prm_disabledBtn :='exportBtn,importBtn,retainBtn,applyBtn,cancelBtn,printBtn3,printBtn4,delBtn,printBtn5';
            GOTO leb_over;
         END IF;
+        
         IF var_iaa002 = '3' AND var_iaa006 ='0' THEN
-           prm_msg :='年申报信息审核未通过，修改后继续提交!';
+           var_aae013 :='';
+           select count(1)
+             into num_count
+             from wsjb.irad54
+            where aab001 = prm_aab001
+              AND aae001 = num_aae001
+              AND iaa011 = 'A05-2' --A05-2 需要携带资料的打回 A05-3 一般的打回 A05-1 基数降低超标的标记
+              AND aab004 = '1'; -- 1是有效状态说明单位还没有再次提交,再次提交后改为2
+           if num_count = 1 then
+            select aae013
+             into var_aae013
+             from wsjb.irad54
+            where aab001 = prm_aab001
+              AND aae001 = num_aae001
+              AND iaa011 = 'A05-2' --A05-2 需要携带资料的打回 A05-3 一般的打回 A05-1 基数降低超标的标记
+              AND aab004 = '1'; -- 1是有效状态说明单位还没有再次提交,再次提交后改为2
+           end if;   
+           prm_msg :='年申报信息审核未通过，修改后继续提交!  '||var_aae013;
            prm_disabledBtn :='printBtn3,printBtn4,printBtn5,delBtn';
         END IF;
 

@@ -4620,8 +4620,6 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                           num_yae097
                           );
 
-
-
        UPDATE xasi2.ac01k8
           SET
               iaz004 = v_iaz004,
@@ -4632,8 +4630,6 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
           AND aae001 = prm_aae001
           AND yab019 = '1';
      END IF;
-
-
 
       --日志记录
       INSERT INTO wsjb.AE02
@@ -4660,6 +4656,23 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                   sysdate,
                   sysdate
                  );
+            
+           -- 存在尚未再次提交的打回数据打回时写为已经再次提交
+            select count(1)
+             into n_count
+             from wsjb.irad54
+            where aab001 = prm_aab001
+              AND aae001 = prm_aae001
+              AND iaa011 in ('A05-2','A05-3') --A05-2 需要携带资料的打回 A05-3 一般的打回 A05-1 基数降低超标的标记
+              AND aab004 = '1'; -- 1是有效状态说明单位还没有再次提交,再次提交后改为2
+           if n_count > 0 then
+             update wsjb.irad54
+                set aab004 = '2'
+              where aab001 = prm_aab001
+                AND aae001 = prm_aae001
+                AND iaa011 in ('A05-2', 'A05-3')
+                AND aab004 = '1';
+           end if;             
 
           -- 计算基数变化比例
           prc_YearApplyJSProportions (prm_aab001,--单位编号
@@ -4927,7 +4940,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
         prm_ErrorMsg     OUT    VARCHAR2             )
      IS
          n_count NUMBER(6);
-        v_iaz004 irad02.iaz004%TYPE;
+         v_iaz004 irad02.iaz004%TYPE;
      BEGIN
       /*初始化变量*/
       prm_AppCode  := gn_def_OK;
@@ -4950,12 +4963,25 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
         FROM xasi2.ac01k8
        WHERE aab001 = prm_aab001
          AND IAA002 <> '0'
-         AND IAA002<>'1'
+         AND IAA002 <> '1'
          AND aae001 = prm_aae001
          AND yab019 = '1';
       IF n_count > 0 THEN
          prm_AppCode  := gn_def_ERR;
          prm_ErrorMsg := '已存在审核的数据，不能撤销申请!';
+         RETURN;
+      END IF;
+      
+      -- 存在打回的信息
+      SELECT count(1)
+        INTO n_count
+        FROM wsjb.irad54
+       WHERE aab001 = prm_aab001
+         AND aae001 = prm_aae001
+         AND IAA011 in ('A05-2','A05-3'); --A05-2 需要携带资料的打回 A05-3 一般的打回
+      IF n_count > 0 THEN
+         prm_AppCode  := gn_def_ERR;
+         prm_ErrorMsg := '已存在审核打回的数据，不能撤销申请!';
          RETURN;
       END IF;
 
@@ -5077,7 +5103,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
         FROM xasi2.ac01k8
        WHERE aab001 = prm_aab001
          AND IAA002 <> '0'
-         AND IAA002<>'1'
+         AND IAA002 <> '1'
          AND aae001 = prm_aae001
          AND yab019 = '2';
       IF n_count > 0 THEN
@@ -5085,7 +5111,20 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
          prm_ErrorMsg := '已存在审核的数据，不能撤销申请!';
          RETURN;
       END IF;
-
+      
+      -- 存在打回的信息
+      SELECT count(1)
+        INTO n_count
+        FROM wsjb.irad54
+       WHERE aab001 = prm_aab001
+         AND aae001 = prm_aae001
+         AND IAA011 in ('A05-2','A05-3'); --A05-2 需要携带资料的打回 A05-3 一般的打回 A05-1 基数降低超标的标记
+      IF n_count > 0 THEN
+         prm_AppCode  := gn_def_ERR;
+         prm_ErrorMsg := '已存在审核打回的数据，不能撤销申请!';
+         RETURN;
+      END IF;
+      
       SELECT count(1)
         INTO n_count
         FROM wsjb.irad51
@@ -7403,10 +7442,9 @@ END prc_insertIRAC08A1;
    ** 作    者：yh         作成日期 ：2013-05-25   版本编号 ：Ver 1.0.0
    ** 修    改：
    *****************************************************************************/
-   PROCEDURE prc_YearInternetAudit(
-                                    prm_aab001       IN     iraa01a1.aab001%TYPE,--申报单位
-                                    prm_aae001       IN     xasi2.ac01k8.aae001%TYPE,--审核年度
-                                    prm_iaa018       IN     irad52.iaa018%TYPE,--审核标志
+   PROCEDURE prc_YearInternetAudit(prm_aab001       IN     iraa01a1.aab001%TYPE,--申报单位
+                                   prm_aae001       IN     xasi2.ac01k8.aae001%TYPE,--审核年度
+                                   prm_iaa018       IN     irad52.iaa018%TYPE,--审核标志
                                    prm_yae092       IN     iraa01a1.aae011%TYPE,--经办人
                                    prm_iaa011       IN     irad51.iaa011%TYPE,--业务类型
                                    prm_yab019       IN     VARCHAR2 , --类型标志 1--企业基数申报 2--机关养老基数申报
