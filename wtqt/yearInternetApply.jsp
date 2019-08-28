@@ -37,7 +37,6 @@
     <ta:button id="cancelBtn" key="撤销年审申报" isShowIcon="true" onClick="fnCancel();" icon="icon-no"/>
     <ta:button id="printBtn1" key="打印基数申报表" isShowIcon="true" onClick="fnPrint();" icon="icon-print"/>
     <ta:button id="printBtn2" key="打印基数申报汇总表" isShowIcon="true" onClick="fnPrint1();" icon="icon-print"/>
-
     <ta:button id="printBtn6" key="打印诚信承诺书" isShowIcon="true" onClick="fnPrint2();" icon="icon-print"/>
     <!--
     <ta:button id="printBtn3" key="打印补差申报表" isShowIcon="true" onClick="fnprintBCDetail();" icon="icon-print"/>
@@ -52,10 +51,9 @@
       <ta:datagrid id="sucGrid" fit="true" columnFilter="true">
         <ta:datagridItem id="rownum" key="序号" width="50" align="center" dataAlign="center"/>
         <ta:datagridItem id="ck" key="查看" width="40" align="center" click="fnInfo" icon="icon-search"/>
-
-        <ta:datagridItem id="aae013" key="备注" width="105" align="left" showDetailed="true"/>
         <ta:datagridItem id="iaa002" key="审核标志" width="70" align="center" dataAlign="left" collection="IAA002"/>
-        <ta:datagridItem id="yab029" key="养老个人编号" width="95" align="center" dataAlign="left"/>
+        <ta:datagridItem id="aae013" key="XXX" width="70" align="center" dataAlign="left"/>
+        <!-- :datagridItem id="yab029" key="养老个人编号" width="95" align="center" dataAlign="left"  -->
         <ta:datagridItem id="aac001" key="个人编号" width="85" align="center" dataAlign="left"/>
         <ta:datagridItem id="aac003" key="姓名" width="70" align="center" dataAlign="left" showDetailed="true"/>
         <ta:datagridItem id="aac002" key="社会保障号" width="150" align="center" dataAlign="left" showDetailed="true"/>
@@ -116,15 +114,22 @@
     Base.submit("form1","yearInternetApplyAction!confirmTip.do",null,null,true,function(){
       var warningTips = Base.getValue("warningTips");
       if(warningTips != "" && warningTips != null ){
-        tipsOpen(warningTips);
+        tipsOpen();
       }
     });
   }
 
   //提示信息弹出框
-  function tipsOpen(warningTips){
-    var title = "年审承诺书";
-    var html = "<div style='display:block;'>"+warningTips+"</div>";
+  function tipsOpen(){
+    var title = "承诺书";
+    var html = "<div style='display:block;'>" +
+      "<h1 align='center'>社会保险缴费基数诚信申报承诺书</h1>" +
+      "<div style='display:block;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;我单位就申报社会保险缴费基数的有关事项承诺如下：</div>"+
+      "<div style='display:block;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;一、严格遵守国家和省、市有关社会保险法律法规政策文件的规定，诚信申报并依法缴费。保证申报的所有资料真实、完整；申报的数据准确、有效。否则，愿承担由此引发的一切责任。</div>"+
+      "<div style='display:block;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;二、切实维护职工的合法权益，做到应保尽保。如实申报单位和职工的缴费基数，做到应缴尽缴。保证申报的职工个人缴费基数已由职工本人签字确认或向全体职工进行了公示，经所有职工核对无误，均无异议。</div>"+
+      "<div style='display:block;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;三、若经查实认定存在瞒报、谎报职工人数、缴费基数等情况，对通过省公共信用信息平台进行违法失信信息公示的后果负全部责任。除进行整改并补缴应缴费外，接受依据《社会保险法》按日加收万分之五滞纳金及欠缴数额一倍以上三倍以下罚款的决定。</div>"+
+      "</div>";
+
     var $w = $(html);
     $w.appendTo($("body"));
     $w.dialog({
@@ -147,7 +152,7 @@
         handler:function(){
           $w.dialog('destroy');
           $w.remove();
-          Base.setDisabled("exportBtn,importBtn,retainBtn,viewBtn,applyBtn,queryBtn,save,save2,preview,dcqb,print1,print2,print3,print4");
+          Base.setDisabled("exportBtn,importBtn,retainBtn,viewBtn,applyBtn,queryBtn,printBtn1,printBtn2,printBtn6");
         }
       }]
     });

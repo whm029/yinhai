@@ -32,6 +32,7 @@
 			AND B.YAB019 = '1'
 			AND a.aab001 = #aab001#
 			AND b.aae001 = #aae001#
+			AND a.yab139 ='610127'
 			GROUP BY a.aae002
 			UNION
 			SELECT COUNT(1) AS yae231,
@@ -53,6 +54,7 @@
 			AND B.YAB019 = '1'
 			AND a.aab001 = #aab001#
 			AND b.aae001 = #aae001#
+			AND a.yab139 ='610127'
 			GROUP BY a.aae002) p
 		</isEqual>
 		<isEqual property="aae140" compareValue="04">
@@ -78,6 +80,7 @@
 			AND B.YAB019 = '1'
 			AND a.aab001 = #aab001#
 			AND b.aae001 = #aae001#
+			AND a.yab139 ='610127'
 			GROUP BY a.aae002
 			UNION
 			SELECT COUNT(1) AS yae231,
@@ -99,6 +102,7 @@
 			AND B.YAB019 = '1'
 			AND a.aab001 = #aab001#
 			AND b.aae001 = #aae001#
+			AND a.yab139 ='610127'
 			GROUP BY a.aae002) p
 		</isEqual>
 		<isEqual property="aae140" compareValue="03">
@@ -119,11 +123,12 @@
 	 	    <!--
 	 	    AND a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#)
 			-->
-			AND aae143 = '01'
+			AND aae143 in ('01','14')
 			AND a.akc021 = '11'
 			AND B.YAB019 = '1'
 			AND a.aab001 = #aab001#
 			AND b.aae001 = #aae001#
+			AND a.yab139 ='610127'
 			GROUP BY a.aae002
 			UNION
 			SELECT COUNT(1) AS yae231,
@@ -140,11 +145,12 @@
 		    <!--
 		    AND a.aae002<(SELECT aae003 FROM  wsjb.irad51 WHERE aab001= #aab001# AND aae001 = #aae001#)
 		    -->
-			AND aae143 = '01'
+			AND aae143 in ('01','14')
 			AND a.akc021 = '11'
 			AND B.YAB019 = '1'
 			AND a.aab001 = #aab001#
 			AND b.aae001 = #aae001#
+			AND a.yab139 ='610127'
 			GROUP BY a.aae002) p
 		</isEqual>
 		<isEqual property="aae140" compareValue="05">
@@ -170,6 +176,7 @@
 			AND B.YAB019 = '1'
 			AND a.aab001 = #aab001#
 			AND b.aae001 = #aae001#
+			AND a.yab139 ='610127'
 			GROUP BY a.aae002
 			UNION
 			SELECT COUNT(1) AS yae231,
@@ -191,6 +198,7 @@
 			AND B.YAB019 = '1'
 			AND a.aab001 = #aab001#
 			AND b.aae001 = #aae001#
+			AND a.yab139 ='610127'
 			GROUP BY a.aae002) p
 		</isEqual>
 	</select>
@@ -360,7 +368,7 @@
 		AND a.aae140 = #aae140#
 		AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
 		<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#) ]]>
-		AND aae143 in ('01','14')
+		AND aae143 = '01'
 		AND B.YAB019 = '1'
 		AND a.aab001 = #aab001#
 		AND b.aae001 = #aae001#
@@ -385,7 +393,7 @@
 		AND a.aae140 = #aae140#
 		AND a.aae002 >= (SELECT aae041 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)
 		<![CDATA[  AND A.aae002 <= (SELECT aae042 FROM xasi2.AA02A3 WHERE aae140 = #aae140# AND aae001 = #aae001#)]]>
-		AND aae143 in('01','14')
+		AND aae143 = '01'
 		AND B.YAB019 = '1'
 		AND a.aab001 = #aab001#
 		AND b.aae001 = #aae001#
@@ -2202,7 +2210,16 @@
 	</select>
 
 	<!--
-	<select id="getIrad51a1_1" parameterClass="map" resultClass="java.lang.Integer">
+	<update id="updateAb05a1_1" parameterClass="map">
+			update xasi2.ac01k8 a
+			   set a.aae013 = #aae013_1#
+			 where a.aab001 = #aab001#
+			 and a.aae001 = #aae001#
+			 and a.aac001 = #aac001#
+		     and a.aae013 is null
+		</update>
+	-->
+	<select id="getIrad51a1" parameterClass="map" resultClass="java.lang.Integer">
 		 SELECT count(1)
 		FROM wsjb.irad51a1
 		 where aac001 = #aac001#
@@ -2212,30 +2229,11 @@
 <![CDATA[ and aae042<=#aae001_e#  ]]>
 <![CDATA[ and not exists (select 1 from wsjb.irac01a3 a where a.aab001=#aab001# and a.aac001=#aac001# and aae110='2')  ]]>
 	</select>
-	<select id="getIrad51a1_2" parameterClass="map" resultClass="java.lang.Integer">
-		 SELECT count(1)
-		FROM wsjb.irad51a1 a, wsjb.irac01a3 b
-		 where a.yae031 = '1'
-		  AND b.aae110 = '2'
-	      AND a.aac001 = b.aac001
-	      AND a.aab001 = b.aab001
-	      AND a.aac001 = #aac001#
-		  AND a.aab001 = #aab001#
-<![CDATA[ AND a.aae041>= #aae001_b# ]]>
-<![CDATA[ AND a.aae042<= #aae001_e# ]]>
-	</select>
+
 	<select id="getac02_zy" parameterClass="java.lang.String" resultClass="java.lang.Integer">
 		 SELECT count(1) FROM xasi2.ac02_zy where aac001 = #aac001#
 	</select>
-	<update id="updateAb05a1_1" parameterClass="map">
-			update xasi2.ac01k8 a
-			   set a.aae013 = #aae013_1#
-			 where a.aab001 = #aab001#
-			 and a.aae001 = #aae001#
-			 and a.aac001 = #aac001#
-		     and a.aae013 is null
-		</update>
--->
+
 	<!-- 是否是重点审核单位(年度写死) -->
 	<select id="getIrad54Count" parameterClass="map" resultClass="java.lang.Integer">
 		SELECT COUNT(1) as k FROM wsjb.irad54 WHERE aab001 = #aab001# AND iaa011 = 'A05' and aae001 = 2019
@@ -2266,9 +2264,11 @@
 	<procedure id="prc_p_checkInfoByYear" parameterMap="prc_p_checkInfoByYearMap">
 		{call wsjb.pkg_P_Validate.prc_p_checkInfoByYear(?,?,?,?,?,?,?,?,?,?,?,?,?,?)}
 	</procedure>
+
 	<select id="getIrac01c1Count" parameterClass="map" resultClass="java.lang.Integer">
 		SELECT COUNT(1) as k FROM wsjb.irac01c1 WHERE aab001 = #aab001# AND aac002 = #aac002# and yab029 = #aac001# and yae031='1' and substr(iaa100,1,4)=#aae001#
 	</select>
+
 	<!-- 数据清除-->
 	<parameterMap id="prc_YearSalaryClearMap"  class="java.util.Map">
 		<parameter property="prm_aab001" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
@@ -2279,6 +2279,7 @@
 		<parameter property="ErrorMsg"   jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" nullValue=""  />
 	</parameterMap>
 	<procedure id="prc_YearSalaryClear" parameterMap="prc_YearSalaryClearMap">{call wsjb.pkg_YearApply.prc_YearSalaryClear(?,?,?,?,?,?)} </procedure>
+
 	<!-- 是否是重点审核单位(年度写死) -->
 	<select id="getIrad56Count" parameterClass="map" resultClass="java.lang.Integer">
 		SELECT COUNT(1) as k FROM wsjb.irad56 WHERE aab001 = #aab001#
@@ -2359,7 +2360,6 @@
 			ORDER BY aae002,aac003
 		</isNotEqual>
 	</select>
-
 
 	<!-- 根据做帐期号查询单位的二次补差信息 -->
 	<select id="getInsPayInfo1" parameterClass="map" resultClass="dto">
@@ -2537,5 +2537,10 @@
 	<select id="checkAac040" parameterClass="map" resultClass="java.lang.Integer">
 		SELECT count(1) as countaac040 FROM xasi2.ac01k8 WHERE aab001 = #aab001# AND aae001 = #aae001# AND (aac040 is null OR aac040 = 0) AND yab019 = '1'
 	</select>
+
+	<!-- 清空年审数据同时删除诚信确认书 -->
+	<delete id="deleteConfirm" parameterClass="map">
+    	DELETE wsjb.yearapply_confirm WHERE yae031='1' AND aab001 = #aab001# AND aae001 = #aae001#
+    </delete>
 
 </sqlMap>

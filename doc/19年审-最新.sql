@@ -1,9 +1,10 @@
 /*
 855555  111111
-854518  111111  企业
-855905  111111
+830558 111111 单养老
+854518  111111  企业   (已审核)
+855905  111111 企业
 890009  111111  弄些人进来
-004459  111111  1月在市本级,2月在高新
+132967  111111  6 7 8 月在高新
 */
 
 --   比例补差  基数补差 补差欠费  限制年审
@@ -14,7 +15,7 @@ wsjb.pkg_P_Validate.prc_p_checkInfoByYear
 
 select * from xasi2.ac01k8 where aab001='855905' and aae001='2019' --for update 
 select * from wsjb.irad51 where aab001='855555' 
-select * from wsjb.yearapply_confirm --for update 
+select * from wsjb.yearapply_confirm -- for update 
 
 select * from wsjb.tmp_ac42 where aab001='855555'  and aac001='1006218794'
 select * from xasi2.ac01k8 where aab001='855555' and aae001='2019' and aac001='9910506277' --for update 

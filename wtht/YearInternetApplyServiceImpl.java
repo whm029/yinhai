@@ -1001,6 +1001,13 @@ public class YearInternetApplyServiceImpl extends WsBaseService implements YearI
     map.clear();
     map.put("flag", prcDto.getAsString("prm_flag"));
     map.put("msg", prcDto.getAsString("ErrorMsg"));
+
+    if (ValidateUtil.isEmpty(map.get("msg"))) {
+      map.put("aab001",prcDto.get("prm_aab001"));
+      map.put("aae001",prcDto.get("prm_aae001"));
+      dao.delete("yearApply.deleteConfirm",map);
+    }
+
     return XmlConverUtil.map2Xml(map);
   }
 

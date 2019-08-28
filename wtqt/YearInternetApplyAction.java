@@ -124,6 +124,7 @@ public class YearInternetApplyAction extends NetHallBaseAction {
     if(countconfm==0){
       setData("warningTips", "承诺书"); //
     }
+
     return JSON;
   }
 
@@ -879,6 +880,7 @@ public class YearInternetApplyAction extends NetHallBaseAction {
     }
     setList("sucGrid", new ArrayList());
     setMsg("数据清除成功！");
+    super.setDisabled("queryBtn,exportBtn,importBtn,retainBtn,viewBtn,applyBtn");
     return JSON;
   }
 }
