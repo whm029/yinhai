@@ -155,8 +155,8 @@
 	<ta:box id="auditDHInfo" cssStyle="display:none;width:500px;height:200px;">
 		<ta:fieldset id="panel" cols="2">
 			<ta:radiogroup id="cwzl" key="是否携带财务资料" cols="2" labelWidth="120">
-				<ta:radio key="是" value="0" onClick="setaae013();"/>
-				<ta:radio key="否" checked="true" value="1"/>
+				<ta:radio key="是" value="0" onClick="setaae013(0);"/>
+				<ta:radio key="否" checked="true" value="1" onClick="setaae013(1);"/>
 			</ta:radiogroup>
 			<ta:textarea id="aae013_1" key="打回信息" height="60" span="2" required="true"/>
 		</ta:fieldset>
@@ -235,8 +235,12 @@ $(document).ready(function () {
 	  Base.submit("grid1,businessform","yearInternetCenterAuditAction!updateJSC.do",{"dto['aab001']":aab001,"dto['aae001']":aae001,"dto['iaa011']":iaa011},null,false,null,null);
 	}
 
-	function setaae013() {
-		Base.setValue("aae013_1","请携带财务资料前往高新区社保中心审核年报!");
+	function setaae013(v) {
+	 	if (v == '0') {
+			Base.setValue("aae013_1","请携带财务资料前往高新区社保中心审核年报!");
+		}else{
+			Base.setValue("aae013_1","");
+		}
 	}
 
 </script>

@@ -2046,7 +2046,6 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
            END LOOP;
 
       --modify by whm 20190813 提前结算且没有续保回原单位,续保回原单位的在下面单独写一条ac01k8 start
-
       --检查是否为养老提前结算
        SELECT count(1)
         INTO n_count
@@ -2058,21 +2057,24 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
          AND aae041 <= prm_aae001||'12'
          AND not exists (select 1 from wsjb.irac01a3 a where a.aab001=prm_aab001 and a.aac001=v_aac001 and aae110='2');
       IF n_count > 0 THEN
-        --拼接提前结算注释
-          select max(decode(aae002, prm_aae001 || '01', '01月/')) ||
+          --拼接提前结算注释
+             select max(decode(aae002, prm_aae001 || '01', '01月/')) ||
                         max(decode(aae002, prm_aae001 || '02', '02月/')) ||
                         max(decode(aae002, prm_aae001 || '03', '03月/')) ||
                         max(decode(aae002, prm_aae001 || '04', '04月/')) ||
                         max(decode(aae002, prm_aae001 || '05', '05月/')) ||
-                        max(decode(aae002, prm_aae001 || '06', '06月/'))
+                        max(decode(aae002, prm_aae001 || '06', '06月/')) ||
+                        max(decode(aae002, prm_aae001 || '07', '07月/')) ||
+                        max(decode(aae002, prm_aae001 || '08', '08月/')) ||
+                        max(decode(aae002, prm_aae001 || '09', '09月/')) 
                     as tqjsyf into v_tqjsyf
                    from wsjb.irad51a2
                   where aac001 = v_aac001
                     and aae002 >= prm_aae001 || '01'
                     and aae002 <= prm_aae001 || '12';
-         v_yae110 := v_yae110||'养老提前结算/'||v_tqjsyf;
+                    v_yae110 := v_yae110||'养老提前结算/'||v_tqjsyf;
       END IF;
-      --modify by whm 20190813 提前结算且没有续保回原单位,续保回原单位的在下面单独写一条ac01k8 ac01k8 end
+     --modify by whm 20190813 提前结算且没有续保回原单位,续保回原单位的在下面单独写一条ac01k8 ac01k8 end
 
 
 
@@ -2919,13 +2921,16 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                         max(decode(aae002, prm_aae001 || '03', '03月/')) ||
                         max(decode(aae002, prm_aae001 || '04', '04月/')) ||
                         max(decode(aae002, prm_aae001 || '05', '05月/')) ||
-                        max(decode(aae002, prm_aae001 || '06', '06月/'))
+                       max(decode(aae002, prm_aae001 || '06', '06月/')) ||
+                        max(decode(aae002, prm_aae001 || '07', '07月/')) ||
+                        max(decode(aae002, prm_aae001 || '08', '08月/')) ||
+                        max(decode(aae002, prm_aae001 || '09', '09月/')) 
                     as tqjsyf into v_tqjsyf
                    from wsjb.irad51a2
                   where aac001 = v_aac001
                     and aae002 >= prm_aae001 || '01'
                     and aae002 <= prm_aae001 || '12';
-                  v_yae110 := '养老提前结算/'||v_tqjsyf;
+                     v_yae110 := '养老提前结算/'||v_tqjsyf;
                   
                   --获取结算月度的结算上账基数(如果提前结算的人续保回来从AC02或IRAC01取就不对了,所以取结算时的基数)
                   select distinct b.yaa334,b.yaa334
@@ -6257,8 +6262,14 @@ PROCEDURE prc_YearSalaryBC(prm_aab001       IN     irab01.aab001%TYPE,--单位编号
            IF PRM_APPCODE <> XASI2.PKG_COMM.GN_DEF_OK THEN
             RETURN;
            END IF;*/
-                                              
-       --modify by fenggg at 20190716 begin
+           --modify by fenggg at 20181202 end
+              
+--           fixme
+            --补差人数大于2000人
+             if 1=1 then
+               
+                                      
+              --modify by fenggg at 20190716 begin
               --增加2019年年审判断，2019年及之后年审调用新的补差过程
               IF prm_aae001 > 2018 THEN
                  xasi2.pkg_p_salaryExamineAdjust.pkg_p_salaryExamineAdjust_ns(
@@ -6282,11 +6293,11 @@ PROCEDURE prc_YearSalaryBC(prm_aab001       IN     irab01.aab001%TYPE,--单位编号
                                                 var_aae076      ,  --财务接口流水号
                                                 prm_AppCode     ,  --执行代码
                                                 PRM_ERRORMSG      ); --执行结果
-                 IF prm_AppCode <> XASI2.pkg_comm.gn_def_OK  THEN
-                    RETURN;
-                 ELSE
-                    PRM_ERRORMSG  := '';
-                 END IF;
+                             IF prm_AppCode <> XASI2.pkg_comm.gn_def_OK  THEN
+                                RETURN;
+                             ELSE
+                                PRM_ERRORMSG  := '';
+                             END IF;
               ELSE  --modify by fenggg at 20190716 end
                  xasi2.pkg_p_salaryExamineAdjust.pkg_p_salaryExamineAdjust(
                                                 VAR_AAZ002,
@@ -6308,16 +6319,17 @@ PROCEDURE prc_YearSalaryBC(prm_aab001       IN     irab01.aab001%TYPE,--单位编号
                                                 var_aae076      ,  --财务接口流水号
                                                 prm_AppCode     ,  --执行代码
                                                 PRM_ERRORMSG      ); --执行结果
-                 IF prm_AppCode <> XASI2.pkg_comm.gn_def_OK  THEN
-                    RETURN;
-                 ELSE
-                    PRM_ERRORMSG  := '';
-                 END IF;
-             END IF;                                              
-                                              
-
-           --modify by fenggg at 20181202 end
-       
+                             IF prm_AppCode <> XASI2.pkg_comm.gn_def_OK  THEN
+                                RETURN;
+                             ELSE
+                                PRM_ERRORMSG  := '';
+                             END IF;
+             END IF; 
+             
+             
+             end if;
+             
+             
       END IF;
 
       --更新费用来源
@@ -10275,7 +10287,7 @@ BEGIN
 /*初始化变量*/
       prm_AppCode  := gn_def_OK;
       prm_ErrorMsg := '';
-      v_proportions_constant := -1;
+      v_proportions_constant := -35;
       v_proportions_msg := '';
 
         -- 单位是否有4险
@@ -10294,12 +10306,14 @@ BEGIN
                    where yae517 = 'H01'
                      and aab001 = prm_aab001
                      and aae041 > (prm_aae001 - 1) || 12
+                    and yab139 = '610127'
                   union
                   select aae041
                     from xasi2.ab08a8
                    where yae517 = 'H01'
                      and aab001 = prm_aab001
-                     and aae041 > (prm_aae001 - 1) || 12);
+                     and aae041 > (prm_aae001 - 1) || 12
+                     and yab139 = '610127') ;
         else --没有四险就是单养老单位取当年养老最小核费期号
           select min(aae041)
             into v_minaae041

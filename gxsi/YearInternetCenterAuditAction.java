@@ -1009,7 +1009,6 @@ public class YearInternetCenterAuditAction extends BaseAction implements IDataSe
       setMsg("没有单位基数数据");
       return JSON;
     }
-
     Map m = new HashMap();
     String msg02 = "";
     for (int i = 0; i < list.size(); i++) {
@@ -1020,8 +1019,6 @@ public class YearInternetCenterAuditAction extends BaseAction implements IDataSe
       }
       String aac001 = (String) m.get("aac001");
       dto.put("aac001", aac001);
-
-
       //根据单位编号和个人编号查询提前结算数据
       //如果有则跳过
       Map m1 = new HashMap();
@@ -1053,7 +1050,6 @@ public class YearInternetCenterAuditAction extends BaseAction implements IDataSe
           if (!xmlMap.get("jyjgfhbs").equals("0")) {
             msg02 = msg02.concat("###").concat("身份证号为：" + m.get("aac002") + "人员").concat(xmlMap.get("errorMsg") + "") + "</br>";
           }
-
         }
         dto.remove("grbh");
       }

@@ -293,7 +293,7 @@ public class YearInternetApplyAction extends NetHallBaseAction {
         /* 调用养老接口写入 */
         key.put("aac040", key.getAsBigDecimal("yac004"));
         //fixme 发布的时候要放开
-       // baseCommService.insertYLINFOBy11(XmlConverUtil.map2Xml(key));
+        baseCommService.insertYLINFOBy11(XmlConverUtil.map2Xml(key));
       }
     }
     /* 检查是否能提交申请 */
