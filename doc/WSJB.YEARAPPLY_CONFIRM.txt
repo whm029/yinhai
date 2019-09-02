@@ -1,0 +1,46 @@
+-- Create table
+create table YEARAPPLY_CONFIRM
+(
+  aab001 VARCHAR2(15),
+  yae031 VARCHAR2(3),
+  aae120 VARCHAR2(6),
+  aae001 NUMBER(4),
+  aae013 VARCHAR2(20),
+  aae036 DATE
+)
+tablespace DATA1
+  pctfree 10
+  initrans 1
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  );
+-- Create/Recreate indexes 
+create index INDEX_YEARAPPLY_CONFIRM_01 on YEARAPPLY_CONFIRM (AAB001)
+  tablespace DATA1
+  pctfree 10
+  initrans 2
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  );
+create index INDEX_YEARAPPLY_CONFIRM_02 on YEARAPPLY_CONFIRM (AAE001)
+  tablespace DATA1
+  pctfree 10
+  initrans 2
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  );

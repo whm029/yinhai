@@ -1,60 +1,60 @@
 CREATE OR REPLACE PACKAGE BODY PKG_P_VALIDATE
 /*****************************************************************************/
-/*  ç¨‹åºåŒ…å ï¼špkg_P_Validate                                                */
-/*  ä¸šåŠ¡ç¯èŠ‚ ï¼šå•ä½æƒé™éªŒè¯                                                  */
-/*  åŠŸèƒ½æè¿° ï¼š                                                              */
+/*  ³ÌĞò°üÃû £ºpkg_P_Validate                                                */
+/*  ÒµÎñ»·½Ú £ºµ¥Î»È¨ÏŞÑéÖ¤                                                  */
+/*  ¹¦ÄÜÃèÊö £º                                                              */
 /*                                                                           */
-/*  ä½œ    è€… ï¼šå››å·ä¹…è¿œé“¶æµ·è½¯ä»¶è‚¡ä»½æœ‰é™å…¬å¸                                  */
-/*  ä½œæˆæ—¥æœŸ ï¼š2015-11-11           ç‰ˆæœ¬ç¼–å· ï¼šVer 1.0.0                     */
+/*  ×÷    Õß £ºËÄ´¨¾ÃÔ¶Òøº£Èí¼ş¹É·İÓĞÏŞ¹«Ë¾                                  */
+/*  ×÷³ÉÈÕÆÚ £º2015-11-11           °æ±¾±àºÅ £ºVer 1.0.0                     */
 /*---------------------------------------------------------------------------*/
-/*  ä¿®æ”¹è®°å½• ï¼š                                                              */
+/*  ĞŞ¸Ä¼ÇÂ¼ £º                                                              */
 /*****************************************************************************/
 AS
 
-   PRE_ERRCODE CONSTANT VARCHAR2(45) := 'prc_p_ValidatePrivilege'; --æœ¬åŒ…çš„é”™è¯¯ç¼–å·å‰ç¼€
+   PRE_ERRCODE CONSTANT VARCHAR2(45) := 'prc_p_ValidatePrivilege'; --±¾°üµÄ´íÎó±àºÅÇ°×º
 
   /*--------------------------------------------------------------------------
-   || ä¸šåŠ¡ç¯èŠ‚ ï¼šå•ä½æƒé™éªŒè¯
-   || è¿‡ç¨‹åç§° ï¼šprc_P_ValidateAab001Privilege
-   || åŠŸèƒ½æè¿° ï¼šå¼€æˆ·æœªé€šè¿‡ï¼Œå•ä½ä¿¡æ¯å¼‚å¸¸ï¼Œæœªæ‰¹å‡†æœˆæŠ¥ï¼Œå•ä½æƒé™æ§åˆ¶ï¼Œå•ä½åšè´¦æœŸå·ä¸ä¸€è‡´æ—¶æ— æ³•æ“ä½œå•ä½
-   || å‚æ•°æè¿° ï¼šå‚æ•°æ ‡è¯†           è¯´æ˜
+   || ÒµÎñ»·½Ú £ºµ¥Î»È¨ÏŞÑéÖ¤
+   || ¹ı³ÌÃû³Æ £ºprc_P_ValidateAab001Privilege
+   || ¹¦ÄÜÃèÊö £º¿ª»§Î´Í¨¹ı£¬µ¥Î»ĞÅÏ¢Òì³££¬Î´Åú×¼ÔÂ±¨£¬µ¥Î»È¨ÏŞ¿ØÖÆ£¬µ¥Î»×öÕËÆÚºÅ²»Ò»ÖÂÊ±ÎŞ·¨²Ù×÷µ¥Î»
+   || ²ÎÊıÃèÊö £º²ÎÊı±êÊ¶           ËµÃ÷
    ||            --------------------------------------------------------------
    ||
    ||
-   || ä½œ    è€… ï¼šcora          å®Œæˆæ—¥æœŸ ï¼š2015-11-11
+   || ×÷    Õß £ºcora          Íê³ÉÈÕÆÚ £º2015-11-11
    ||------------------------------------------------------------------------*/
    PROCEDURE prc_P_ValidateAab001Privilege(
-      prm_aab001          IN            VARCHAR2,     --å•ä½ç¼–å·
-      prm_msg             OUT           VARCHAR2,     --é”™è¯¯ä¿¡æ¯
-      prm_sign            OUT           VARCHAR2,     --é”™è¯¯æ ‡å¿—
-      prm_AppCode         OUT           VARCHAR2,     --æ‰§è¡Œä»£ç 
-      prm_ErrorMsg        OUT           VARCHAR2)     --å‡ºé”™ä¿¡æ¯
+      prm_aab001          IN            VARCHAR2,     --µ¥Î»±àºÅ
+      prm_msg             OUT           VARCHAR2,     --´íÎóĞÅÏ¢
+      prm_sign            OUT           VARCHAR2,     --´íÎó±êÖ¾
+      prm_AppCode         OUT           VARCHAR2,     --Ö´ĞĞ´úÂë
+      prm_ErrorMsg        OUT           VARCHAR2)     --³ö´íĞÅÏ¢
    IS
-       /*å­—æ®µå®šä¹‰*/
-      var_iaa002     VARCHAR2(30); -- å®¡æ ¸æ ‡å¿—
-      var_yab010     irab01.yab010%TYPE;  -- æœªæ‰¹å‡†æœˆæŠ¥
-      num_count1     NUMBER(6);    --  aab001æ˜¯å¦å­˜åœ¨å¤šæ¡ä¿¡æ¯
-      num_count2     NUMBER(6);    --  irab01 å•ä½æ˜¯å¦å­˜åœ¨å¤šæ¡ä¿¡æ¯
-      num_count3     NUMBER(6);    --  irab01 åˆ¤æ–­å•ä½æœ€å¤§åšè´¦æœŸå·æ˜¯å¦ä¸€è‡´
-      /*æ¸¸æ ‡å£°æ˜*/
+       /*×Ö¶Î¶¨Òå*/
+      var_iaa002     VARCHAR2(30); -- ÉóºË±êÖ¾
+      var_yab010     irab01.yab010%TYPE;  -- Î´Åú×¼ÔÂ±¨
+      num_count1     NUMBER(6);    --  aab001ÊÇ·ñ´æÔÚ¶àÌõĞÅÏ¢
+      num_count2     NUMBER(6);    --  irab01 µ¥Î»ÊÇ·ñ´æÔÚ¶àÌõĞÅÏ¢
+      num_count3     NUMBER(6);    --  irab01 ÅĞ¶Ïµ¥Î»×î´ó×öÕËÆÚºÅÊÇ·ñÒ»ÖÂ
+      /*ÓÎ±êÉùÃ÷*/
 
 
    BEGIN
-       /*åˆå§‹åŒ–å˜é‡*/
+       /*³õÊ¼»¯±äÁ¿*/
       prm_AppCode  := GN_DEF_OK;
       prm_ErrorMsg := '';
-      prm_msg :='æç¤ºä¿¡æ¯ï¼š';
+      prm_msg :='ÌáÊ¾ĞÅÏ¢£º';
       prm_sign :='0';
 
-      --æ ¡éªŒå‚æ•°
+      --Ğ£Ñé²ÎÊı
       IF prm_aab001 IS NULL  THEN
 
-         prm_msg :=  prm_msg||'ä¼ å…¥å‚æ•°æœ‰è¯¯ï¼Œè¯·æ ¸å®ã€‚ã€‚ã€‚';
+         prm_msg :=  prm_msg||'´«Èë²ÎÊıÓĞÎó£¬ÇëºËÊµ¡£¡£¡£';
          prm_sign := '1';
          GOTO label_ERROR;
        END IF;
 
-      -- å­˜åœ¨å¤šæ¡å•ä½ä¿¡æ¯
+      -- ´æÔÚ¶àÌõµ¥Î»ĞÅÏ¢
       SELECT COUNT(1)
         INTO num_count1
         FROM wsjb.irab01
@@ -63,12 +63,12 @@ AS
 
        IF num_count1 <> 1 THEN
 
-           prm_msg :=  prm_msg||'å­˜åœ¨å¤šæ¡å•ä½ä¿¡æ¯ï¼Œè¯·å‚ä¿å•ä½è”ç³»ç¤¾ä¿åŸºé‡‘ç®¡ç†ä¸­å¿ƒå¤„ç†ï¼';
+           prm_msg :=  prm_msg||'´æÔÚ¶àÌõµ¥Î»ĞÅÏ¢£¬Çë²Î±£µ¥Î»ÁªÏµÉç±£»ù½ğ¹ÜÀíÖĞĞÄ´¦Àí£¡';
            prm_sign := '1';
            GOTO label_ERROR;
         END IF;
 
-       --  è‹¥å•ä½å®¡æ ¸æ ‡å¿—è‹¥ä¸ç­‰äº2 åˆ™æ— æ³•æ“ä½œè¯¥å•ä½
+       --  Èôµ¥Î»ÉóºË±êÖ¾Èô²»µÈÓÚ2 ÔòÎŞ·¨²Ù×÷¸Ãµ¥Î»
        SELECT IAA002
          INTO var_iaa002
          FROM wsjb.irab01
@@ -76,12 +76,12 @@ AS
           AND AAB001 = prm_aab001;
 
         IF var_iaa002 != '2' THEN
-           prm_msg :=  prm_msg||'å•ä½å¤„äºæœªå®¡æ ¸é€šè¿‡çŠ¶æ€,åˆ™æ— æ³•æ“ä½œè¯¥å•ä½ï¼ï¼ã€‚ã€‚ã€‚';
+           prm_msg :=  prm_msg||'µ¥Î»´¦ÓÚÎ´ÉóºËÍ¨¹ı×´Ì¬,ÔòÎŞ·¨²Ù×÷¸Ãµ¥Î»£¡£¡¡£¡£¡£';
            prm_sign := '1';
            GOTO label_ERROR;
         END IF;
 
-       --  åˆ¤æ–­æ˜¯å¦æœªæ‰¹å‡†æœˆæŠ¥
+       --  ÅĞ¶ÏÊÇ·ñÎ´Åú×¼ÔÂ±¨
        SELECT YAB010
          INTO var_yab010
          FROM wsjb.irab01
@@ -89,12 +89,12 @@ AS
           AND iab001 = AAB001;
 
         IF var_yab010 != '1' THEN
-           prm_msg :=  prm_msg||'è¯¥å•ä½è¿˜æœªæ‰¹å‡†æœˆæŠ¥ï¼è¯·å•ä½äººå‘˜æºå¸¦ç›¸å…³èµ„æ–™åˆ°åŸºé‡‘ç®¡ç†ä¸­å¿ƒå¤å®¡ï¼';
+           prm_msg :=  prm_msg||'¸Ãµ¥Î»»¹Î´Åú×¼ÔÂ±¨£¡Çëµ¥Î»ÈËÔ±Ğ¯´øÏà¹Ø×ÊÁÏµ½»ù½ğ¹ÜÀíÖĞĞÄ¸´Éó£¡';
            prm_sign := '1';
            GOTO label_ERROR;
         END IF;
 
-       --   åˆ¤æ–­å•ä½åšè´¦æœŸå·æ˜¯å¦ä¸ä¸€è‡´
+       --   ÅĞ¶Ïµ¥Î»×öÕËÆÚºÅÊÇ·ñ²»Ò»ÖÂ
         SELECT COUNT(DISTINCT yae097) INTO num_count2
           FROM xasi2.ab02
          WHERE aab001=prm_aab001
@@ -102,54 +102,54 @@ AS
 
           IF num_count2 >1 THEN
 
-          prm_msg :=  prm_msg||'è¯¥å•ä½æœ€å¤§åšè´¦æœŸå·æœ‰ä¸ä¸€è‡´çš„æƒ…å†µï¼è¯·å‚ä¿å•ä½è”ç³»ç¤¾ä¿åŸºé‡‘ç®¡ç†ä¸­å¿ƒå¤„ç†ï¼';
+          prm_msg :=  prm_msg||'¸Ãµ¥Î»×î´ó×öÕËÆÚºÅÓĞ²»Ò»ÖÂµÄÇé¿ö£¡Çë²Î±£µ¥Î»ÁªÏµÉç±£»ù½ğ¹ÜÀíÖĞĞÄ´¦Àí£¡';
           prm_sign := '1';
           GOTO label_ERROR;
         END IF;
 
-       --  å•ä½æƒé™æ§åˆ¶
+       --  µ¥Î»È¨ÏŞ¿ØÖÆ
        SELECT COUNT(*)
          INTO num_count3
          FROM wsjb.irab01a2
         WHERE AAB001=prm_aab001;
 
        IF num_count3 >0 THEN
-           prm_msg :=  prm_msg||'è¯¥å•ä½å­˜åœ¨ä¸€äº›ç‰¹æ®Šæ§åˆ¶ï¼Œè¯·å‚ä¿å•ä½è”ç³»ç¤¾ä¿åŸºé‡‘ç®¡ç†ä¸­å¿ƒå¤„ç†!';
+           prm_msg :=  prm_msg||'¸Ãµ¥Î»´æÔÚÒ»Ğ©ÌØÊâ¿ØÖÆ£¬Çë²Î±£µ¥Î»ÁªÏµÉç±£»ù½ğ¹ÜÀíÖĞĞÄ´¦Àí!';
            prm_sign := '1';
            GOTO label_ERROR;
         END IF;
 
-      /*å¤„ç†å¤±è´¥*/
+      /*´¦ÀíÊ§°Ü*/
       <<label_ERROR>>
       num_count1 := 0;
 
 
    EXCEPTION
      WHEN OTHERS THEN
-          /*å…³é—­æ‰“å¼€çš„æ¸¸æ ‡*/
+          /*¹Ø±Õ´ò¿ªµÄÓÎ±ê*/
           prm_AppCode  := PRE_ERRCODE || GN_DEF_ERR;
-          prm_ErrorMsg := 'æ•°æ®åº“é”™è¯¯ï¼'|| SQLERRM ;
+          prm_ErrorMsg := 'Êı¾İ¿â´íÎó£¡'|| SQLERRM ;
           RETURN;
    END prc_P_ValidateAab001Privilege;
    /*--------------------------------------------------------------------------
-   || ä¸šåŠ¡ç¯èŠ‚ ï¼šäººå‘˜æ–°å‚ä¿ç½‘å…éªŒè¯
-   || è¿‡ç¨‹åç§° prc_p_ValidateAac002Privilege
-   || åŠŸèƒ½æè¿° ï¼šæ ¡éªŒè¯¥äººå‘˜æ˜¯å¦èƒ½è¿›è¡Œæ–°å‚ä¿çš„ä¿¡æ¯å½•å…¥
+   || ÒµÎñ»·½Ú £ºÈËÔ±ĞÂ²Î±£ÍøÌüÑéÖ¤
+   || ¹ı³ÌÃû³Æ prc_p_ValidateAac002Privilege
+   || ¹¦ÄÜÃèÊö £ºĞ£Ñé¸ÃÈËÔ±ÊÇ·ñÄÜ½øĞĞĞÂ²Î±£µÄĞÅÏ¢Â¼Èë
    ||
-   || å‚æ•°æè¿° ï¼šå‚æ•°æ ‡è¯†           è¯´æ˜
+   || ²ÎÊıÃèÊö £º²ÎÊı±êÊ¶           ËµÃ÷
    ||            --------------------------------------------------------------
    ||
    ||
-   || ä½œ    è€… ï¼šzhujing         å®Œæˆæ—¥æœŸ ï¼š2015-11-16
+   || ×÷    Õß £ºzhujing         Íê³ÉÈÕÆÚ £º2015-11-16
    ||------------------------------------------------------------------------*/
    PROCEDURE prc_p_ValidateAac002Privilege(
-      prm_yae181          IN            VARCHAR2,     --è¯ä»¶ç±»å‹
-      prm_aac002          IN            VARCHAR2,     --è¯ä»¶å·ç 
-      prm_aab001          IN            VARCHAR2,     --å•ä½ç¼–å·
-      prm_msg             OUT           VARCHAR2,     -- é”™è¯¯ä¿¡æ¯
-      prm_sign            OUT           VARCHAR2,     -- é”™è¯¯æ ‡å¿—
-      prm_AppCode         OUT           VARCHAR2,     --æ‰§è¡Œä»£ç 
-      prm_ErrorMsg        OUT           VARCHAR2)    --å‡ºé”™ä¿¡æ¯
+      prm_yae181          IN            VARCHAR2,     --Ö¤¼şÀàĞÍ
+      prm_aac002          IN            VARCHAR2,     --Ö¤¼şºÅÂë
+      prm_aab001          IN            VARCHAR2,     --µ¥Î»±àºÅ
+      prm_msg             OUT           VARCHAR2,     -- ´íÎóĞÅÏ¢
+      prm_sign            OUT           VARCHAR2,     -- ´íÎó±êÖ¾
+      prm_AppCode         OUT           VARCHAR2,     --Ö´ĞĞ´úÂë
+      prm_ErrorMsg        OUT           VARCHAR2)    --³ö´íĞÅÏ¢
    IS
     sj_acount       NUMBER(6);
    num_count        NUMBER(6);
@@ -166,30 +166,30 @@ AS
    sj_count1        NUMBER(6);
    count_jm         NUMBER(6);
    BEGIN
-    /*åˆå§‹åŒ–å˜é‡*/
+    /*³õÊ¼»¯±äÁ¿*/
       prm_AppCode  := GN_DEF_OK;
       prm_ErrorMsg := '';
       prm_msg :='';
       prm_sign :='0';
-   --æ ¡éªŒå‚æ•°
+   --Ğ£Ñé²ÎÊı
       IF prm_yae181 IS NULL  THEN
-         prm_msg :=  prm_msg||'ä¼ å…¥è¯ä»¶ç±»å‹ä¸ºç©ºï¼Œè¯·æ ¸å®ã€‚ã€‚ã€‚';
+         prm_msg :=  prm_msg||'´«ÈëÖ¤¼şÀàĞÍÎª¿Õ£¬ÇëºËÊµ¡£¡£¡£';
          prm_sign := '1';
          GOTO label_ERROR;
       END IF;
       IF prm_aab001 IS NULL  THEN
-         prm_msg :=  prm_msg||'ä¼ å…¥å•ä½ç¼–å·ä¸ºç©ºï¼Œè¯·æ ¸å®ã€‚ã€‚ã€‚';
+         prm_msg :=  prm_msg||'´«Èëµ¥Î»±àºÅÎª¿Õ£¬ÇëºËÊµ¡£¡£¡£';
          prm_sign := '1';
          GOTO label_ERROR;
       END IF;
       IF prm_aac002 IS NULL  THEN
-         prm_msg :=  prm_msg||'ä¼ å…¥è¯ä»¶å·ç ä¸ºç©ºï¼Œè¯·æ ¸å®ã€‚ã€‚ã€‚';
+         prm_msg :=  prm_msg||'´«ÈëÖ¤¼şºÅÂëÎª¿Õ£¬ÇëºËÊµ¡£¡£¡£';
          prm_sign := '1';
          GOTO label_ERROR;
       END IF;
-       --èº«ä»½è¯ç±»å‹
+       --Éí·İÖ¤ÀàĞÍ
      IF prm_yae181 = 1 THEN
-        --è·å–å„ç§å½¢å¼çš„è¯ä»¶å·ç 
+        --»ñÈ¡¸÷ÖÖĞÎÊ½µÄÖ¤¼şºÅÂë
          var_15aac002 := SUBSTR(prm_aac002,1,6)||SUBSTR(prm_aac002,9, 9);
          var_aac002Low := LOWER(prm_aac002);
 
@@ -198,7 +198,7 @@ AS
           FROM xasi2.ac01 A
          WHERE AAE120 = '0'
            AND A.AAC002 IN (var_15aac002, var_aac002Low, prm_aac002)
-           AND AAC003 NOT LIKE '%é‡å¤%';
+           AND AAC003 NOT LIKE '%ÖØ¸´%';
 
          IF num_count > 0 THEN
             SELECT COUNT(1)
@@ -208,9 +208,9 @@ AS
                                 FROM XASI2.AC01
                                WHERE AAE120 = '0'
                                  AND AAC002 = PRM_AAC002
-                                 AND AAC003 NOT LIKE '%é‡å¤%');
+                                 AND AAC003 NOT LIKE '%ÖØ¸´%');
               IF count_jm>0 THEN
-                prm_msg := 'è¯¥äººå‘˜å­˜åœ¨å±…æ°‘åŒ»ä¿å‚ä¿è®°å½•ï¼';
+                prm_msg := '¸ÃÈËÔ±´æÔÚ¾ÓÃñÒ½±£²Î±£¼ÇÂ¼£¡';
                 prm_sign :='1';
                 GOTO label_ERROR ;
               END IF;
@@ -222,10 +222,10 @@ AS
                FROM xasi2.ac01
               WHERE AAE120 = '0'
               AND aac002 = prm_aac002
-              AND AAC003 NOT LIKE '%é‡å¤%';
+              AND AAC003 NOT LIKE '%ÖØ¸´%';
              EXCEPTION
                   WHEN OTHERS THEN
-                       prm_msg := 'è¯¥äººå‘˜å­˜åœ¨å¤šä¸ªè´¦æˆ·ï¼Œè¯·æ ¸å¯¹è¯¥äººå‘˜æ˜¯å¦å­˜åœ¨å¤šæ¡åŒ»ç–—è´¦æˆ·ï¼Œè‹¥å­˜åœ¨ï¼Œåˆ™éœ€è¦åˆå¹¶ï¼›è‹¥ä¸å­˜åœ¨å¤šæ¡åŒ»ç–—è´¦æˆ·ï¼Œè¯·åœ¨ç»­ä¿æ¨¡å—æ“ä½œï¼';
+                       prm_msg := '¸ÃÈËÔ±´æÔÚ¶à¸öÕË»§£¬ÇëºË¶Ô¸ÃÈËÔ±ÊÇ·ñ´æÔÚ¶àÌõÒ½ÁÆÕË»§£¬Èô´æÔÚ£¬ÔòĞèÒªºÏ²¢£»Èô²»´æÔÚ¶àÌõÒ½ÁÆÕË»§£¬ÇëÔÚĞø±£Ä£¿é²Ù×÷£¡';
                        prm_sign :='1';
                        GOTO label_ERROR ;
             END;
@@ -275,14 +275,14 @@ AS
                        END;
             END;
              IF var_aac031='1' THEN
-                 var_aac031 :='å‚ä¿ç¼´è´¹';
+                 var_aac031 :='²Î±£½É·Ñ';
              ELSIF var_aac031='2' THEN
-                 var_aac031 :='æš‚åœç¼´è´¹';
+                 var_aac031 :='ÔİÍ£½É·Ñ';
              ELSIF var_aac031='3' THEN
-                 var_aac031 :='ç»ˆæ­¢ç¼´è´¹';
+                 var_aac031 :='ÖÕÖ¹½É·Ñ';
              END IF;
              SELECT aab004 INTO var_aab004 FROM xasi2.ab01 WHERE aab001 = var_aab001;
-               prm_msg := 'äººå‘˜æ–°å‚ä¿ç™»è®°éªŒè¯ä¸é€šè¿‡ï¼æ­¤èº«ä»½è¯å·ç äººå‘˜åŒ»ç–—ä¿é™©å…³ç³»ç›®å‰åœ¨ç¤¾ä¿ä¸­å¿ƒ,å§“å'||var_aac003||',å•ä½åç§°ï¼š'||var_aab004||'å‚ä¿ï¼Œå‚ä¿çŠ¶æ€:'||var_aac031||'ã€‚';
+               prm_msg := 'ÈËÔ±ĞÂ²Î±£µÇ¼ÇÑéÖ¤²»Í¨¹ı£¡´ËÉí·İÖ¤ºÅÂëÈËÔ±Ò½ÁÆ±£ÏÕ¹ØÏµÄ¿Ç°ÔÚÉç±£ÖĞĞÄ,ĞÕÃû'||var_aac003||',µ¥Î»Ãû³Æ£º'||var_aab004||'²Î±££¬²Î±£×´Ì¬:'||var_aac031||'¡£';
                prm_sign :='1';
                GOTO label_ERROR ;
          END IF ;
@@ -303,7 +303,7 @@ AS
              AND a.iaa001 <> '4'
              AND A.IAA002 <> '3'
              AND rownum =1;
-           prm_msg := 'è¯ä»¶å·ä¸ºï¼š['||prm_aac002||']çš„äººå‘˜åœ¨å•ä½'||var_aab001||'æœ‰ç”³æŠ¥è®°å½•,ä¸èƒ½æ–°å¢!';
+           prm_msg := 'Ö¤¼şºÅÎª£º['||prm_aac002||']µÄÈËÔ±ÔÚµ¥Î»'||var_aab001||'ÓĞÉê±¨¼ÇÂ¼,²»ÄÜĞÂÔö!';
            prm_sign :='1';
            GOTO label_ERROR ;
          END IF;
@@ -346,17 +346,17 @@ AS
                        and aac031='2'
                        AND ROWNUM =1;
                   ELSIF sj_count1 = 0 then
-                        --prm_msg := 'äººå‘˜æ–°å‚ä¿ç™»è®°éªŒè¯ä¸é€šè¿‡ï¼æ­¤èº«ä»½è¯å·ç äººå‘˜åŒ»ç–—ä¿é™©å…³ç³»ç›®å‰åœ¨è¥¿å®‰å¸‚ç¤¾ä¿ä¸­å¿ƒ,å§“å'||var_aac003;
+                        --prm_msg := 'ÈËÔ±ĞÂ²Î±£µÇ¼ÇÑéÖ¤²»Í¨¹ı£¡´ËÉí·İÖ¤ºÅÂëÈËÔ±Ò½ÁÆ±£ÏÕ¹ØÏµÄ¿Ç°ÔÚÎ÷°²ÊĞÉç±£ÖĞĞÄ,ĞÕÃû'||var_aac003;
                        --prm_sign :='1';
                    GOTO label_ERROR ;
                   END IF;
               end if;
               IF var_aac031='1' THEN
-                 var_aac031 :='å‚ä¿ç¼´è´¹';
+                 var_aac031 :='²Î±£½É·Ñ';
              ELSIF var_aac031='2' THEN
-                 var_aac031 :='æš‚åœç¼´è´¹';
+                 var_aac031 :='ÔİÍ£½É·Ñ';
              ELSIF var_aac031='3' THEN
-                 var_aac031 :='ç»ˆæ­¢ç¼´è´¹';
+                 var_aac031 :='ÖÕÖ¹½É·Ñ';
              END IF;
              BEGIN
               SELECT aab004
@@ -367,7 +367,7 @@ AS
                   WHEN OTHERS THEN
                        var_aab004 :='';
              END;
-           prm_msg := 'äººå‘˜æ–°å‚ä¿ç™»è®°éªŒè¯ä¸é€šè¿‡ï¼æ­¤èº«ä»½è¯å·ç äººå‘˜åŒ»ç–—ä¿é™©å…³ç³»ç›®å‰åœ¨è¥¿å®‰å¸‚ç¤¾ä¿ä¸­å¿ƒ,å§“å'||var_aac003||',å•ä½åç§°ï¼š'||var_aab004||'å‚ä¿ï¼Œå‚ä¿çŠ¶æ€:'||var_aac031||'ã€‚';
+           prm_msg := 'ÈËÔ±ĞÂ²Î±£µÇ¼ÇÑéÖ¤²»Í¨¹ı£¡´ËÉí·İÖ¤ºÅÂëÈËÔ±Ò½ÁÆ±£ÏÕ¹ØÏµÄ¿Ç°ÔÚÎ÷°²ÊĞÉç±£ÖĞĞÄ,ĞÕÃû'||var_aac003||',µ¥Î»Ãû³Æ£º'||var_aab004||'²Î±££¬²Î±£×´Ì¬:'||var_aac031||'¡£';
            prm_sign :='1';
            GOTO label_ERROR ;
        END IF;*/
@@ -376,17 +376,17 @@ AS
 
 
      END IF;
-     --æŠ¤ç…§ç±»å‹
+     --»¤ÕÕÀàĞÍ
      IF prm_yae181 <> '1' THEN
        SELECT count(1)
           INTO num_count
           FROM xasi2.ac01 A
          WHERE AAE120 = '0'
            AND A.AAC002 = prm_aac002
-           AND AAC003 NOT LIKE '%é‡å¤%';
+           AND AAC003 NOT LIKE '%ÖØ¸´%';
 
          IF num_count > 0 THEN
-           prm_msg := 'è¯ä»¶å·ä¸ºï¼š['||prm_aac002||']çš„äººå‘˜å·²å­˜åœ¨ä¸ªäººä¿¡æ¯ï¼Œè¯·åœ¨ç»­ä¿æ¨¡å—é‡Œæ“ä½œ';
+           prm_msg := 'Ö¤¼şºÅÎª£º['||prm_aac002||']µÄÈËÔ±ÒÑ´æÔÚ¸öÈËĞÅÏ¢£¬ÇëÔÚĞø±£Ä£¿éÀï²Ù×÷';
            prm_sign :='1';
            GOTO label_ERROR;
          END IF;
@@ -407,7 +407,7 @@ AS
              AND A.iaa001 <> '4'
              AND A.IAA002 <> '3'
              AND rownum =1;
-           prm_msg := 'è¯ä»¶å·ä¸ºï¼š['||prm_aac002||']çš„äººå‘˜åœ¨å•ä½'||var_aab001||'æœ‰ç”³æŠ¥è®°å½•,ä¸èƒ½æ–°å¢!';
+           prm_msg := 'Ö¤¼şºÅÎª£º['||prm_aac002||']µÄÈËÔ±ÔÚµ¥Î»'||var_aab001||'ÓĞÉê±¨¼ÇÂ¼,²»ÄÜĞÂÔö!';
            prm_sign :='1';
            GOTO label_ERROR ;
          END IF;
@@ -420,51 +420,51 @@ AS
 
    EXCEPTION
      WHEN OTHERS THEN
-          /*å…³é—­æ‰“å¼€çš„æ¸¸æ ‡*/
+          /*¹Ø±Õ´ò¿ªµÄÓÎ±ê*/
           prm_AppCode  := PRE_ERRCODE || GN_DEF_ERR;
-          prm_ErrorMsg := 'æ•°æ®åº“é”™è¯¯ï¼'|| SQLERRM ;
+          prm_ErrorMsg := 'Êı¾İ¿â´íÎó£¡'|| SQLERRM ;
           RETURN;
    END prc_p_ValidateAac002Privilege;
 
    /*--------------------------------------------------------------------------
-   || ä¸šåŠ¡ç¯èŠ‚ ï¼šäººå‘˜å•ä¸ªæ–°å‚ä¿ç½‘å…ä¿å­˜éªŒè¯
-   || è¿‡ç¨‹åç§° prc_p_ValidateAac002Privilege
-   || åŠŸèƒ½æè¿° ï¼šæ ¡éªŒè¯¥äººå‘˜æ˜¯å¦èƒ½è¿›è¡Œæ–°å‚ä¿çš„ä¿¡æ¯å½•å…¥
+   || ÒµÎñ»·½Ú £ºÈËÔ±µ¥¸öĞÂ²Î±£ÍøÌü±£´æÑéÖ¤
+   || ¹ı³ÌÃû³Æ prc_p_ValidateAac002Privilege
+   || ¹¦ÄÜÃèÊö £ºĞ£Ñé¸ÃÈËÔ±ÊÇ·ñÄÜ½øĞĞĞÂ²Î±£µÄĞÅÏ¢Â¼Èë
    ||
-   || å‚æ•°æè¿° ï¼šå‚æ•°æ ‡è¯†           è¯´æ˜
+   || ²ÎÊıÃèÊö £º²ÎÊı±êÊ¶           ËµÃ÷
    ||            --------------------------------------------------------------
    ||
    ||
-   || ä½œ    è€… ï¼šzhujing         å®Œæˆæ—¥æœŸ ï¼š2015-11-16
+   || ×÷    Õß £ºzhujing         Íê³ÉÈÕÆÚ £º2015-11-16
    ||------------------------------------------------------------------------*/
    PROCEDURE prc_p_checkNewInsur(
-       prm_iaz018          IN            VARCHAR2,     --æ‰¹æ¬¡å·
-      prm_yab139          IN            VARCHAR2,     --ç»åŠæœºæ„
-      prm_msg             OUT           VARCHAR2,     -- é”™è¯¯ä¿¡æ¯
-      prm_sign            OUT           VARCHAR2,     -- é”™è¯¯æ ‡å¿—
-      prm_AppCode         OUT           VARCHAR2,     --æ‰§è¡Œä»£ç 
-      prm_ErrorMsg        OUT           VARCHAR2)    --å‡ºé”™ä¿¡æ¯
+       prm_iaz018          IN            VARCHAR2,     --Åú´ÎºÅ
+      prm_yab139          IN            VARCHAR2,     --¾­°ì»ú¹¹
+      prm_msg             OUT           VARCHAR2,     -- ´íÎóĞÅÏ¢
+      prm_sign            OUT           VARCHAR2,     -- ´íÎó±êÖ¾
+      prm_AppCode         OUT           VARCHAR2,     --Ö´ĞĞ´úÂë
+      prm_ErrorMsg        OUT           VARCHAR2)    --³ö´íĞÅÏ¢
 
    IS
    num_count        NUMBER(6);
    rec_tmp_irac01a2 tmp_irac01a2%ROWTYPE;
-   dat_aac006       DATE ;--å‡ºç”Ÿæ—¥æœŸ
-   dat_aac007       DATE ;--å‚å·¥æ—¥æœŸ
-   dat_aac030       DATE ;--æœ¬ç³»ç»Ÿå‚ä¿æ—¥æœŸ
-   dat_yac033       DATE ;--ä¸ªäººåˆæ¬¡å‚ä¿æ—¥æœŸ
+   dat_aac006       DATE ;--³öÉúÈÕÆÚ
+   dat_aac007       DATE ;--²Î¹¤ÈÕÆÚ
+   dat_aac030       DATE ;--±¾ÏµÍ³²Î±£ÈÕÆÚ
+   dat_yac033       DATE ;--¸öÈË³õ´Î²Î±£ÈÕÆÚ
    var_aab001       irab01.aab001%TYPE;
    var_aae140       irab02.aae140%TYPE;
-   num_aac040       NUMBER(14,2); --ç¼´è´¹å·¥èµ„
-   num_yac004       NUMBER(14,2); --å…»è€åŸºæ•°
-   num_yac005       NUMBER(14,2); --å…¶ä»–åŸºæ•°
-   var_iaa100       varchar2(6);  --ç”³æŠ¥æœˆåº¦
+   num_aac040       NUMBER(14,2); --½É·Ñ¹¤×Ê
+   num_yac004       NUMBER(14,2); --ÑøÀÏ»ùÊı
+   num_yac005       NUMBER(14,2); --ÆäËû»ùÊı
+   var_iaa100       varchar2(6);  --Éê±¨ÔÂ¶È
    var_iaa100_a      DATE;
-   var_aac004       irac01.aac004%TYPE;  --æ€§åˆ«
-   var_aac008       irac01.aac008%TYPE;  --äººå‘˜çŠ¶æ€
-   dat_yearAge      DATE;  --åˆ°é¾„æ—¥æœŸ
-   var_aac012       irac01.aac012%TYPE;  --äººå‘˜èº«ä»½
+   var_aac004       irac01.aac004%TYPE;  --ĞÔ±ğ
+   var_aac008       irac01.aac008%TYPE;  --ÈËÔ±×´Ì¬
+   dat_yearAge      DATE;  --µ½ÁäÈÕÆÚ
+   var_aac012       irac01.aac012%TYPE;  --ÈËÔ±Éí·İ
    BEGIN
-   /*åˆå§‹åŒ–å˜é‡*/
+   /*³õÊ¼»¯±äÁ¿*/
      prm_AppCode  := GN_DEF_OK;
      prm_ErrorMsg := '';
      prm_msg :='';
@@ -476,14 +476,14 @@ AS
      INTO rec_tmp_irac01a2
      FROM wsjb.tmp_irac01a2
     WHERE iaz018 = prm_iaz018;
-     --æ ¡éªŒå‚æ•°
+     --Ğ£Ñé²ÎÊı
     IF prm_iaz018 IS NULL  THEN
-      prm_msg :=  prm_msg||'ä¼ å…¥æ ¡éªŒæµæ°´å·ä¸ºç©ºï¼Œè¯·æ ¸å®ã€‚ã€‚ã€‚';
+      prm_msg :=  prm_msg||'´«ÈëĞ£ÑéÁ÷Ë®ºÅÎª¿Õ£¬ÇëºËÊµ¡£¡£¡£';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
     var_aab001 := rec_tmp_irac01a2.aab001;
-   --åˆ¤æ–­æ˜¯å¦æ˜¯å•å…»è€å•ä½
+   --ÅĞ¶ÏÊÇ·ñÊÇµ¥ÑøÀÏµ¥Î»
     SELECT COUNT(1)
       INTO num_count
       FROM xasi2.ab02
@@ -491,106 +491,106 @@ AS
        AND AAB051 = '1';
 
     IF num_count = 0 THEN
-    --å…¶ä»–åŸºæ•°æ›´æ–°ä¸º0
+    --ÆäËû»ùÊı¸üĞÂÎª0
       UPDATE wsjb.tmp_irac01a2
          SET yac005 = 0
        WHERE iaz018 = prm_iaz018;
     END IF;
 
-    dat_aac006 := rec_tmp_irac01a2.aac006;--å‡ºç”Ÿæ—¥æœŸ
-    dat_aac007 := rec_tmp_irac01a2.aac007;--å‚å·¥æ—¥æœŸ
-    dat_aac030 := rec_tmp_irac01a2.aac030;--æœ¬ç³»ç»Ÿå‚ä¿æ—¥æœŸ
-    dat_yac033 := rec_tmp_irac01a2.yac033;--ä¸ªäººåˆæ¬¡å‚ä¿æ—¥æœŸ
-    var_iaa100 := rec_tmp_irac01a2.iaa100;--ç”³æŠ¥æœˆåº¦
+    dat_aac006 := rec_tmp_irac01a2.aac006;--³öÉúÈÕÆÚ
+    dat_aac007 := rec_tmp_irac01a2.aac007;--²Î¹¤ÈÕÆÚ
+    dat_aac030 := rec_tmp_irac01a2.aac030;--±¾ÏµÍ³²Î±£ÈÕÆÚ
+    dat_yac033 := rec_tmp_irac01a2.yac033;--¸öÈË³õ´Î²Î±£ÈÕÆÚ
+    var_iaa100 := rec_tmp_irac01a2.iaa100;--Éê±¨ÔÂ¶È
     SELECT to_date(rec_tmp_irac01a2.iaa100||'01','yyyy-MM-dd hh:mi:ss') INTO var_iaa100_a FROM dual;
-    var_aac004 := rec_tmp_irac01a2.aac004;--æ€§åˆ«
-    var_aac008 := rec_tmp_irac01a2.aac008;--äººå‘˜çŠ¶æ€
-    var_aac012 := rec_tmp_irac01a2.aac012;--äººå‘˜èº«ä»½
+    var_aac004 := rec_tmp_irac01a2.aac004;--ĞÔ±ğ
+    var_aac008 := rec_tmp_irac01a2.aac008;--ÈËÔ±×´Ì¬
+    var_aac012 := rec_tmp_irac01a2.aac012;--ÈËÔ±Éí·İ
     IF dat_aac007 > dat_aac030 THEN
-      prm_msg :=  prm_msg||'é¦–æ¬¡å‚åŠ å·¥ä½œæ—¥æœŸä¸èƒ½æ™šäºåˆ°æœ¬å•ä½å‚ä¿æ—¥æœŸ!';
+      prm_msg :=  prm_msg||'Ê×´Î²Î¼Ó¹¤×÷ÈÕÆÚ²»ÄÜÍíÓÚµ½±¾µ¥Î»²Î±£ÈÕÆÚ!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
     IF dat_aac007 > var_iaa100_a THEN
-      prm_msg :=  prm_msg||'å‚å·¥æ—¥æœŸä¸èƒ½æ™šäºç”³æŠ¥æœˆåº¦'||TO_CHAR(SYSDATE,'yyyy-MM-dd')||'!';
+      prm_msg :=  prm_msg||'²Î¹¤ÈÕÆÚ²»ÄÜÍíÓÚÉê±¨ÔÂ¶È'||TO_CHAR(SYSDATE,'yyyy-MM-dd')||'!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
     IF dat_yac033 > var_iaa100_a THEN
-      prm_msg :=  prm_msg||'ä¸ªäººåˆæ¬¡å‚ä¿æ—¥æœŸä¸èƒ½æ™šäºæ™šäºç”³æŠ¥æœˆåº¦'||TO_CHAR(SYSDATE,'yyyy-MM-dd')||'!';
+      prm_msg :=  prm_msg||'¸öÈË³õ´Î²Î±£ÈÕÆÚ²»ÄÜÍíÓÚÍíÓÚÉê±¨ÔÂ¶È'||TO_CHAR(SYSDATE,'yyyy-MM-dd')||'!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
 --    IF dat_aac030 > SYSDATE THEN
---      prm_msg :=  prm_msg||'åˆ°æœ¬å•ä½å‚ä¿æ—¥æœŸä¸èƒ½æ™šäºç³»ç»Ÿæ—¥æœŸ'||TO_CHAR(SYSDATE,'yyyy-MM-dd')||'!';
+--      prm_msg :=  prm_msg||'µ½±¾µ¥Î»²Î±£ÈÕÆÚ²»ÄÜÍíÓÚÏµÍ³ÈÕÆÚ'||TO_CHAR(SYSDATE,'yyyy-MM-dd')||'!';
 --      prm_sign := '1';
 --      GOTO label_ERROR;
 --    END IF;
     IF TO_NUMBER(TO_CHAR(dat_aac030,'yyyyMM')) > TO_NUMBER(var_iaa100) THEN
-      prm_msg :=  prm_msg||'åˆ°æœ¬å•ä½å‚ä¿æ—¥æœŸä¸èƒ½æ™šäºå½“å‰å¯ç”³æŠ¥æœˆåº¦'||var_iaa100||'!';
+      prm_msg :=  prm_msg||'µ½±¾µ¥Î»²Î±£ÈÕÆÚ²»ÄÜÍíÓÚµ±Ç°¿ÉÉê±¨ÔÂ¶È'||var_iaa100||'!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
     IF dat_aac006 > dat_aac007 THEN
-      prm_msg :=  prm_msg||'é¦–æ¬¡å‚åŠ å·¥ä½œæ—¥æœŸä¸èƒ½æ—©äºå‡ºç”Ÿæ—¥æœŸ!';
+      prm_msg :=  prm_msg||'Ê×´Î²Î¼Ó¹¤×÷ÈÕÆÚ²»ÄÜÔçÓÚ³öÉúÈÕÆÚ!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
     IF dat_aac006 > dat_aac030 THEN
-      prm_msg :=  prm_msg||'æœ¬å•ä½å‚ä¿æ—¥æœŸä¸èƒ½æ—©äºå‡ºç”Ÿæ—¥æœŸ!';
+      prm_msg :=  prm_msg||'±¾µ¥Î»²Î±£ÈÕÆÚ²»ÄÜÔçÓÚ³öÉúÈÕÆÚ!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
     IF dat_aac006 > dat_yac033 THEN
-      prm_msg :=  prm_msg||'ä¸ªäººåˆæ¬¡å‚ä¿æ—¥æœŸä¸èƒ½æ—©äºå‡ºç”Ÿæ—¥æœŸ!';
+      prm_msg :=  prm_msg||'¸öÈË³õ´Î²Î±£ÈÕÆÚ²»ÄÜÔçÓÚ³öÉúÈÕÆÚ!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
 
     /**
-     --æ ¡éªŒèº«ä»½è¯å·ç 
+     --Ğ£ÑéÉí·İÖ¤ºÅÂë
      prc_p_ValidateAac002Privilege(
-                                   rec_tmp_irac01a2.yae181   ,     --è¯ä»¶ç±»å‹
-                                   rec_tmp_irac01a2.aac002   ,     --è¯ä»¶å·ç 
-                                   rec_tmp_irac01a2.aab001   ,     --å•ä½ç¼–å·
-                                   prm_msg      ,     -- é”™è¯¯ä¿¡æ¯
-                                   prm_sign     ,     -- é”™è¯¯æ ‡å¿—
-                                   prm_AppCode  ,     --æ‰§è¡Œä»£ç 
-                                   prm_ErrorMsg );    --å‡ºé”™ä¿¡æ¯
+                                   rec_tmp_irac01a2.yae181   ,     --Ö¤¼şÀàĞÍ
+                                   rec_tmp_irac01a2.aac002   ,     --Ö¤¼şºÅÂë
+                                   rec_tmp_irac01a2.aab001   ,     --µ¥Î»±àºÅ
+                                   prm_msg      ,     -- ´íÎóĞÅÏ¢
+                                   prm_sign     ,     -- ´íÎó±êÖ¾
+                                   prm_AppCode  ,     --Ö´ĞĞ´úÂë
+                                   prm_ErrorMsg );    --³ö´íĞÅÏ¢
      IF prm_sign = '1' THEN
       GOTO label_ERROR;
      END IF ;
      **/
-     --è¶…é¾„äººå‘˜å‚ä¿éœ€è¦æç¤º
+     --³¬ÁäÈËÔ±²Î±£ĞèÒªÌáÊ¾
      IF var_aac008 = '1' THEN
 
-         IF var_aac004 = '1' THEN --ç”· 60å²
+         IF var_aac004 = '1' THEN --ÄĞ 60Ëê
            dat_yearAge := ADD_MONTHS(dat_aac006,60*12);
-         ELSIF var_aac004 = '2' AND var_aac012 = '4' THEN --å¥³å¹²éƒ¨ 55å²
+         ELSIF var_aac004 = '2' AND var_aac012 = '4' THEN --Å®¸É²¿ 55Ëê
            dat_yearAge := ADD_MONTHS(dat_aac006,55*12);
-         ELSIF var_aac004 = '2' AND var_aac012 = '1' THEN --å¥³å·¥äºº 50å²
+         ELSIF var_aac004 = '2' AND var_aac012 = '1' THEN --Å®¹¤ÈË 50Ëê
            dat_yearAge := ADD_MONTHS(dat_aac006,50*12);
          ELSE
-           prm_msg := 'æ€§åˆ«è·å–å¤±è´¥';
+           prm_msg := 'ĞÔ±ğ»ñÈ¡Ê§°Ü';
            prm_sign := '1';
            GOTO label_ERROR;
          END IF;
          IF dat_yearAge < SYSDATE THEN
-           prm_msg :=  prm_msg||'æ‚¨å¥½ï¼Œæ­¤å‘˜å·¥å·²è¶…è¿‡é€€ä¼‘å¹´é¾„ï¼Œè¯·æ ¸å®å› ä½•ç§æƒ…å†µéœ€ä¸ºæ­¤äººç¼´çº³ç¤¾ä¼šä¿é™©ã€‚ç¡®æœ‰ç‰¹æ®Šæƒ…å†µï¼Œè¯·æä¾›ç›¸å…³è¯´æ˜ææ–™è‡³ç¤¾ä¿ä¸­å¿ƒç½‘ä¸Šå®¡æ ¸çª—å£å¤‡æ¡ˆ!';
+           prm_msg :=  prm_msg||'ÄúºÃ£¬´ËÔ±¹¤ÒÑ³¬¹ıÍËĞİÄêÁä£¬ÇëºËÊµÒòºÎÖÖÇé¿öĞèÎª´ËÈË½ÉÄÉÉç»á±£ÏÕ¡£È·ÓĞÌØÊâÇé¿ö£¬ÇëÌá¹©Ïà¹ØËµÃ÷²ÄÁÏÖÁÉç±£ÖĞĞÄÍøÉÏÉóºË´°¿Ú±¸°¸!';
             prm_sign := '1';
            GOTO label_ERROR;
          END IF;
 
      END IF;
 
-     --å¦‚æ˜¯èº«ä»½è¯ï¼Œåˆ™å§“åä¸èƒ½æœ‰ç©ºæ ¼
+     --ÈçÊÇÉí·İÖ¤£¬ÔòĞÕÃû²»ÄÜÓĞ¿Õ¸ñ
      IF rec_tmp_irac01a2.yae181 = '1' THEN
        UPDATE wsjb.tmp_irac01a2
          SET aac003 = REPLACE(aac003,' ','')
        WHERE iaz018 = prm_iaz018;
      END IF;
 
-     --é™©ç§æ ¡éªŒ
+     --ÏÕÖÖĞ£Ñé
      IF rec_tmp_irac01a2.aae110 = '0' AND
         rec_tmp_irac01a2.aae120 = '0' AND
         rec_tmp_irac01a2.aae210 = '0' AND
@@ -600,16 +600,16 @@ AS
         rec_tmp_irac01a2.aae311 = '0' AND
         rec_tmp_irac01a2.aae810 = '0' THEN
 
-        prm_msg :=  prm_msg||'æœªè·å–åˆ°å‹¾é€‰å‚ä¿çš„é™©ç§ä¿¡æ¯!';
+        prm_msg :=  prm_msg||'Î´»ñÈ¡µ½¹´Ñ¡²Î±£µÄÏÕÖÖĞÅÏ¢!';
         prm_sign := '1';
         GOTO label_ERROR;
 
      END IF;
-     --å…¬åŠ¡å‘˜è¡¥åŠ©é™©ç§æ ¡éªŒ
+     --¹«ÎñÔ±²¹ÖúÏÕÖÖĞ£Ñé
      IF rec_tmp_irac01a2.aae810 = '1' THEN
 
         IF rec_tmp_irac01a2.yac200 IS NULL THEN
-          prm_msg :=  prm_msg||'å…¬åŠ¡å‘˜èŒçº§ä¸èƒ½ä¸ºç©º!';
+          prm_msg :=  prm_msg||'¹«ÎñÔ±Ö°¼¶²»ÄÜÎª¿Õ!';
            prm_sign := '1';
            GOTO label_ERROR;
         END IF;
@@ -618,14 +618,14 @@ AS
 
 
 
-     --åŸºæ•°æ ¡éªŒ
-     num_aac040 := rec_tmp_irac01a2.aac040;--ç¼´è´¹å·¥èµ„
+     --»ùÊıĞ£Ñé
+     num_aac040 := rec_tmp_irac01a2.aac040;--½É·Ñ¹¤×Ê
      IF rec_tmp_irac01a2.aae110 = '1' THEN
         SELECT ROUND(pkg_common.fun_p_getcontributionbase(null,var_aab001,num_aac040,'0','01','1','1',var_iaa100,prm_yab139))
           INTO num_yac004
           FROM  dual ;
         IF ROUND(num_yac004) <> rec_tmp_irac01a2.yac004 THEN
-          --ä¼ä¸šå…»è€åŸºæ•°æ›´æ–°
+          --ÆóÒµÑøÀÏ»ùÊı¸üĞÂ
           UPDATE wsjb.tmp_irac01a2
              SET yac004 = ROUND(num_yac004)
            WHERE iaz018 = prm_iaz018;
@@ -636,7 +636,7 @@ AS
      IF rec_tmp_irac01a2.aae120 = '1' THEN
 
         IF num_aac040 <> rec_tmp_irac01a2.yac004 THEN
-          --æœºå…³å…»è€åŸºæ•°æ›´æ–°
+          --»ú¹ØÑøÀÏ»ùÊı¸üĞÂ
           UPDATE wsjb.tmp_irac01a2
              SET yac004 = num_aac040
            WHERE iaz018 = prm_iaz018;
@@ -649,7 +649,7 @@ AS
         rec_tmp_irac01a2.aae410 = '1' OR
         rec_tmp_irac01a2.aae510 = '1' OR
         rec_tmp_irac01a2.aae810 = '1' THEN
-        --ä»¥ä¸€ä¸ªé™©ç§ä¸ºå‡†
+        --ÒÔÒ»¸öÏÕÖÖÎª×¼
         SELECT aae140
           INTO var_aae140
           FROM xasi2.AB02
@@ -661,7 +661,7 @@ AS
           INTO num_yac005
           FROM  dual ;
         IF ROUND(num_yac005) <> rec_tmp_irac01a2.yac005 THEN
-          --å…¶ä»–åŸºæ•°æ›´æ–°
+          --ÆäËû»ùÊı¸üĞÂ
           UPDATE wsjb.tmp_irac01a2
              SET yac005 = ROUND(num_yac005),
                  yaa333 = ROUND(num_yac005)
@@ -672,43 +672,43 @@ AS
 
 
 
-     /*å¤„ç†å¤±è´¥*/
+     /*´¦ÀíÊ§°Ü*/
       <<label_ERROR>>
 
         num_count :=0;
 
    EXCEPTION
      WHEN OTHERS THEN
-          /*å…³é—­æ‰“å¼€çš„æ¸¸æ ‡*/
+          /*¹Ø±Õ´ò¿ªµÄÓÎ±ê*/
           prm_AppCode  := PRE_ERRCODE || GN_DEF_ERR;
-          prm_ErrorMsg := 'æ•°æ®åº“é”™è¯¯ï¼'|| SQLERRM ;
+          prm_ErrorMsg := 'Êı¾İ¿â´íÎó£¡'|| SQLERRM ;
           RETURN;
    END prc_p_checkNewInsur;
 
      /*--------------------------------------------------------------------------
-   || ä¸šåŠ¡ç¯èŠ‚ ï¼šäººå‘˜ç»­ä¿ç½‘å…éªŒè¯
-   || è¿‡ç¨‹åç§° prc_p_ValidateAac002Continue
-   || åŠŸèƒ½æè¿° ï¼šæ ¡éªŒè¯¥äººå‘˜æ˜¯å¦èƒ½è¿›è¡Œç»­ä¿çš„ä¿¡æ¯å½•å…¥
+   || ÒµÎñ»·½Ú £ºÈËÔ±Ğø±£ÍøÌüÑéÖ¤
+   || ¹ı³ÌÃû³Æ prc_p_ValidateAac002Continue
+   || ¹¦ÄÜÃèÊö £ºĞ£Ñé¸ÃÈËÔ±ÊÇ·ñÄÜ½øĞĞĞø±£µÄĞÅÏ¢Â¼Èë
    ||
-   || å‚æ•°æè¿° ï¼šå‚æ•°æ ‡è¯†           è¯´æ˜
+   || ²ÎÊıÃèÊö £º²ÎÊı±êÊ¶           ËµÃ÷
    ||            --------------------------------------------------------------
    ||
    ||
-   || ä½œ    è€… ï¼šzhujing         å®Œæˆæ—¥æœŸ ï¼š2015-11-23
+   || ×÷    Õß £ºzhujing         Íê³ÉÈÕÆÚ £º2015-11-23
    ||------------------------------------------------------------------------*/
    PROCEDURE prc_p_ValidateAac002Continue(
-       prm_yae181          IN            VARCHAR2,     --è¯ä»¶ç±»å‹
-      prm_aac002          IN            VARCHAR2,     --è¯ä»¶å·ç 
-      prm_aab001          IN            VARCHAR2,     --å•ä½ç¼–å·
-      prm_iaa100          IN            VARCHAR2,     --æœˆåº¦
-      prm_aac001          IN           VARCHAR2,     --ä¸ªäººç¼–å·
-      prm_msg             OUT           VARCHAR2,     -- é”™è¯¯ä¿¡æ¯
-      prm_sign            OUT           VARCHAR2,     -- é”™è¯¯æ ‡å¿—
-      prm_AppCode         OUT           VARCHAR2,     --æ‰§è¡Œä»£ç 
-      prm_ErrorMsg        OUT           VARCHAR2)    --å‡ºé”™ä¿¡æ¯
+       prm_yae181          IN            VARCHAR2,     --Ö¤¼şÀàĞÍ
+      prm_aac002          IN            VARCHAR2,     --Ö¤¼şºÅÂë
+      prm_aab001          IN            VARCHAR2,     --µ¥Î»±àºÅ
+      prm_iaa100          IN            VARCHAR2,     --ÔÂ¶È
+      prm_aac001          IN           VARCHAR2,     --¸öÈË±àºÅ
+      prm_msg             OUT           VARCHAR2,     -- ´íÎóĞÅÏ¢
+      prm_sign            OUT           VARCHAR2,     -- ´íÎó±êÖ¾
+      prm_AppCode         OUT           VARCHAR2,     --Ö´ĞĞ´úÂë
+      prm_ErrorMsg        OUT           VARCHAR2)    --³ö´íĞÅÏ¢
 
    IS
-     sj_count       NUMBER;--æŸ¥è¯¢ac01å¸‚å±€
+     sj_count       NUMBER;--²éÑ¯ac01ÊĞ¾Ö
     sj_acount       NUMBER;
     aac001_sj        irac01.aac001%TYPE;
    num_count        NUMBER(6);
@@ -720,38 +720,38 @@ AS
    num_ab02count    NUMBER;
    var_akc021       irac01.akc021%TYPE;
    var_aac008       irac01.aac008%TYPE;
-   var_yab013       irac01.yab013%TYPE;--åŸå•ä½ç¼–å·
+   var_yab013       irac01.yab013%TYPE;--Ô­µ¥Î»±àºÅ
    BEGIN
-    /*åˆå§‹åŒ–å˜é‡*/
+    /*³õÊ¼»¯±äÁ¿*/
       prm_AppCode  := GN_DEF_OK;
       prm_ErrorMsg := '';
       prm_msg :='';
       prm_sign :='0';
-   --æ ¡éªŒå‚æ•°
+   --Ğ£Ñé²ÎÊı
       IF prm_yae181 IS NULL  THEN
-         prm_msg :=  prm_msg||'ä¼ å…¥è¯ä»¶ç±»å‹ä¸ºç©ºï¼Œè¯·æ ¸å®ã€‚ã€‚ã€‚';
+         prm_msg :=  prm_msg||'´«ÈëÖ¤¼şÀàĞÍÎª¿Õ£¬ÇëºËÊµ¡£¡£¡£';
          prm_sign := '1';
          GOTO label_ERROR;
       END IF;
       IF prm_aab001 IS NULL  THEN
-         prm_msg :=  prm_msg||'ä¼ å…¥å•ä½ç¼–å·ä¸ºç©ºï¼Œè¯·æ ¸å®ã€‚ã€‚ã€‚';
+         prm_msg :=  prm_msg||'´«Èëµ¥Î»±àºÅÎª¿Õ£¬ÇëºËÊµ¡£¡£¡£';
          prm_sign := '1';
          GOTO label_ERROR;
       END IF;
       IF prm_aac002 IS NULL  THEN
-         prm_msg :=  prm_msg||'ä¼ å…¥è¯ä»¶å·ç ä¸ºç©ºï¼Œè¯·æ ¸å®ã€‚ã€‚ã€‚';
+         prm_msg :=  prm_msg||'´«ÈëÖ¤¼şºÅÂëÎª¿Õ£¬ÇëºËÊµ¡£¡£¡£';
          prm_sign := '1';
          GOTO label_ERROR;
       END IF;
 
-       --èº«ä»½è¯ç±»å‹
+       --Éí·İÖ¤ÀàĞÍ
      IF prm_yae181 = 1 THEN
       SELECT count(1)
        INTO  num_ab02count
        FROM xasi2.ab02 a
        WHERE aab051='1'
        AND  aab001= prm_aab001;
-        --è·å–å„ç§å½¢å¼çš„è¯ä»¶å·ç 
+        --»ñÈ¡¸÷ÖÖĞÎÊ½µÄÖ¤¼şºÅÂë
          var_15aac002 := SUBSTR(prm_aac002,1,6)||SUBSTR(prm_aac002,9, 9);
          var_aac002Low := LOWER(prm_aac002);
         IF prm_aac001 IS NULL  THEN
@@ -762,7 +762,7 @@ AS
          AND A.IAA002 = '0'
          AND A.AAC002 = prm_aac002;
       IF num_count > 0 THEN
-         prm_msg := 'æ­¤äººå­˜åœ¨å¾…ç”³æŠ¥çš„ç»­ä¿ä¿¡æ¯,è¯·å…ˆåŠç†ç”³æŠ¥ä¸šåŠ¡!';
+         prm_msg := '´ËÈË´æÔÚ´ıÉê±¨µÄĞø±£ĞÅÏ¢,ÇëÏÈ°ìÀíÉê±¨ÒµÎñ!';
          prm_sign :='1';
          GOTO label_ERROR ;
       END IF;
@@ -774,7 +774,7 @@ AS
          AND A.IAA002 = '0'
          AND A.AAC002 = prm_aac002;
       IF num_count > 0 THEN
-         prm_msg := 'æ­¤äººå­˜åœ¨å¾…ç”³æŠ¥çš„æš‚åœä¿¡æ¯,è¯·å…ˆåŠç†ç”³æŠ¥ä¸šåŠ¡!';
+         prm_msg := '´ËÈË´æÔÚ´ıÉê±¨µÄÔİÍ£ĞÅÏ¢,ÇëÏÈ°ìÀíÉê±¨ÒµÎñ!';
          prm_sign :='1';
          GOTO label_ERROR ;
       END IF;
@@ -786,7 +786,7 @@ AS
          AND A.IAA002 = '1'
          AND A.AAC002 = prm_aac002;
       IF num_count > 0 THEN
-         prm_msg := 'æ­¤äººå­˜åœ¨å·²ç”³æŠ¥çš„ç»­ä¿ä¿¡æ¯,è¯·ç­‰å¾…å®¡æ ¸é€šè¿‡!!';
+         prm_msg := '´ËÈË´æÔÚÒÑÉê±¨µÄĞø±£ĞÅÏ¢,ÇëµÈ´ıÉóºËÍ¨¹ı!!';
          prm_sign :='1';
          GOTO label_ERROR ;
       END IF;
@@ -798,7 +798,7 @@ AS
          AND A.IAA002 = '4'
          AND A.AAC002 = prm_aac002;
       IF num_count > 0 THEN
-         prm_msg := 'æ­¤äººå­˜åœ¨è¢«æ‰“å›çš„ç»­ä¿ä¿¡æ¯,è¯·åˆ°[æœˆç”³æŠ¥]åŠŸèƒ½ä¸‹ä¿®æ”¹ç›¸å…³ä¿¡æ¯ç»§ç»­ç”³æŠ¥!!';
+         prm_msg := '´ËÈË´æÔÚ±»´ò»ØµÄĞø±£ĞÅÏ¢,Çëµ½[ÔÂÉê±¨]¹¦ÄÜÏÂĞŞ¸ÄÏà¹ØĞÅÏ¢¼ÌĞøÉê±¨!!';
          prm_sign :='1';
          GOTO label_ERROR ;
       END IF;
@@ -810,7 +810,7 @@ AS
          AND A.IAA002 = '0'
          AND A.AAC002 = prm_aac002;
       IF num_count > 0 THEN
-         prm_msg := 'æ­¤äººå­˜åœ¨å¾…ç”³æŠ¥çš„é™©ç§æ–°å¢ä¿¡æ¯,è¯·å…ˆåŠç†ç”³æŠ¥ä¸šåŠ¡!';
+         prm_msg := '´ËÈË´æÔÚ´ıÉê±¨µÄÏÕÖÖĞÂÔöĞÅÏ¢,ÇëÏÈ°ìÀíÉê±¨ÒµÎñ!';
          prm_sign :='1';
          GOTO label_ERROR ;
       END IF;
@@ -822,7 +822,7 @@ AS
          AND A.IAA002 = '1'
          AND A.AAC002 = prm_aac002;
       IF num_count > 0 THEN
-         prm_msg := 'æ­¤äººå­˜åœ¨å·²ç”³æŠ¥çš„é™©ç§æ–°å¢ä¿¡æ¯,è¯·ç­‰å¾…å®¡æ ¸é€šè¿‡!';
+         prm_msg := '´ËÈË´æÔÚÒÑÉê±¨µÄÏÕÖÖĞÂÔöĞÅÏ¢,ÇëµÈ´ıÉóºËÍ¨¹ı!';
          prm_sign :='1';
          GOTO label_ERROR ;
       END IF;
@@ -834,7 +834,7 @@ AS
           FROM xasi2.ac01 A
          WHERE AAE120 = '0'
            AND A.AAC002 IN (var_15aac002, var_aac002Low, prm_aac002)
-           AND AAC003 NOT LIKE '%é‡å¤%';
+           AND AAC003 NOT LIKE '%ÖØ¸´%';
 
              /*IF num_count = 0 THEN
              select count(*)
@@ -843,23 +843,23 @@ AS
                where aac002 = prm_aac002 ;
 
               IF sj_count=0 THEN
-                 prm_msg := 'è¯ä»¶å·ä¸ºï¼š['||prm_aac002||']çš„äººå‘˜ä¸å­˜åœ¨ä¸ªäººä¿¡æ¯ï¼Œè¯·åœ¨æ–°å‚ä¿æ¨¡å—é‡Œæ“ä½œï¼';
+                 prm_msg := 'Ö¤¼şºÅÎª£º['||prm_aac002||']µÄÈËÔ±²»´æÔÚ¸öÈËĞÅÏ¢£¬ÇëÔÚĞÂ²Î±£Ä£¿éÀï²Ù×÷£¡';
                  prm_sign :='1';
                  GOTO label_ERROR ;
                END IF;
                IF sj_count>1 THEN
-                 prm_msg := 'è¯ä»¶å·ä¸ºï¼š['||prm_aac002||']çš„äººå‘˜åœ¨å¸‚å±€å­˜åœ¨å¤šæ¡ä¿¡æ¯ï¼Œè¯·æ³¨æ„ï¼';
+                 prm_msg := 'Ö¤¼şºÅÎª£º['||prm_aac002||']µÄÈËÔ±ÔÚÊĞ¾Ö´æÔÚ¶àÌõĞÅÏ¢£¬Çë×¢Òâ£¡';
                  prm_sign :='1';
                  GOTO label_ERROR ;
                END IF;
-            \***               --æŸ¥è¯¢æ–°åºåˆ—
+            \***               --²éÑ¯ĞÂĞòÁĞ
                          select xasi2.seq_aac001.nextval into var_aac001 from dual;
-                         --å¸‚å±€å¯¹åº”çš„aac001
+                         --ÊĞ¾Ö¶ÔÓ¦µÄaac001
                              select aac001
                          INTO aac001_sj
                          from sjxt.ac01
                        where aac002 = prm_aac002 ;
-                       --æ’å…¥å¯¹åº”è¡¨
+                       --²åÈë¶ÔÓ¦±í
                           insert into xasi2.ac01d1(
                           aac001,
                           aac002,
@@ -872,7 +872,7 @@ AS
                           aac001_sj,
                           sysdate
                           );
-                          --ä½¿ç”¨å¸‚å±€çš„aac008; è·å–æ–¹å¼å¾…å®š
+                          --Ê¹ÓÃÊĞ¾ÖµÄaac008; »ñÈ¡·½Ê½´ı¶¨
                     --       select    aac008     INTO    var_aac008
                     --  from sjxt.ac01
                      --  where aac002 = prm_aac002 ;
@@ -882,14 +882,14 @@ AS
             SELECT count(1) INTO num_count1
               FROM xasi2.ac01 a,xasi2.ac02 b
               WHERE a.aac001=b.aac001
-              AND   a.aac003 NOT LIKE '%é‡å¤%'
+              AND   a.aac003 NOT LIKE '%ÖØ¸´%'
               AND    b.aac031='2'
               AND   b.aae140='03'
               AND   a.aac002 = prm_aac002;
 
         END IF ;
           /*IF num_count1 >1 THEN
-             prm_msg := 'è¯ä»¶å·ä¸ºï¼š['||prm_aac002||']çš„äººå‘˜å­˜åœ¨å¤šæ¡ä¸ªäººä¿¡æ¯ï¼Œè¯·åœ¨è”ç³»ç¤¾ä¿ä¸­å¿ƒï¼';
+             prm_msg := 'Ö¤¼şºÅÎª£º['||prm_aac002||']µÄÈËÔ±´æÔÚ¶àÌõ¸öÈËĞÅÏ¢£¬ÇëÔÚÁªÏµÉç±£ÖĞĞÄ£¡';
              prm_sign :='1';
              GOTO label_ERROR ;
            END IF;
@@ -897,7 +897,7 @@ AS
              SELECT a.aac001 INTO var_aac001
               FROM xasi2.ac01 a,xasi2.ac02 b
               WHERE a.aac001=b.aac001
-              AND   a.aac003 NOT LIKE '%é‡å¤%'
+              AND   a.aac003 NOT LIKE '%ÖØ¸´%'
               AND    b.aac031='2'
               AND   b.aae140='03'
               AND   a.aac002 = prm_aac002;
@@ -912,7 +912,7 @@ AS
                       FROM xasi2.ac01 A
                      WHERE AAE120 = '0'
                        AND A.aac001=prm_aac001
-                       AND AAC003 NOT LIKE '%é‡å¤%';
+                       AND AAC003 NOT LIKE '%ÖØ¸´%';
 
                 ELSIF  num_count > 1  THEN
 
@@ -923,7 +923,7 @@ AS
                       FROM xasi2.ac01 A
                      WHERE AAE120 = '0'
                        AND A.aac001=prm_aac001
-                       AND AAC003 NOT LIKE '%é‡å¤%';
+                       AND AAC003 NOT LIKE '%ÖØ¸´%';
                END IF;
    ELSE
         SELECT count(1)
@@ -931,7 +931,7 @@ AS
           FROM xasi2.ac01 A
          WHERE AAE120 = '0'
            AND A.AAC002 = prm_aac002
-           AND AAC003 NOT LIKE '%é‡å¤%';
+           AND AAC003 NOT LIKE '%ÖØ¸´%';
 
        /* IF num_count = 0 THEN
           select count(*)
@@ -940,19 +940,19 @@ AS
            where aac002 = prm_aac002 ;
 
           IF sj_count=0 THEN
-           prm_msg := 'è¯ä»¶å·ä¸ºï¼š['||prm_aac002||']çš„äººå‘˜ä¸å­˜åœ¨ä¸ªäººä¿¡æ¯ï¼Œè¯·åœ¨æ–°å‚ä¿æ¨¡å—é‡Œæ“ä½œï¼';
+           prm_msg := 'Ö¤¼şºÅÎª£º['||prm_aac002||']µÄÈËÔ±²»´æÔÚ¸öÈËĞÅÏ¢£¬ÇëÔÚĞÂ²Î±£Ä£¿éÀï²Ù×÷£¡';
            prm_sign :='1';
            GOTO label_ERROR ;
            END IF;
            IF sj_count>1 THEN
-           prm_msg := 'è¯ä»¶å·ä¸ºï¼š['||prm_aac002||']çš„äººå‘˜åœ¨å¸‚å±€å­˜åœ¨å¤šæ¡ä¿¡æ¯ï¼Œè¯·æ³¨æ„ï¼';
+           prm_msg := 'Ö¤¼şºÅÎª£º['||prm_aac002||']µÄÈËÔ±ÔÚÊĞ¾Ö´æÔÚ¶àÌõĞÅÏ¢£¬Çë×¢Òâ£¡';
            prm_sign :='1';
            GOTO label_ERROR ;
            END IF;
 
         END IF ;*/
         /*IF num_count > 1 THEN
-           prm_msg := 'è¯ä»¶å·ä¸ºï¼š['||prm_aac002||']çš„äººå‘˜å­˜åœ¨å¤šæ¡ä¸ªäººä¿¡æ¯ï¼Œè¯·åœ¨è”ç³»ç¤¾ä¿ä¸­å¿ƒï¼';
+           prm_msg := 'Ö¤¼şºÅÎª£º['||prm_aac002||']µÄÈËÔ±´æÔÚ¶àÌõ¸öÈËĞÅÏ¢£¬ÇëÔÚÁªÏµÉç±£ÖĞĞÄ£¡';
            prm_sign :='1';
            GOTO label_ERROR ;
         END IF ;
@@ -965,19 +965,19 @@ AS
           FROM xasi2.ac01 A
          WHERE AAE120 = '0'
            AND A.aac001=prm_aac001
-           AND AAC003 NOT LIKE '%é‡å¤%';
+           AND AAC003 NOT LIKE '%ÖØ¸´%';
           /*ELSE IF num_count >1 THEN
-           prm_msg := 'è¯ä»¶å·ä¸ºï¼š['||prm_aac002||']çš„äººå‘˜å­˜åœ¨å¤šæ¡ä¸ªäººä¿¡æ¯ï¼Œè¯·åœ¨è”ç³»ç¤¾ä¿ä¸­å¿ƒï¼';
+           prm_msg := 'Ö¤¼şºÅÎª£º['||prm_aac002||']µÄÈËÔ±´æÔÚ¶àÌõ¸öÈËĞÅÏ¢£¬ÇëÔÚÁªÏµÉç±£ÖĞĞÄ£¡';
            prm_sign :='1';
            GOTO label_ERROR ;*/
-          /**  --æŸ¥è¯¢æ–°åºåˆ—
+          /**  --²éÑ¯ĞÂĞòÁĞ
              select xasi2.seq_aac001.nextval into var_aac001 from dual;
-             --å¸‚å±€å¯¹åº”çš„aac001
+             --ÊĞ¾Ö¶ÔÓ¦µÄaac001
                  select aac001
              INTO aac001_sj
              from sjxt.ac01
            where aac002 = prm_aac002 ;
-           --æ’å…¥å¯¹åº”è¡¨
+           --²åÈë¶ÔÓ¦±í
               insert into xasi2.ac01d1(
               aac001,
               aac002,
@@ -990,7 +990,7 @@ AS
               aac001_sj,
               sysdate
               );
-              --ä½¿ç”¨å¸‚å±€çš„aac008; è·å–æ–¹å¼å¾…å®š
+              --Ê¹ÓÃÊĞ¾ÖµÄaac008; »ñÈ¡·½Ê½´ı¶¨
           --     select    aac008    INTO     var_aac008
          -- from sjxt.ac01
           -- where aac002 = prm_aac002 ;
@@ -1008,7 +1008,7 @@ AS
           FROM xasi2.KC01 A
          WHERE A.AAC001 = var_aac001;
        IF var_aac008 = '2' AND var_akc021 = '11' THEN
-           prm_msg := 'è¯ä»¶å·ä¸ºï¼š['||prm_aac002||']çš„äººå‘˜æ­£åœ¨åŠç†å¾…é€€ä¸šåŠ¡,ä¸èƒ½åŠç†ç»­ä¿æ‰‹ç»­ï¼Œå¦‚è¦åŠç†è”ç³»ç¤¾ä¿ä¸­å¿ƒï¼';
+           prm_msg := 'Ö¤¼şºÅÎª£º['||prm_aac002||']µÄÈËÔ±ÕıÔÚ°ìÀí´ıÍËÒµÎñ,²»ÄÜ°ìÀíĞø±£ÊÖĞø£¬ÈçÒª°ìÀíÁªÏµÉç±£ÖĞĞÄ£¡';
           prm_sign :='1';
           GOTO label_ERROR ;
        END IF;
@@ -1016,7 +1016,7 @@ AS
 
 
       -- prm_aac001 := var_aac001;
-        --å››é™©å…¨å‚çš„ä¸èƒ½ç»­ä¿å…»è€
+        --ËÄÏÕÈ«²ÎµÄ²»ÄÜĞø±£ÑøÀÏ
 
        SELECT count(1)
          INTO num_count
@@ -1026,23 +1026,23 @@ AS
           AND aac031 = '1'
           AND aae140 <> '06';
        IF num_count = 5 THEN
-           prm_msg := 'è¯ä»¶å·ä¸ºï¼š['||prm_aac002||']çš„äººå‘˜åœ¨æœ¬å•ä½åªå¯èƒ½å…»è€ä¿é™©æœªå‚ä¿ï¼Œè¯·åˆ°æ–°å¢é™©ç§åŠŸèƒ½ä¸‹æ–°å¢å…»è€é™©ç§ï¼';
+           prm_msg := 'Ö¤¼şºÅÎª£º['||prm_aac002||']µÄÈËÔ±ÔÚ±¾µ¥Î»Ö»¿ÉÄÜÑøÀÏ±£ÏÕÎ´²Î±££¬Çëµ½ĞÂÔöÏÕÖÖ¹¦ÄÜÏÂĞÂÔöÑøÀÏÏÕÖÖ£¡';
           prm_sign :='1';
           GOTO label_ERROR ;
        END IF;
 /*
-         --æŸ¥è¯¢å¸‚å±€æ•°æ®æœ‰æ— æ­£å‚ä¿ä¿¡æ¯
+         --²éÑ¯ÊĞ¾ÖÊı¾İÓĞÎŞÕı²Î±£ĞÅÏ¢
            SELECT count(*)
          into sj_acount
           from sjxt.ac02 where aac031='1' and
           aac001 in(select aac001 from sjxt.ac01
               where aac002 = prm_aac002 );
          IF sj_acount > 0 THEN
-             prm_msg := 'è¯ä»¶å·ä¸ºï¼š['||prm_aac002||']çš„äººå‘˜åœ¨å¸‚å±€å•ä½æœ‰æ­£åœ¨å‚ä¿çš„é™©ç§ï¼';
+             prm_msg := 'Ö¤¼şºÅÎª£º['||prm_aac002||']µÄÈËÔ±ÔÚÊĞ¾Öµ¥Î»ÓĞÕıÔÚ²Î±£µÄÏÕÖÖ£¡';
             prm_sign :='1';
             GOTO label_ERROR ;
              END IF;
-*/     --åœ¨æœ¬å•ä½æ˜¯å¦æ­£å¸¸å‚ä¿
+*/     --ÔÚ±¾µ¥Î»ÊÇ·ñÕı³£²Î±£
       SELECT COUNT(1) AS COUNT1
           INTO num_count
           FROM xasi2.ac01 A, xasi2.ac02 B
@@ -1052,11 +1052,11 @@ AS
            AND A.AAC001 = var_aac001
            AND B.AAB001 = prm_aab001;
            IF num_count >0 THEN
-            prm_msg := 'æ­¤äººåœ¨æœ¬å•ä½æœ‰æ­£å¸¸å‚ä¿çš„é™©ç§ï¼Œè¯·åˆ°æ–°å¢é™©ç§åŠŸèƒ½ä¸‹æ“ä½œ';
+            prm_msg := '´ËÈËÔÚ±¾µ¥Î»ÓĞÕı³£²Î±£µÄÏÕÖÖ£¬Çëµ½ĞÂÔöÏÕÖÖ¹¦ÄÜÏÂ²Ù×÷';
           prm_sign :='1';
           GOTO label_ERROR ;
            END IF;
-       --åœ¨åˆ«çš„å•ä½æ˜¯å¦æœ‰å‚ä¿ç¼´è´¹è®°å½•
+       --ÔÚ±ğµÄµ¥Î»ÊÇ·ñÓĞ²Î±£½É·Ñ¼ÇÂ¼
        SELECT SUM(COUNT1)
          INTO num_count
          FROM (SELECT COUNT(*) AS COUNT1
@@ -1081,7 +1081,7 @@ AS
            AND IAA001 = '4'
            AND IAA002 = '1';
         IF num_count > 0 THEN
-          prm_msg := 'æ­¤äººå­˜åœ¨å¾…å®¡æ ¸çš„â€œäººå‘˜é‡è¦ä¿¡æ¯å˜æ›´â€ç”³è¯·,è¯·æç¤ºæœ¬äººå°½å¿«æºå¸¦ç›¸å…³èµ„æ–™åˆ°ç¤¾ä¿ä¸­å¿ƒè¿›è¡Œå®¡æ ¸åŠç†ã€‚åŠç†æˆåŠŸåï¼Œæ–¹å¯è¿›è¡Œç»­ä¿æ“ä½œï¼';
+          prm_msg := '´ËÈË´æÔÚ´ıÉóºËµÄ¡°ÈËÔ±ÖØÒªĞÅÏ¢±ä¸ü¡±ÉêÇë,ÇëÌáÊ¾±¾ÈË¾¡¿ìĞ¯´øÏà¹Ø×ÊÁÏµ½Éç±£ÖĞĞÄ½øĞĞÉóºË°ìÀí¡£°ìÀí³É¹¦ºó£¬·½¿É½øĞĞĞø±£²Ù×÷£¡';
           prm_sign :='1';
           GOTO label_ERROR ;
         END IF;
@@ -1096,7 +1096,7 @@ AS
            AND A.AAC001 = var_aac001
            AND B.AAB001 = prm_aab001;
          IF num_count > 0 THEN
-             prm_msg := 'æ­¤äººåœ¨å…¶ä»–å•ä½æœ‰é™©ç§æœªåšæš‚åœï¼Œä¸”åœ¨æœ¬å•ä½ä¹Ÿå·²å‚å·¥ä¼¤é™©ç§ï¼';
+             prm_msg := '´ËÈËÔÚÆäËûµ¥Î»ÓĞÏÕÖÖÎ´×öÔİÍ££¬ÇÒÔÚ±¾µ¥Î»Ò²ÒÑ²Î¹¤ÉËÏÕÖÖ£¡';
             prm_sign :='1';
             GOTO label_ERROR ;
          END IF;
@@ -1112,12 +1112,12 @@ AS
            AND A.AAC001 = var_aac001
            AND C.YAB136 = '001';
         IF num_count > 0 THEN
-           prm_msg := 'æ­¤äººåœ¨äººäº‹ä»£ç†æœºæ„æœ‰é™©ç§æœªåšæš‚åœ,è¯·æš‚åœåå†ç»­ä¿ï¼';
+           prm_msg := '´ËÈËÔÚÈËÊÂ´úÀí»ú¹¹ÓĞÏÕÖÖÎ´×öÔİÍ£,ÇëÔİÍ£ºóÔÙĞø±££¡';
            prm_sign :='1';
            GOTO label_ERROR ;
         END IF;
 
-      prm_msg := 'æ­¤äººåœ¨å…¶ä»–å•ä½æœ‰é™©ç§æœªåšæš‚åœ,æœ¬å•ä½åªèƒ½å‚ä¿å·¥ä¼¤é™©ï¼';
+      prm_msg := '´ËÈËÔÚÆäËûµ¥Î»ÓĞÏÕÖÖÎ´×öÔİÍ£,±¾µ¥Î»Ö»ÄÜ²Î±£¹¤ÉËÏÕ£¡';
       prm_sign :='2';
       GOTO label_ERROR ;
       END IF;
@@ -1138,7 +1138,7 @@ AS
                  AND AAE140 = '03'
                  AND AAE002 = prm_iaa100);
       IF num_count > 0 THEN
-         prm_msg := 'æ­¤äºº'||prm_iaa100||'å­˜åœ¨åŒ»ç–—ç¼´è´¹è®°å½•ä¿¡æ¯,ä¸èƒ½ç»­ä¿ã€‚è¯¦ç»†è¯·å’¨è¯¢ç¤¾ä¿ä¸­å¿ƒ!';
+         prm_msg := '´ËÈË'||prm_iaa100||'´æÔÚÒ½ÁÆ½É·Ñ¼ÇÂ¼ĞÅÏ¢,²»ÄÜĞø±£¡£ÏêÏ¸Çë×ÉÑ¯Éç±£ÖĞĞÄ!';
          prm_sign :='1';
          GOTO label_ERROR ;
       END IF;
@@ -1149,7 +1149,7 @@ AS
          AND A.IAA002 = '0'
          AND A.AAC002 = prm_aac002;
       IF num_count > 0 THEN
-         prm_msg := 'æ­¤äººå­˜åœ¨å¾…ç”³æŠ¥çš„ç»­ä¿ä¿¡æ¯,è¯·å…ˆåŠç†ç”³æŠ¥ä¸šåŠ¡!';
+         prm_msg := '´ËÈË´æÔÚ´ıÉê±¨µÄĞø±£ĞÅÏ¢,ÇëÏÈ°ìÀíÉê±¨ÒµÎñ!';
          prm_sign :='1';
          GOTO label_ERROR ;
       END IF;
@@ -1161,7 +1161,7 @@ AS
          AND A.IAA002 = '0'
          AND A.AAC002 = prm_aac002;
       IF num_count > 0 THEN
-         prm_msg := 'æ­¤äººå­˜åœ¨å¾…ç”³æŠ¥çš„æš‚åœä¿¡æ¯,è¯·å…ˆåŠç†ç”³æŠ¥ä¸šåŠ¡!';
+         prm_msg := '´ËÈË´æÔÚ´ıÉê±¨µÄÔİÍ£ĞÅÏ¢,ÇëÏÈ°ìÀíÉê±¨ÒµÎñ!';
          prm_sign :='1';
          GOTO label_ERROR ;
       END IF;
@@ -1173,7 +1173,7 @@ AS
          AND A.IAA002 = '1'
          AND A.AAC002 = prm_aac002;
       IF num_count > 0 THEN
-         prm_msg := 'æ­¤äººå­˜åœ¨å·²ç”³æŠ¥çš„ç»­ä¿ä¿¡æ¯,è¯·ç­‰å¾…å®¡æ ¸é€šè¿‡!!';
+         prm_msg := '´ËÈË´æÔÚÒÑÉê±¨µÄĞø±£ĞÅÏ¢,ÇëµÈ´ıÉóºËÍ¨¹ı!!';
          prm_sign :='1';
          GOTO label_ERROR ;
       END IF;
@@ -1185,7 +1185,7 @@ AS
          AND A.IAA002 = '4'
          AND A.AAC002 = prm_aac002;
       IF num_count > 0 THEN
-         prm_msg := 'æ­¤äººå­˜åœ¨è¢«æ‰“å›çš„ç»­ä¿ä¿¡æ¯,è¯·åˆ°[æœˆç”³æŠ¥]åŠŸèƒ½ä¸‹ä¿®æ”¹ç›¸å…³ä¿¡æ¯ç»§ç»­ç”³æŠ¥!!';
+         prm_msg := '´ËÈË´æÔÚ±»´ò»ØµÄĞø±£ĞÅÏ¢,Çëµ½[ÔÂÉê±¨]¹¦ÄÜÏÂĞŞ¸ÄÏà¹ØĞÅÏ¢¼ÌĞøÉê±¨!!';
          prm_sign :='1';
          GOTO label_ERROR ;
       END IF;
@@ -1197,7 +1197,7 @@ AS
          AND A.IAA002 = '0'
          AND A.AAC002 = prm_aac002;
       IF num_count > 0 THEN
-         prm_msg := 'æ­¤äººå­˜åœ¨å¾…ç”³æŠ¥çš„é™©ç§æ–°å¢ä¿¡æ¯,è¯·å…ˆåŠç†ç”³æŠ¥ä¸šåŠ¡!';
+         prm_msg := '´ËÈË´æÔÚ´ıÉê±¨µÄÏÕÖÖĞÂÔöĞÅÏ¢,ÇëÏÈ°ìÀíÉê±¨ÒµÎñ!';
          prm_sign :='1';
          GOTO label_ERROR ;
       END IF;
@@ -1209,7 +1209,7 @@ AS
          AND A.IAA002 = '1'
          AND A.AAC002 = prm_aac002;
       IF num_count > 0 THEN
-         prm_msg := 'æ­¤äººå­˜åœ¨å·²ç”³æŠ¥çš„é™©ç§æ–°å¢ä¿¡æ¯,è¯·ç­‰å¾…å®¡æ ¸é€šè¿‡!';
+         prm_msg := '´ËÈË´æÔÚÒÑÉê±¨µÄÏÕÖÖĞÂÔöĞÅÏ¢,ÇëµÈ´ıÉóºËÍ¨¹ı!';
          prm_sign :='1';
          GOTO label_ERROR ;
       END IF;
@@ -1251,7 +1251,7 @@ AS
                    AND AAE003 = prm_iaa100
                    AND YAE517 = 'H01');
        IF num_count > 0 THEN
-          prm_msg := 'æ­¤äººå­˜åœ¨å¾…å®¡æ ¸çš„äººå‘˜å‡å°‘ä¿¡æ¯æˆ–è€…å½“å‰æœˆä»½å­˜åœ¨ç¼´è´¹è®°å½•ï¼Œä¸èƒ½åŠç†ç»­ä¿,è¯·ç­‰å¾…å®¡æ ¸é€šè¿‡!';
+          prm_msg := '´ËÈË´æÔÚ´ıÉóºËµÄÈËÔ±¼õÉÙĞÅÏ¢»òÕßµ±Ç°ÔÂ·İ´æÔÚ½É·Ñ¼ÇÂ¼£¬²»ÄÜ°ìÀíĞø±£,ÇëµÈ´ıÉóºËÍ¨¹ı!';
          prm_sign :='1';
          GOTO label_ERROR ;
        END IF;
@@ -1277,60 +1277,60 @@ AS
                    AND AAE003 = prm_iaa100
                    AND YAE517 = 'H01');
        IF num_count > 0 THEN
-          prm_msg := 'æ­¤äººå½“å‰æœˆä»½å­˜åœ¨ç¼´è´¹è®°å½•ï¼Œä¸èƒ½åŠç†ç»­ä¿!';
+          prm_msg := '´ËÈËµ±Ç°ÔÂ·İ´æÔÚ½É·Ñ¼ÇÂ¼£¬²»ÄÜ°ìÀíĞø±£!';
          prm_sign :='1';
          GOTO label_ERROR ;
        END IF;
 
 
-      /*å¤„ç†å¤±è´¥*/
+      /*´¦ÀíÊ§°Ü*/
       <<label_ERROR>>
 
        num_count :=0;
   EXCEPTION
      WHEN OTHERS THEN
-          /*å…³é—­æ‰“å¼€çš„æ¸¸æ ‡*/
+          /*¹Ø±Õ´ò¿ªµÄÓÎ±ê*/
           prm_AppCode  := PRE_ERRCODE || GN_DEF_ERR;
-          prm_ErrorMsg := 'æ•°æ®åº“é”™è¯¯ï¼'|| SQLERRM ;
+          prm_ErrorMsg := 'Êı¾İ¿â´íÎó£¡'|| SQLERRM ;
           RETURN;
    END prc_p_ValidateAac002Continue;
 
 
   /*--------------------------------------------------------------------------
-   || ä¸šåŠ¡ç¯èŠ‚ ï¼šäººå‘˜ç»­ä¿ç½‘å…éªŒè¯
-   || è¿‡ç¨‹åç§° prc_p_ValidateContinueCheck
-   || åŠŸèƒ½æè¿° ï¼šæ ¡éªŒè¯¥äººå‘˜å½•å…¥çš„ç»­ä¿ä¿¡æ¯
+   || ÒµÎñ»·½Ú £ºÈËÔ±Ğø±£ÍøÌüÑéÖ¤
+   || ¹ı³ÌÃû³Æ prc_p_ValidateContinueCheck
+   || ¹¦ÄÜÃèÊö £ºĞ£Ñé¸ÃÈËÔ±Â¼ÈëµÄĞø±£ĞÅÏ¢
    ||
-   || å‚æ•°æè¿° ï¼šå‚æ•°æ ‡è¯†           è¯´æ˜
+   || ²ÎÊıÃèÊö £º²ÎÊı±êÊ¶           ËµÃ÷
    ||            --------------------------------------------------------------
    ||
    ||
-   || ä½œ    è€… ï¼šzhujing         å®Œæˆæ—¥æœŸ ï¼š2015-11-24
+   || ×÷    Õß £ºzhujing         Íê³ÉÈÕÆÚ £º2015-11-24
    ||------------------------------------------------------------------------*/
    PROCEDURE prc_p_ValidateContinueCheck(
-       prm_iaz018          IN            VARCHAR2,     --æ‰¹æ¬¡å·
-      prm_yab139          IN            VARCHAR2,     --ç»åŠæœºæ„
-      prm_msg             OUT           VARCHAR2,     -- é”™è¯¯ä¿¡æ¯
-      prm_sign            OUT           VARCHAR2,     -- é”™è¯¯æ ‡å¿—
-      prm_AppCode         OUT           VARCHAR2,     --æ‰§è¡Œä»£ç 
-      prm_ErrorMsg        OUT           VARCHAR2)    --å‡ºé”™ä¿¡æ¯
+       prm_iaz018          IN            VARCHAR2,     --Åú´ÎºÅ
+      prm_yab139          IN            VARCHAR2,     --¾­°ì»ú¹¹
+      prm_msg             OUT           VARCHAR2,     -- ´íÎóĞÅÏ¢
+      prm_sign            OUT           VARCHAR2,     -- ´íÎó±êÖ¾
+      prm_AppCode         OUT           VARCHAR2,     --Ö´ĞĞ´úÂë
+      prm_ErrorMsg        OUT           VARCHAR2)    --³ö´íĞÅÏ¢
   IS
    num_count        NUMBER(6);
    rec_tmp_irac01a2 tmp_irac01a2%ROWTYPE;
-   dat_aac006       DATE ;--å‡ºç”Ÿæ—¥æœŸ
-   dat_aac007       DATE ;--å‚å·¥æ—¥æœŸ
-   dat_aac030       DATE ;--æœ¬ç³»ç»Ÿå‚ä¿æ—¥æœŸ
-   dat_yac033       DATE ;--ä¸ªäººåˆæ¬¡å‚ä¿æ—¥æœŸ
+   dat_aac006       DATE ;--³öÉúÈÕÆÚ
+   dat_aac007       DATE ;--²Î¹¤ÈÕÆÚ
+   dat_aac030       DATE ;--±¾ÏµÍ³²Î±£ÈÕÆÚ
+   dat_yac033       DATE ;--¸öÈË³õ´Î²Î±£ÈÕÆÚ
    var_aab001       irab01.aab001%TYPE;
    var_aae140       irab02.aae140%TYPE;
-   num_aac040       NUMBER(14,2); --ç¼´è´¹å·¥èµ„
-   num_yac004       NUMBER(14,2); --å…»è€åŸºæ•°
-   num_yac005       NUMBER(14,2); --å…¶ä»–åŸºæ•°
-   var_iaa100       VARCHAR2(6);  --ç”³æŠ¥æœˆåº¦
+   num_aac040       NUMBER(14,2); --½É·Ñ¹¤×Ê
+   num_yac004       NUMBER(14,2); --ÑøÀÏ»ùÊı
+   num_yac005       NUMBER(14,2); --ÆäËû»ùÊı
+   var_iaa100       VARCHAR2(6);  --Éê±¨ÔÂ¶È
    dat_iaa100        DATE;
    var_aac001       irac01.aac001%TYPE;
    var_aac002       irac01.aac002%TYPE;
-   var_aac009       irac01.aac009%TYPE;  --æˆ·å£æ€§è´¨
+   var_aac009       irac01.aac009%TYPE;  --»§¿ÚĞÔÖÊ
    var_aac008       irac01.aac008%TYPE;
    var_aae110       irac01.aae110%TYPE;
    var_aae120       irac01.aae120%TYPE;
@@ -1373,18 +1373,18 @@ AS
    var_iaz018       VARCHAR2(30);
    ac01_irac01a3_count NUMBER;
    count_aab001_irac01a3 NUMBER;
-   yl_count    NUMBER;   
+   yl_count    NUMBER;
    zy_akc021     VARCHAR2(30);
    X            VARCHAR2(30);
    woman_months  NUMBER(6);
    woman_worker_months  NUMBER(6);
    sj_months         NUMBER(6);
    var_aac006_ac01   NUMBER(8);
-   
+
    num_count_tmp_irac01a2  number;
 
    irac01a3_count  number(5);
-        --æ£€æŸ¥ä¸ªäººå‚ä¿ä¿¡æ¯
+        --¼ì²é¸öÈË²Î±£ĞÅÏ¢
       CURSOR cur_aae140 IS
          SELECT aae140
            FROM xasi2.tmp_aae140
@@ -1392,7 +1392,7 @@ AS
             AND aab001 = var_aab001;
 
 
-      --æ£€æŸ¥æ˜¯å¦å­˜åœ¨å…¶ä»–åŒ»ä¿ç¼–å·
+      --¼ì²éÊÇ·ñ´æÔÚÆäËûÒ½±£±àºÅ
       CURSOR cur_aac001 IS
          SELECT aac001,aac002,aac003
            FROM xasi2.ac01
@@ -1403,7 +1403,7 @@ AS
 
 
 
-   /*åˆå§‹åŒ–å˜é‡*/
+   /*³õÊ¼»¯±äÁ¿*/
      prm_AppCode  := GN_DEF_OK;
      prm_ErrorMsg := '';
      prm_msg :='';
@@ -1416,9 +1416,9 @@ AS
      INTO rec_tmp_irac01a2
      FROM wsjb.tmp_irac01a2
     WHERE iaz018 = prm_iaz018;
-     --æ ¡éªŒå‚æ•°
+     --Ğ£Ñé²ÎÊı
     IF prm_iaz018 IS NULL  THEN
-      prm_msg :=  prm_msg||'ä¼ å…¥æ ¡éªŒæµæ°´å·ä¸ºç©ºï¼Œè¯·æ ¸å®ã€‚ã€‚ã€‚';
+      prm_msg :=  prm_msg||'´«ÈëĞ£ÑéÁ÷Ë®ºÅÎª¿Õ£¬ÇëºËÊµ¡£¡£¡£';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
@@ -1434,7 +1434,7 @@ AS
     var_aae510 := rec_tmp_irac01a2.aae510;
     var_aae311 := rec_tmp_irac01a2.aae311;
     var_aae810 := rec_tmp_irac01a2.aae810;
-    --irac01a3 æ–°å¢
+    --irac01a3 ĞÂÔö
     var_iaz018 := rec_tmp_irac01a2.iaz018;
     var_aae011 := rec_tmp_irac01a2.aae011;
     var_aae036 := rec_tmp_irac01a2.aae036;
@@ -1461,24 +1461,24 @@ AS
     var_aac014 := rec_tmp_irac01a2.aac014;
     var_aac015 := rec_tmp_irac01a2.aac015;
     var_iaa100_new := rec_tmp_irac01a2.iaa100;
-    
-    
-    --  AAC012  ä¸ªäººèº«ä»½ å·¥äºº  50  å¹²éƒ¨ 55 
+
+
+    --  AAC012  ¸öÈËÉí·İ ¹¤ÈË  50  ¸É²¿ 55
      var_aac012 := rec_tmp_irac01a2.aac012;
-    
+
       IF var_aac012 IS NULL  THEN
-      prm_msg :=  prm_msg||'ä¼ å…¥ä¸ªäººèº«ä»½ä¸ºç©ºï¼Œè¯·æ ¸å®ã€‚ã€‚ã€‚';
+      prm_msg :=  prm_msg||'´«Èë¸öÈËÉí·İÎª¿Õ£¬ÇëºËÊµ¡£¡£¡£';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
 
 
-   --  å¤„ç†irac01 å’Œ irac01a3   aac001 ä¸ä¸€è‡´é—®é¢˜
+   --  ´¦Àíirac01 ºÍ irac01a3   aac001 ²»Ò»ÖÂÎÊÌâ
    -- begin wangz 20190605
-   -- æ— ac01 è°ƒè¿‡æ ¡éªŒ
-   select count(1) INTO ac01_irac01a3_count from xasi2.ac01 where aac002  = var_aac002 and aac003 = var_aac003; 
-  IF ac01_irac01a3_count > 0 THEN 
-    -- IF 1=1 THEN 
+   -- ÎŞac01 µ÷¹ıĞ£Ñé
+   select count(1) INTO ac01_irac01a3_count from xasi2.ac01 where aac002  = var_aac002 and aac003 = var_aac003;
+  IF ac01_irac01a3_count > 0 THEN
+    -- IF 1=1 THEN
       SELECT COUNT(1)
         INTO num_count
         FROM wsjb.IRAC01A3
@@ -1488,22 +1488,22 @@ AS
          var_yac001 := PKG_COMMON.FUN_GETSEQUENCE(NULL,'YAC001');
          IF var_yac001 is null THEN
             prm_AppCode := gn_def_ERR ;
-            prm_msg  := 'æ²¡æœ‰è·å–åˆ°å•ä½äººå‘˜åºåˆ—å·yac001!';
+            prm_msg  := 'Ã»ÓĞ»ñÈ¡µ½µ¥Î»ÈËÔ±ĞòÁĞºÅyac001!';
             RETURN;
          END IF;
         INSERT INTO wsjb.tmp_irac01a3 (
        --  INSERT INTO wsjb.irac01a3 (
                      yac001,
-                     aac001,          -- ä¸ªäººç¼–å·
+                     aac001,          -- ¸öÈË±àºÅ
                      aab001,
-                     yae181,          -- è¯ä»¶ç±»å‹
-                     aac002,          -- èº«ä»½è¯å·ç (è¯ä»¶å·ç )
-                     aac003,          -- å§“å
-                     aac004,          -- æ€§åˆ«
+                     yae181,          -- Ö¤¼şÀàĞÍ
+                     aac002,          -- Éí·İÖ¤ºÅÂë(Ö¤¼şºÅÂë)
+                     aac003,          -- ĞÕÃû
+                     aac004,          -- ĞÔ±ğ
                      aac005,
-                     aac006,          -- å‡ºç”Ÿæ—¥æœŸ
-                     aac007,          -- å‚åŠ å·¥ä½œæ—¥æœŸ
-                     aac008,          -- äººå‘˜çŠ¶æ€
+                     aac006,          -- ³öÉúÈÕÆÚ
+                     aac007,          -- ²Î¼Ó¹¤×÷ÈÕÆÚ
+                     aac008,          -- ÈËÔ±×´Ì¬
                      aac009,
                      aac010,
                      aac012,
@@ -1511,30 +1511,30 @@ AS
                      aac014,
                      aac015,
                      aac020,
-                     yac067,          -- æ¥æºæ–¹å¼
-                     yac168,          -- å†œæ°‘å·¥æ ‡å¿—
+                     yac067,          -- À´Ô´·½Ê½
+                     yac168,          -- Å©Ãñ¹¤±êÖ¾
                      aae004,
-                     aae005,          -- è”ç³»ç”µè¯
-                     aae006,          -- åœ°å€
+                     aae005,          -- ÁªÏµµç»°
+                     aae006,          -- µØÖ·
                      aae007,
                      yae222,
                      aae013,
                      aac040,
                      yab139,
                      yab013,
-                     aae011,          -- ç»åŠäºº
-                     aae036)          -- ç»åŠæ—¶é—´
+                     aae011,          -- ¾­°ìÈË
+                     aae036)          -- ¾­°ìÊ±¼ä
             VALUES ( var_yac001,
-                     var_aac001,          -- ä¸ªäººç¼–å·
+                     var_aac001,          -- ¸öÈË±àºÅ
                      var_aab001,
-                     var_yae181,          -- è¯ä»¶ç±»å‹
-                     var_aac002,          -- èº«ä»½è¯å·ç (è¯ä»¶å·ç )
-                     var_aac003,          -- å§“å
-                     var_aac004,          -- æ€§åˆ«
+                     var_yae181,          -- Ö¤¼şÀàĞÍ
+                     var_aac002,          -- Éí·İÖ¤ºÅÂë(Ö¤¼şºÅÂë)
+                     var_aac003,          -- ĞÕÃû
+                     var_aac004,          -- ĞÔ±ğ
                      var_aac005,
-                     var_aac006,          -- å‡ºç”Ÿæ—¥æœŸ
-                     var_aac007,          -- å‚åŠ å·¥ä½œæ—¥æœŸ
-                     var_aac008,          -- äººå‘˜çŠ¶æ€
+                     var_aac006,          -- ³öÉúÈÕÆÚ
+                     var_aac007,          -- ²Î¼Ó¹¤×÷ÈÕÆÚ
+                     var_aac008,          -- ÈËÔ±×´Ì¬
                      var_aac009,
                      var_aac010,
                      var_aac012,
@@ -1542,35 +1542,35 @@ AS
                      var_aac014,
                      var_aac015,
                      var_aac020,
-                     var_yac067,          -- æ¥æºæ–¹å¼
-                     var_yac168,          -- å†œæ°‘å·¥æ ‡å¿—
+                     var_yac067,          -- À´Ô´·½Ê½
+                     var_yac168,          -- Å©Ãñ¹¤±êÖ¾
                      var_aae004,
-                     var_aae005,          -- è”ç³»ç”µè¯
-                     var_aae006,          -- åœ°å€
+                     var_aae005,          -- ÁªÏµµç»°
+                     var_aae006,          -- µØÖ·
                      var_aae007,
                      var_yae222,
                      var_aae013,
                      0,
                      PKG_Constant.YAB003_JBFZX,
                      var_aab001,
-                     var_aae011,          -- ç»åŠäºº
-                     sysdate);         -- ç»åŠæ—¶é—´
+                     var_aae011,          -- ¾­°ìÈË
+                     sysdate);         -- ¾­°ìÊ±¼ä
       END IF;
 
-    --  å¤„ç†ç”³æŠ¥æ•°æ®å’Œå…»è€ä¿¡æ¯æ•°æ®
-    --  å¤„ç†ä¹‹å‰çš„irac01a3 æ•°æ®
-    -- å½“å‰å•ä½æœ‰æ•°æ® 
+    --  ´¦ÀíÉê±¨Êı¾İºÍÑøÀÏĞÅÏ¢Êı¾İ
+    --  ´¦ÀíÖ®Ç°µÄirac01a3 Êı¾İ
+    -- µ±Ç°µ¥Î»ÓĞÊı¾İ
      SELECT count(1) INTO count_aab001_irac01a3  FROM wsjb.irac01a3 WHERE aac002 = var_aac002  AND aab001 = var_aab001;
-   
+
     IF  count_aab001_irac01a3 > 0  THEN
-    
+
      INSERT INTO wsjb.tmp_irac01a3 SELECT * FROM wsjb.irac01a3 WHERE aac002 = var_aac002  AND aac003 = var_aac003;
-     
+
          BEGIN
-          
-               select count(1) 
-                 into num_count_tmp_irac01a2 
-                 from wsjb.tmp_irac01a2 
+
+               select count(1)
+                 into num_count_tmp_irac01a2
+                 from wsjb.tmp_irac01a2
                 where aac002 =  var_aac002
                     AND aab001 = var_aab001
                      AND  IAA002='0'
@@ -1578,101 +1578,101 @@ AS
                      --AND IAA100 = var_iaa100_new ;
                      AND IAA100  IS NULL;
               if  num_count_tmp_irac01a2 < 1 then
-                  prm_msg := prm_msg|| 'tmp_irac01a2æ²¡æœ‰å¯å¤„ç†ä¿¡æ¯ï¼';
+                  prm_msg := prm_msg|| 'tmp_irac01a2Ã»ÓĞ¿É´¦ÀíĞÅÏ¢£¡';
                   return;
               end if;
-         
-             SELECT aac001  INTO irac01_aac001  FROM wsjb.tmp_irac01a2 
+
+             SELECT aac001  INTO irac01_aac001  FROM wsjb.tmp_irac01a2
                     WHERE aac002 =  var_aac002
                     AND aab001 = var_aab001
                      AND  IAA002='0'
                      AND IAA001 <> '4'
                      --AND IAA100 = var_iaa100_new ;
                      AND IAA100  IS NULL ;
-                 
+
             SELECT aac001  INTO irac01a3_aac001   FROM wsjb.tmp_irac01a3
                          WHERE  aac002 = var_aac002 AND aab001 =  var_aab001;
-                        
-                         
+
+
               /*  SELECT aac001  INTO irac01a3_aac001   FROM wsjb.irac01a3
                 WHERE  aac002 = var_aac002 AND aab001 =  var_aab001;
-                   */ 
+                   */
 
            EXCEPTION
 
               WHEN NO_DATA_FOUND THEN
-                 prm_sign := '1'; 
-                  prm_msg := prm_msg|| 'æœªè·å–åˆ°å…»è€åŸºæœ¬ä¿¡æ¯';
+                 prm_sign := '1';
+                  prm_msg := prm_msg|| 'Î´»ñÈ¡µ½ÑøÀÏ»ù±¾ĞÅÏ¢';
               -- prm_ErrorMsg := prm_msg;
                --   GOTO label_ERROR;
                 RETURN;
               WHEN TOO_MANY_ROWS THEN
-                 
+
                   --prm_AppCode  :=  PKG_Constant.;
-                  prm_msg := prm_msg|| 'è¯¥èº«ä»½è¯å·'|| var_aac002 ||'ä¸ºå¤šç¼–å·äººå‘˜ï¼Œè¯·é€‰æ‹©å¦å¤–ä¸€ä¸ªä¸ªäººç¼–å·å†è¿›è¡Œæ“ä½œ';
+                  prm_msg := prm_msg|| '¸ÃÉí·İÖ¤ºÅ'|| var_aac002 ||'Îª¶à±àºÅÈËÔ±£¬ÇëÑ¡ÔñÁíÍâÒ»¸ö¸öÈË±àºÅÔÙ½øĞĞ²Ù×÷';
                   -- prm_ErrorMsg := prm_msg;
-                   prm_sign := '1'; 
+                   prm_sign := '1';
                   -- delete from wsjb.irac01a3 where  aac002 = var_aac002 and aac001 = var_aac001 and aac003 = var_aac003;
                --   GOTO label_ERROR;
                  RETURN;
 
           WHEN OTHERS THEN
 
-                
+
              IF    irac01_aac001   <>  irac01a3_aac001 THEN
              -- prm_AppCode  :=  PKG_Constant.gn_def_ERR;
-               prm_msg   := 'irac01'||irac01_aac001||'ä¸irac01a3'||irac01a3_aac001||'ä¿¡æ¯ä¸åŒ¹é…!';
+               prm_msg   := 'irac01'||irac01_aac001||'Óëirac01a3'||irac01a3_aac001||'ĞÅÏ¢²»Æ¥Åä!';
                prm_ErrorMsg := prm_msg;
-               prm_sign := '1'; 
+               prm_sign := '1';
               END IF;
-              -- GOTO label_ERROR; 
-           
+              -- GOTO label_ERROR;
+
              RETURN;
          END;
        END IF;
    END IF;
    --  end wangz 20190605
-   
-   
+
+
     -- begin wangz 20190708
      IF  var_aac006 is null  THEN
             prm_sign := '1';
-            prm_msg  := 'è¯¥äººå‘˜å‡ºç”Ÿæ—¥æœŸä¸ºç©º!!ï¼';
+            prm_msg  := '¸ÃÈËÔ±³öÉúÈÕÆÚÎª¿Õ!!£¡';
             GOTO label_ERROR;
      END IF ;
 
       --  select trunc(months_between(sysdate,to_date(to_char(var_aac006,'yyyymm'),'yyyymm'))) INTO sj_months from dual;
      --   select trunc(months_between(sysdate,to_date(to_number(to_char(var_aac006,'yyyyMMdd'),'yyyymm')),'yyyymm')) INTO sj_months from dual;
     --  select  months_between(sysdate,to_date(to_number(substr(replace(var_aac006,'-',''),0,6)),'yyyyMM'))   INTO sj_months   from dual;
-      select to_number(to_char(min(aac006),'yyyymm'))   INTO var_aac006_ac01  
+      select to_number(to_char(min(aac006),'yyyymm'))   INTO var_aac006_ac01
             from xasi2.ac01
            where aac002 = var_aac002
            and aac001   = var_aac001
              AND rownum = 1   ;
 
            select trunc(months_between(sysdate,to_date(var_aac006_ac01,'yyyymm'))) INTO sj_months from dual;
-   
-    
+
+
         --select akc021  INTO  zy_akc021 from xasi2.kc01    where aac001 = var_aac001;
 
-         IF   var_aae110 = '1' and  var_aac004 = '2' and var_aac004 IS NOT NULL  THEN --  å…»è€é¦–æ¬¡å‚ä¿
+         IF   var_aae110 = '1' and  var_aac004 = '2' and var_aac004 IS NOT NULL  THEN --  ÑøÀÏÊ×´Î²Î±£
                 select X INTO X from dual;
-         
-             --  å¤„ç†å¹²éƒ¨  55 4  å·¥äºº 50  1  é’ˆå¯¹å¥³æ€§   
+
+             --  ´¦Àí¸É²¿  55 4  ¹¤ÈË 50  1  Õë¶ÔÅ®ĞÔ
                  IF   sj_months > woman_worker_months  and var_aac012 = '1' THEN
                       prm_sign := '1';
-                      prm_msg  := 'è¯¥äººå‘˜ä¸ªäººèº«ä»½ä¸ºå·¥äººï¼Œè¶…è¿‡éœ€è¦ç»­ä¿çš„å¹´çºªï¼';
+                      prm_msg  := '¸ÃÈËÔ±¸öÈËÉí·İÎª¹¤ÈË£¬³¬¹ıĞèÒªĞø±£µÄÄê¼Í£¡';
                        GOTO label_ERROR;
                  ELSIF   sj_months >=  woman_months and  var_aac012 = '4'  THEN
                       prm_sign := '1';
-                      prm_msg  := 'è¯¥äººå‘˜ä¸ªäººèº«ä»½ä¸ºå¹²éƒ¨ï¼Œè¶…è¿‡éœ€è¦ç»­ä¿çš„å¹´çºªï¼';
+                      prm_msg  := '¸ÃÈËÔ±¸öÈËÉí·İÎª¸É²¿£¬³¬¹ıĞèÒªĞø±£µÄÄê¼Í£¡';
                        GOTO label_ERROR;
                  END IF;
-             
+
              END IF;
     --  end  20190708
 
-   --åˆ¤æ–­æ˜¯å¦æ˜¯å•å…»è€å•ä½
+   --ÅĞ¶ÏÊÇ·ñÊÇµ¥ÑøÀÏµ¥Î»
     SELECT COUNT(1)
       INTO num_count
       FROM xasi2.ab02
@@ -1680,57 +1680,57 @@ AS
        AND AAB051 = '1';
 
     IF num_count = 0 THEN
-    --å…¶ä»–åŸºæ•°æ›´æ–°ä¸º0
+    --ÆäËû»ùÊı¸üĞÂÎª0
       UPDATE wsjb.tmp_irac01a2
          SET yac005 = 0
        WHERE iaz018 = prm_iaz018;
     END IF;
 
-    dat_aac006 := rec_tmp_irac01a2.aac006;--å‡ºç”Ÿæ—¥æœŸ
-    dat_aac007 := rec_tmp_irac01a2.aac007;--å‚å·¥æ—¥æœŸ
-    dat_aac030 := rec_tmp_irac01a2.aac030;--æœ¬ç³»ç»Ÿå‚ä¿æ—¥æœŸ
-    dat_yac033 := rec_tmp_irac01a2.yac033;--ä¸ªäººåˆæ¬¡å‚ä¿æ—¥æœŸ
-    var_iaa100 := rec_tmp_irac01a2.iaa100;--ç”³æŠ¥æœˆåº¦
+    dat_aac006 := rec_tmp_irac01a2.aac006;--³öÉúÈÕÆÚ
+    dat_aac007 := rec_tmp_irac01a2.aac007;--²Î¹¤ÈÕÆÚ
+    dat_aac030 := rec_tmp_irac01a2.aac030;--±¾ÏµÍ³²Î±£ÈÕÆÚ
+    dat_yac033 := rec_tmp_irac01a2.yac033;--¸öÈË³õ´Î²Î±£ÈÕÆÚ
+    var_iaa100 := rec_tmp_irac01a2.iaa100;--Éê±¨ÔÂ¶È
   --  SELECT TO_DATE(var_iaa100||'01','yyyy-MM-dd HH:MI:SS') INTO dat_iaa100 FROM dual;
     IF dat_aac007 > dat_aac030 THEN
-      prm_msg :=  prm_msg||'é¦–æ¬¡å‚åŠ å·¥ä½œæ—¥æœŸä¸èƒ½æ™šäºåˆ°æœ¬å•ä½å‚ä¿æ—¥æœŸ!';
+      prm_msg :=  prm_msg||'Ê×´Î²Î¼Ó¹¤×÷ÈÕÆÚ²»ÄÜÍíÓÚµ½±¾µ¥Î»²Î±£ÈÕÆÚ!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
 
     IF TO_NUMBER(TO_CHAR(dat_aac030,'yyyyMM')) > TO_NUMBER(var_iaa100) THEN
-      prm_msg :=  prm_msg||'åˆ°æœ¬å•ä½å‚ä¿æ—¥æœŸä¸èƒ½æ™šäºå½“å‰å¯ç”³æŠ¥æœˆåº¦'||var_iaa100||'!';
+      prm_msg :=  prm_msg||'µ½±¾µ¥Î»²Î±£ÈÕÆÚ²»ÄÜÍíÓÚµ±Ç°¿ÉÉê±¨ÔÂ¶È'||var_iaa100||'!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
     IF dat_aac006 > dat_aac007 THEN
-      prm_msg :=  prm_msg||'é¦–æ¬¡å‚åŠ å·¥ä½œæ—¥æœŸä¸èƒ½æ—©äºå‡ºç”Ÿæ—¥æœŸ!';
+      prm_msg :=  prm_msg||'Ê×´Î²Î¼Ó¹¤×÷ÈÕÆÚ²»ÄÜÔçÓÚ³öÉúÈÕÆÚ!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
     IF dat_aac006 > dat_aac030 THEN
-      prm_msg :=  prm_msg||'æœ¬å•ä½å‚ä¿æ—¥æœŸä¸èƒ½æ—©äºå‡ºç”Ÿæ—¥æœŸ!';
+      prm_msg :=  prm_msg||'±¾µ¥Î»²Î±£ÈÕÆÚ²»ÄÜÔçÓÚ³öÉúÈÕÆÚ!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
 
 
-     --æ ¡éªŒè¯ä»¶ä¿¡æ¯
-     prc_p_ValidateAac002Continue(rec_tmp_irac01a2.yae181,     --è¯ä»¶ç±»å‹
-                                  rec_tmp_irac01a2.aac002,     --è¯ä»¶å·ç 
-                                  var_aab001,     --å•ä½ç¼–å·
-                                  var_iaa100,     --æœˆåº¦
-                                  var_aac001,     --ä¸ªäººç¼–å·
-                                  prm_msg ,     -- é”™è¯¯ä¿¡æ¯
-                                  prm_sign,     -- é”™è¯¯æ ‡å¿—
-                                  prm_AppCode,     --æ‰§è¡Œä»£ç 
-                                  prm_ErrorMsg);    --å‡ºé”™ä¿¡æ¯
+     --Ğ£ÑéÖ¤¼şĞÅÏ¢
+     prc_p_ValidateAac002Continue(rec_tmp_irac01a2.yae181,     --Ö¤¼şÀàĞÍ
+                                  rec_tmp_irac01a2.aac002,     --Ö¤¼şºÅÂë
+                                  var_aab001,     --µ¥Î»±àºÅ
+                                  var_iaa100,     --ÔÂ¶È
+                                  var_aac001,     --¸öÈË±àºÅ
+                                  prm_msg ,     -- ´íÎóĞÅÏ¢
+                                  prm_sign,     -- ´íÎó±êÖ¾
+                                  prm_AppCode,     --Ö´ĞĞ´úÂë
+                                  prm_ErrorMsg);    --³ö´íĞÅÏ¢
      IF prm_sign = '1' THEN
 
       GOTO label_ERROR;
      END IF ;
 
-     --é™©ç§æ ¡éªŒ
+     --ÏÕÖÖĞ£Ñé
      IF rec_tmp_irac01a2.aae110 = '0' AND
         rec_tmp_irac01a2.aae120 = '0' AND
         rec_tmp_irac01a2.aae210 = '0' AND
@@ -1740,13 +1740,13 @@ AS
         rec_tmp_irac01a2.aae311 = '0' AND
         rec_tmp_irac01a2.aae810 = '0' THEN
 
-        prm_msg :=  prm_msg||'æœªè·å–åˆ°å‹¾é€‰å‚ä¿çš„é™©ç§ä¿¡æ¯!';
+        prm_msg :=  prm_msg||'Î´»ñÈ¡µ½¹´Ñ¡²Î±£µÄÏÕÖÖĞÅÏ¢!';
         prm_sign := '1';
         GOTO label_ERROR;
 
      END IF;
 
-      -- è§£å†³å¤šç¼–å· æœ‰åœ¨å½“å‰ç¼–å·å‚å·¥å•† æç¤ºé™©ç§æ–°å¢ begin
+      -- ½â¾ö¶à±àºÅ ÓĞÔÚµ±Ç°±àºÅ²Î¹¤ÉÌ ÌáÊ¾ÏÕÖÖĞÂÔö begin
 
        SELECT count(1) into ac01_count
            FROM xasi2.ac01
@@ -1754,7 +1754,7 @@ AS
             AND aac002  = var_aac002;
 
          IF    ac01_count > 0 THEN
-          -- æ ¡éªŒåœ¨å½“å‰å•ä½å‚å·¥ä¼¤
+          -- Ğ£ÑéÔÚµ±Ç°µ¥Î»²Î¹¤ÉË
          FOR rec_aac001 IN cur_aac001 LOOP
          select count(1) INTO ac02_count_04 from xasi2.ac02 where aac001  in (
                SELECT  aac001
@@ -1768,104 +1768,104 @@ AS
 
             IF  ac02_count_04 > 0 THEN
                 Select aab004 INTO  var_aab004 from xasi2.ab01 where aab001 =  var_aab001;
-                prm_msg := 'ä¸ªäººç¼–å·:'||rec_aac001.aac001||'å§“å:'
-                                    ||rec_aac001.aac003||'èº«ä»½è¯å·:'||rec_aac001.aac002
-                                    ||' æ­£åœ¨' ||var_aab004|| 'æ­¤äººå·²åœ¨æœ¬å•ä½å‚åŠ å·¥ä¼¤é™©ç§ï¼Œè¯·åœ¨äººå‘˜æ–°å¢é™©ç§æ¨¡å—ä¸‹æ“ä½œï¼'||';';
+                prm_msg := '¸öÈË±àºÅ:'||rec_aac001.aac001||'ĞÕÃû:'
+                                    ||rec_aac001.aac003||'Éí·İÖ¤ºÅ:'||rec_aac001.aac002
+                                    ||' ÕıÔÚ' ||var_aab004|| '´ËÈËÒÑÔÚ±¾µ¥Î»²Î¼Ó¹¤ÉËÏÕÖÖ£¬ÇëÔÚÈËÔ±ĞÂÔöÏÕÖÖÄ£¿éÏÂ²Ù×÷£¡'||';';
                 prm_sign:= '1';
             END IF ;
           END LOOP;
          END IF ;
 
-     -- è§£å†³å¤šç¼–å· æœ‰åœ¨å½“å‰ç¼–å·å‚å·¥å•† æç¤ºé™©ç§æ–°å¢ end
+     -- ½â¾ö¶à±àºÅ ÓĞÔÚµ±Ç°±àºÅ²Î¹¤ÉÌ ÌáÊ¾ÏÕÖÖĞÂÔö end
 
 
 
-     -- é™©ç§æ ¡éªŒ   201812229 begin  wangz
+     -- ÏÕÖÖĞ£Ñé   201812229 begin  wangz
 
 
-         --åˆ¤æ–­äººå‘˜æ˜¯å¦å­˜åœ¨å‚ä¿ä¿¡æ¯ac02,æ— ä»»ä½•èŒå·¥å‚ä¿ä¿¡æ¯è·³è¿‡æ ¡éªŒ
+         --ÅĞ¶ÏÈËÔ±ÊÇ·ñ´æÔÚ²Î±£ĞÅÏ¢ac02,ÎŞÈÎºÎÖ°¹¤²Î±£ĞÅÏ¢Ìø¹ıĞ£Ñé
          IF ( var_aae210  = '1'  or  var_aae210  = '10'    ) THEN
-         INSERT INTO XASI2.TMP_AAE140(  yae099,--ä¸ªäººç¼–ç -->
-                                         aab001,--å•ä½ç¼–ç  -->
-                                         aae140,--é™©ç§-->
-                                         yab139 --å‚ä¿åˆ†ä¸­å¿ƒ-->
+         INSERT INTO XASI2.TMP_AAE140(  yae099,--¸öÈË±àÂë-->
+                                         aab001,--µ¥Î»±àÂë -->
+                                         aae140,--ÏÕÖÖ-->
+                                         yab139 --²Î±£·ÖÖĞĞÄ-->
                                          )
-                                  VALUES (var_aac001       ,--ä¸ªäººç¼–ç -->
-                                          var_aab001 , --å•ä½ç¼–ç  -->
-                                          '02', --é™©ç§-->
-                                          PKG_Constant.YAB003_JBFZX  --å‚ä¿åˆ†ä¸­å¿ƒ-->
+                                  VALUES (var_aac001       ,--¸öÈË±àÂë-->
+                                          var_aab001 , --µ¥Î»±àÂë -->
+                                          '02', --ÏÕÖÖ-->
+                                          PKG_Constant.YAB003_JBFZX  --²Î±£·ÖÖĞĞÄ-->
                                          );
       END IF;
       IF (var_aae310  = '1'  or  var_aae310  = '10'   ) THEN
-         INSERT INTO XASI2.TMP_AAE140(yae099,--ä¸ªäººç¼–ç -->
-                                         aab001,--å•ä½ç¼–ç  -->
-                                         aae140,--é™©ç§-->
-                                         yab139 --å‚ä¿åˆ†ä¸­å¿ƒ-->
+         INSERT INTO XASI2.TMP_AAE140(yae099,--¸öÈË±àÂë-->
+                                         aab001,--µ¥Î»±àÂë -->
+                                         aae140,--ÏÕÖÖ-->
+                                         yab139 --²Î±£·ÖÖĞĞÄ-->
                                          )
-                                  VALUES (var_aac001       ,--ä¸ªäººç¼–ç -->
-                                          var_aab001 , --å•ä½ç¼–ç  -->
-                                          '03', --é™©ç§-->
-                                          PKG_Constant.YAB003_JBFZX  --å‚ä¿åˆ†ä¸­å¿ƒ-->
+                                  VALUES (var_aac001       ,--¸öÈË±àÂë-->
+                                          var_aab001 , --µ¥Î»±àÂë -->
+                                          '03', --ÏÕÖÖ-->
+                                          PKG_Constant.YAB003_JBFZX  --²Î±£·ÖÖĞĞÄ-->
                                          );
       END IF;
       IF ( var_aae410  = '1'  or  var_aae410  = '10'  ) THEN
-         INSERT INTO XASI2.TMP_AAE140(yae099,--ä¸ªäººç¼–ç -->
-                                         aab001,--å•ä½ç¼–ç  -->
-                                         aae140,--é™©ç§-->
-                                         yab139 --å‚ä¿åˆ†ä¸­å¿ƒ-->
+         INSERT INTO XASI2.TMP_AAE140(yae099,--¸öÈË±àÂë-->
+                                         aab001,--µ¥Î»±àÂë -->
+                                         aae140,--ÏÕÖÖ-->
+                                         yab139 --²Î±£·ÖÖĞĞÄ-->
                                          )
-                                  VALUES (var_aac001       ,--ä¸ªäººç¼–ç -->
-                                          var_aab001, --å•ä½ç¼–ç  -->
-                                          '04', --é™©ç§-->
-                                          PKG_Constant.YAB003_JBFZX  --å‚ä¿åˆ†ä¸­å¿ƒ-->
+                                  VALUES (var_aac001       ,--¸öÈË±àÂë-->
+                                          var_aab001, --µ¥Î»±àÂë -->
+                                          '04', --ÏÕÖÖ-->
+                                          PKG_Constant.YAB003_JBFZX  --²Î±£·ÖÖĞĞÄ-->
                                          );
       END IF;
       IF (var_aae510  = '1'  or  var_aae510  = '10') THEN
-         INSERT INTO XASI2.TMP_AAE140(yae099,--ä¸ªäººç¼–ç -->
-                                         aab001,--å•ä½ç¼–ç  -->
-                                         aae140,--é™©ç§-->
-                                         yab139 --å‚ä¿åˆ†ä¸­å¿ƒ-->
+         INSERT INTO XASI2.TMP_AAE140(yae099,--¸öÈË±àÂë-->
+                                         aab001,--µ¥Î»±àÂë -->
+                                         aae140,--ÏÕÖÖ-->
+                                         yab139 --²Î±£·ÖÖĞĞÄ-->
                                          )
-                                  VALUES (var_aac001       ,--ä¸ªäººç¼–ç -->
-                                          var_aab001, --å•ä½ç¼–ç  -->
-                                          '05', --é™©ç§-->
-                                          PKG_Constant.YAB003_JBFZX  --å‚ä¿åˆ†ä¸­å¿ƒ-->
+                                  VALUES (var_aac001       ,--¸öÈË±àÂë-->
+                                          var_aab001, --µ¥Î»±àÂë -->
+                                          '05', --ÏÕÖÖ-->
+                                          PKG_Constant.YAB003_JBFZX  --²Î±£·ÖÖĞĞÄ-->
                                          );
       END IF;
       IF ( var_aae311 = '1'  or  var_aae311  = '10') THEN
-         INSERT INTO XASI2.TMP_AAE140(yae099,--ä¸ªäººç¼–ç -->
-                                         aab001,--å•ä½ç¼–ç  -->
-                                         aae140,--é™©ç§-->
-                                         yab139 --å‚ä¿åˆ†ä¸­å¿ƒ-->
+         INSERT INTO XASI2.TMP_AAE140(yae099,--¸öÈË±àÂë-->
+                                         aab001,--µ¥Î»±àÂë -->
+                                         aae140,--ÏÕÖÖ-->
+                                         yab139 --²Î±£·ÖÖĞĞÄ-->
                                          )
-                                  VALUES (var_aac001       ,--ä¸ªäººç¼–ç -->
-                                          var_aab001, --å•ä½ç¼–ç  -->
-                                          '07', --é™©ç§-->
-                                          PKG_Constant.YAB003_JBFZX  --å‚ä¿åˆ†ä¸­å¿ƒ-->
+                                  VALUES (var_aac001       ,--¸öÈË±àÂë-->
+                                          var_aab001, --µ¥Î»±àÂë -->
+                                          '07', --ÏÕÖÖ-->
+                                          PKG_Constant.YAB003_JBFZX  --²Î±£·ÖÖĞĞÄ-->
                                          );
       END IF;
       IF ( var_aae120 = '1'  or  var_aae120  = '10') THEN
-         INSERT INTO XASI2.TMP_AAE140(yae099,--ä¸ªäººç¼–ç -->
-                                         aab001,--å•ä½ç¼–ç  -->
-                                         aae140,--é™©ç§-->
-                                         yab139 --å‚ä¿åˆ†ä¸­å¿ƒ-->
+         INSERT INTO XASI2.TMP_AAE140(yae099,--¸öÈË±àÂë-->
+                                         aab001,--µ¥Î»±àÂë -->
+                                         aae140,--ÏÕÖÖ-->
+                                         yab139 --²Î±£·ÖÖĞĞÄ-->
                                          )
-                                  VALUES (var_aac001       ,--ä¸ªäººç¼–ç -->
-                                          var_aab001, --å•ä½ç¼–ç  -->
-                                          '06', --é™©ç§-->
-                                          PKG_Constant.YAB003_JBFZX  --å‚ä¿åˆ†ä¸­å¿ƒ-->
+                                  VALUES (var_aac001       ,--¸öÈË±àÂë-->
+                                          var_aab001, --µ¥Î»±àÂë -->
+                                          '06', --ÏÕÖÖ-->
+                                          PKG_Constant.YAB003_JBFZX  --²Î±£·ÖÖĞĞÄ-->
                                          );
       END IF;
       IF (var_aae810 = '1'  or  var_aae810  = '10' ) THEN
-         INSERT INTO XASI2.TMP_AAE140(yae099,--ä¸ªäººç¼–ç -->
-                                         aab001,--å•ä½ç¼–ç  -->
-                                         aae140,--é™©ç§-->
-                                         yab139 --å‚ä¿åˆ†ä¸­å¿ƒ-->
+         INSERT INTO XASI2.TMP_AAE140(yae099,--¸öÈË±àÂë-->
+                                         aab001,--µ¥Î»±àÂë -->
+                                         aae140,--ÏÕÖÖ-->
+                                         yab139 --²Î±£·ÖÖĞĞÄ-->
                                          )
-                                  VALUES (var_aac001       ,--ä¸ªäººç¼–ç -->
-                                          var_aab001  , --å•ä½ç¼–ç  -->
-                                          '08', --é™©ç§-->
-                                          PKG_Constant.YAB003_JBFZX  --å‚ä¿åˆ†ä¸­å¿ƒ-->
+                                  VALUES (var_aac001       ,--¸öÈË±àÂë-->
+                                          var_aab001  , --µ¥Î»±àÂë -->
+                                          '08', --ÏÕÖÖ-->
+                                          PKG_Constant.YAB003_JBFZX  --²Î±£·ÖÖĞĞÄ-->
                                          );
       END IF;
 
@@ -1878,7 +1878,7 @@ AS
           WHERE AAC001 = var_aac001;
 
           IF (NUM_COUNT = 0 or NUM_COUNT != 0)   AND var_aac008 <> xasi2.PKG_COMM.AAC008_TX THEN
-             --æŒ‰å•ä½é™©ç§å¾ªç¯æ£€æŸ¥ä¸ªäººå‚ä¿ä¿¡æ¯
+             --°´µ¥Î»ÏÕÖÖÑ­»·¼ì²é¸öÈË²Î±£ĞÅÏ¢
            FOR rec_aae140 IN cur_aae140 LOOP
                var_aae140 := rec_aae140.aae140;
                FOR rec_aac001 IN cur_aac001 LOOP
@@ -1896,9 +1896,9 @@ AS
                      WHERE aac001 = rec_aac001.aac001
                       AND aae140 IN ('03','05','07','08','02')
                        AND aac031 = '1');
-                      prm_msg := 'ä¸ªäººç¼–å·:'||rec_aac001.aac001||'å§“å:'
-                                    ||rec_aac001.aac003||'èº«ä»½è¯å·:'||rec_aac001.aac002
-                                    ||' æ­£åœ¨' ||var_aab004|| 'å‚åŠ èŒå·¥åŒ»ä¿ï¼è¯´æ˜ï¼šå¦‚å‚ä¿çŠ¶æ€ä¸ºæš‚åœç¼´è´¹ï¼Œè¯·åœ¨ç»­ä¿æ¨¡å—æ“ä½œï¼›å¦‚å‚ä¿çŠ¶æ€ä¸ºå‚ä¿ç¼´è´¹ï¼Œè¯·å…ˆåœ¨åŸå•ä½åŠç†æš‚åœç¼´è´¹åï¼Œå†æ“ä½œç»­ä¿ã€‚'||';';
+                      prm_msg := '¸öÈË±àºÅ:'||rec_aac001.aac001||'ĞÕÃû:'
+                                    ||rec_aac001.aac003||'Éí·İÖ¤ºÅ:'||rec_aac001.aac002
+                                    ||' ÕıÔÚ' ||var_aab004|| '²Î¼ÓÖ°¹¤Ò½±££¡ËµÃ÷£ºÈç²Î±£×´Ì¬ÎªÔİÍ£½É·Ñ£¬ÇëÔÚĞø±£Ä£¿é²Ù×÷£»Èç²Î±£×´Ì¬Îª²Î±£½É·Ñ£¬ÇëÏÈÔÚÔ­µ¥Î»°ìÀíÔİÍ£½É·Ñºó£¬ÔÙ²Ù×÷Ğø±£¡£'||';';
                        prm_sign:= '1';
                    END IF;
 
@@ -1908,13 +1908,13 @@ AS
           END IF;
 
 
-     -- é™©ç§æ ¡éªŒ   201812229 begin  wangz
+     -- ÏÕÖÖĞ£Ñé   201812229 begin  wangz
 
-     --å…¬åŠ¡å‘˜è¡¥åŠ©é™©ç§æ ¡éªŒ
+     --¹«ÎñÔ±²¹ÖúÏÕÖÖĞ£Ñé
      IF rec_tmp_irac01a2.aae810 = '1' THEN
 
         IF rec_tmp_irac01a2.yac200 IS NULL THEN
-          prm_msg :=  prm_msg||'å…¬åŠ¡å‘˜èŒçº§ä¸èƒ½ä¸ºç©º!';
+          prm_msg :=  prm_msg||'¹«ÎñÔ±Ö°¼¶²»ÄÜÎª¿Õ!';
            prm_sign := '1';
            GOTO label_ERROR;
         END IF;
@@ -1923,15 +1923,15 @@ AS
 
 
 
-     --åŸºæ•°æ ¡éªŒ
-     num_aac040 := rec_tmp_irac01a2.aac040;--ç¼´è´¹å·¥èµ„
+     --»ùÊıĞ£Ñé
+     num_aac040 := rec_tmp_irac01a2.aac040;--½É·Ñ¹¤×Ê
  IF rec_tmp_irac01a2.iaa100 IS NOT NULL THEN
      IF rec_tmp_irac01a2.aae110 IN  ('1','10') THEN
         SELECT ROUND(pkg_common.fun_p_getcontributionbase(null,var_aab001,num_aac040,'0','01','1','1',var_iaa100,prm_yab139))
           INTO num_yac004
           FROM  dual ;
         IF ROUND(num_yac004) <> rec_tmp_irac01a2.yac004 THEN
-          --ä¼ä¸šå…»è€åŸºæ•°æ›´æ–°
+          --ÆóÒµÑøÀÏ»ùÊı¸üĞÂ
           UPDATE wsjb.tmp_irac01a2
              SET yac004 = ROUND(num_yac004)
            WHERE iaz018 = prm_iaz018
@@ -1947,7 +1947,7 @@ AS
      IF rec_tmp_irac01a2.aae120 = '1' THEN
 
         IF num_aac040 <> rec_tmp_irac01a2.yac004 THEN
-          --æœºå…³å…»è€åŸºæ•°æ›´æ–°
+          --»ú¹ØÑøÀÏ»ùÊı¸üĞÂ
           UPDATE wsjb.tmp_irac01a2
              SET yac004 = num_aac040
            WHERE iaz018 = prm_iaz018
@@ -1961,7 +1961,7 @@ AS
         rec_tmp_irac01a2.aae410 = '1' OR
         rec_tmp_irac01a2.aae510 = '1' OR
         rec_tmp_irac01a2.aae810 = '1' THEN
-        --ä»¥ä¸€ä¸ªé™©ç§ä¸ºå‡†
+        --ÒÔÒ»¸öÏÕÖÖÎª×¼
         SELECT aae140
           INTO var_aae140
           FROM xasi2.AB02
@@ -1973,7 +1973,7 @@ AS
           INTO num_yac005
           FROM  dual ;
         IF ROUND(num_yac005) <> rec_tmp_irac01a2.yac005 THEN
-          --å…¶ä»–åŸºæ•°æ›´æ–°
+          --ÆäËû»ùÊı¸üĞÂ
           UPDATE tmp_irac01a2
              SET yac005 = ROUND(num_yac005),
                  yaa333 = ROUND(num_yac005)
@@ -1981,9 +1981,9 @@ AS
         END IF;
 
      END IF;   */
-     --é™©ç§çŠ¶æ€åˆ¤æ–­
+     --ÏÕÖÖ×´Ì¬ÅĞ¶Ï
 /*
-     --èŒå·¥å…»è€
+     --Ö°¹¤ÑøÀÏ
      IF rec_tmp_irac01a2.aae110 = '1' THEN
          SELECT count(1)
            INTO num_count
@@ -1993,18 +1993,18 @@ AS
             AND aae110 = '0';
         IF num_count > 0 THEN
           UPDATE tmp_irac01a2
-             SET aae110 = '10'  --ç»­ä¿
+             SET aae110 = '10'  --Ğø±£
            WHERE iaz018 = prm_iaz018;
 
         ELSE
           UPDATE tmp_irac01a2
-             SET aae110 = '1'  --æ–°å¢
+             SET aae110 = '1'  --ĞÂÔö
            WHERE iaz018 = prm_iaz018;
         END IF;
 
 
      ELSIF rec_tmp_irac01a2.aae110 = '0' THEN
-        --æœªå‹¾é€‰é™©ç§
+        --Î´¹´Ñ¡ÏÕÖÖ
         SELECT count(1)
            INTO num_count
            FROM IRAC01A3
@@ -2013,7 +2013,7 @@ AS
             AND aae110 = '2';
          IF num_count > 0 THEN
           UPDATE tmp_irac01a2
-             SET aae110 = '2'   --å‚ä¿ç¼´è´¹
+             SET aae110 = '2'   --²Î±£½É·Ñ
            WHERE iaz018 = prm_iaz018;
         END IF;
 
@@ -2025,13 +2025,13 @@ AS
             AND aae110 = '0';
          IF num_count > 0 THEN
           UPDATE tmp_irac01a2
-             SET aae110 = '0'  --æš‚åœç¼´è´¹
+             SET aae110 = '0'  --ÔİÍ£½É·Ñ
            WHERE iaz018 = prm_iaz018;
         END IF;
 
      END IF;
 */
-      --æœºå…³å…»è€
+      --»ú¹ØÑøÀÏ
      IF rec_tmp_irac01a2.aae120 = '1' THEN
          SELECT count(1)
            INTO num_count
@@ -2050,7 +2050,7 @@ AS
                SET aae120 = '10'
              WHERE iaz018 = prm_iaz018;
           ELSE
-            prm_msg :=  prm_msg||'æœºå…³å…»è€é™©ç§ä¸ä¸ºæš‚åœç¼´è´¹çŠ¶æ€ï¼';
+            prm_msg :=  prm_msg||'»ú¹ØÑøÀÏÏÕÖÖ²»ÎªÔİÍ£½É·Ñ×´Ì¬£¡';
             prm_sign := '1';
             GOTO label_ERROR;
           END IF ;
@@ -2060,7 +2060,7 @@ AS
              WHERE iaz018 = prm_iaz018;
         END IF;
      ELSIF rec_tmp_irac01a2.aae120 = '0' THEN
-        --æœªå‹¾é€‰é™©ç§
+        --Î´¹´Ñ¡ÏÕÖÖ
         SELECT count(1)
            INTO num_count
            FROM xasi2.ac02
@@ -2088,7 +2088,7 @@ AS
         END IF;
      END IF;
 
-     --å·¥ä¼¤
+     --¹¤ÉË
      IF rec_tmp_irac01a2.aae410 = '1' THEN
          SELECT count(1)
            INTO num_count
@@ -2133,7 +2133,7 @@ AS
            WHERE iaz018 = prm_iaz018;
         END IF;
      END IF;
-     --å¤±ä¸š
+     --Ê§Òµ
      IF rec_tmp_irac01a2.aae210 = '1' THEN
          SELECT count(1)
            INTO num_count
@@ -2152,7 +2152,7 @@ AS
                SET aae210 = '10'
              WHERE iaz018 = prm_iaz018;
           ELSE
-            prm_msg :=  prm_msg||'å¤±ä¸šé™©ç§ä¸ä¸ºæš‚åœç¼´è´¹çŠ¶æ€ï¼';
+            prm_msg :=  prm_msg||'Ê§ÒµÏÕÖÖ²»ÎªÔİÍ£½É·Ñ×´Ì¬£¡';
             prm_sign := '1';
             GOTO label_ERROR;
 
@@ -2164,7 +2164,7 @@ AS
              WHERE iaz018 = prm_iaz018;
         END IF;
      ELSIF rec_tmp_irac01a2.aae210 = '0' THEN
-        --æœªå‹¾é€‰é™©ç§
+        --Î´¹´Ñ¡ÏÕÖÖ
         SELECT count(1)
            INTO num_count
            FROM xasi2.ac02
@@ -2192,7 +2192,7 @@ AS
         END IF;
      END IF;
 
-      --åŒ»ç–—
+      --Ò½ÁÆ
      IF rec_tmp_irac01a2.aae310 = '1' THEN
          SELECT count(1)
            INTO num_count
@@ -2212,7 +2212,7 @@ AS
              WHERE iaz018 = prm_iaz018;
 
           ELSE
-            prm_msg :=  prm_msg||'åŒ»ç–—é™©ç§ä¸ä¸ºæš‚åœç¼´è´¹çŠ¶æ€ï¼';
+            prm_msg :=  prm_msg||'Ò½ÁÆÏÕÖÖ²»ÎªÔİÍ£½É·Ñ×´Ì¬£¡';
             prm_sign := '1';
             GOTO label_ERROR;
 
@@ -2224,7 +2224,7 @@ AS
              WHERE iaz018 = prm_iaz018;
         END IF;
      ELSIF rec_tmp_irac01a2.aae310 = '0' THEN
-        --æœªå‹¾é€‰é™©ç§
+        --Î´¹´Ñ¡ÏÕÖÖ
         SELECT count(1)
            INTO num_count
            FROM xasi2.ac02
@@ -2252,7 +2252,7 @@ AS
         END IF;
      END IF;
 
-      --ç”Ÿè‚²
+      --ÉúÓı
      IF rec_tmp_irac01a2.aae510 = '1' THEN
          SELECT count(1)
            INTO num_count
@@ -2271,7 +2271,7 @@ AS
                SET aae510 = '10'
              WHERE iaz018 = prm_iaz018;
           ELSE
-            prm_msg :=  prm_msg||'ç”Ÿè‚²é™©ç§ä¸ä¸ºæš‚åœç¼´è´¹çŠ¶æ€ï¼';
+            prm_msg :=  prm_msg||'ÉúÓıÏÕÖÖ²»ÎªÔİÍ£½É·Ñ×´Ì¬£¡';
             prm_sign := '1';
             GOTO label_ERROR;
           END IF ;
@@ -2282,7 +2282,7 @@ AS
              WHERE iaz018 = prm_iaz018;
         END IF;
      ELSIF rec_tmp_irac01a2.aae510 = '0' THEN
-        --æœªå‹¾é€‰é™©ç§
+        --Î´¹´Ñ¡ÏÕÖÖ
         SELECT count(1)
            INTO num_count
            FROM xasi2.ac02
@@ -2310,7 +2310,7 @@ AS
         END IF;
      END IF;
 
-      --å¤§é¢
+      --´ó¶î
      IF rec_tmp_irac01a2.aae311 = '1' THEN
          SELECT count(1)
            INTO num_count
@@ -2329,7 +2329,7 @@ AS
                SET aae311 = '10'
              WHERE iaz018 = prm_iaz018;
           ELSE
-            prm_msg :=  prm_msg||'å¤§é¢è¡¥å……é™©ç§ä¸ä¸ºæš‚åœç¼´è´¹çŠ¶æ€ï¼';
+            prm_msg :=  prm_msg||'´ó¶î²¹³äÏÕÖÖ²»ÎªÔİÍ£½É·Ñ×´Ì¬£¡';
             prm_sign := '1';
             GOTO label_ERROR;
           END IF ;
@@ -2340,7 +2340,7 @@ AS
              WHERE iaz018 = prm_iaz018;
         END IF;
      ELSIF rec_tmp_irac01a2.aae311 = '0' THEN
-        --æœªå‹¾é€‰é™©ç§
+        --Î´¹´Ñ¡ÏÕÖÖ
         SELECT count(1)
            INTO num_count
            FROM xasi2.ac02
@@ -2368,7 +2368,7 @@ AS
         END IF;
      END IF;
 
-     --å…¬åŠ¡å‘˜è¡¥åŠ©
+     --¹«ÎñÔ±²¹Öú
      IF rec_tmp_irac01a2.aae810 = '1' THEN
          SELECT count(1)
            INTO num_count
@@ -2387,7 +2387,7 @@ AS
                SET aae810 = '10'
              WHERE iaz018 = prm_iaz018;
           ELSE
-            prm_msg :=  prm_msg||'å…¬åŠ¡å‘˜è¡¥åŠ©é™©ç§ä¸ä¸ºæš‚åœç¼´è´¹çŠ¶æ€ï¼';
+            prm_msg :=  prm_msg||'¹«ÎñÔ±²¹ÖúÏÕÖÖ²»ÎªÔİÍ£½É·Ñ×´Ì¬£¡';
             prm_sign := '1';
             GOTO label_ERROR;
           END IF;
@@ -2398,7 +2398,7 @@ AS
              WHERE iaz018 = prm_iaz018;
         END IF;
      ELSIF rec_tmp_irac01a2.aae810 = '0' THEN
-        --æœªå‹¾é€‰é™©ç§
+        --Î´¹´Ñ¡ÏÕÖÖ
         SELECT count(1)
            INTO num_count
            FROM xasi2.ac02
@@ -2428,8 +2428,8 @@ AS
 
 
 
-     /*æ ¡éªŒæ— è¯¯å¤„ç†*/
-      --ç»­ä¿ä¿®æ”¹æˆ·å£æ€§è´¨
+     /*Ğ£ÑéÎŞÎó´¦Àí*/
+      --Ğø±£ĞŞ¸Ä»§¿ÚĞÔÖÊ
     var_aac009 := rec_tmp_irac01a2.aac009;
     IF var_aac009 = '10' THEN
       UPDATE wsjb.tmp_irac01a2
@@ -2472,40 +2472,40 @@ AS
     UPDATE wsjb.tmp_irac01a2
        SET iaa100 = ''
        WHERE iaz018 = prm_iaz018;
-     /*å¤„ç†å¤±è´¥*/
+     /*´¦ÀíÊ§°Ü*/
       <<label_ERROR>>
 
         num_count :=0;
 
    EXCEPTION
      WHEN OTHERS THEN
-          /*å…³é—­æ‰“å¼€çš„æ¸¸æ ‡*/
+          /*¹Ø±Õ´ò¿ªµÄÓÎ±ê*/
           prm_AppCode  := PRE_ERRCODE || GN_DEF_ERR;
-          prm_ErrorMsg := 'æ•°æ®åº“é”™è¯¯ï¼'|| SQLERRM||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE() ;
+          prm_ErrorMsg := 'Êı¾İ¿â´íÎó£¡'|| SQLERRM||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE() ;
           RETURN;
    END prc_p_ValidateContinueCheck;
 
    /*--------------------------------------------------------------------------
-   || ä¸šåŠ¡ç¯èŠ‚ ï¼šäººå‘˜æ–°å¢é™©ç§ç½‘å…éªŒè¯
-   || è¿‡ç¨‹åç§° prc_p_ValidateAac002KindAdd
-   || åŠŸèƒ½æè¿° ï¼šæ ¡éªŒè¯¥äººå‘˜æ˜¯å¦èƒ½è¿›è¡Œæ–°å¢é™©ç§çš„ä¿¡æ¯å½•å…¥
+   || ÒµÎñ»·½Ú £ºÈËÔ±ĞÂÔöÏÕÖÖÍøÌüÑéÖ¤
+   || ¹ı³ÌÃû³Æ prc_p_ValidateAac002KindAdd
+   || ¹¦ÄÜÃèÊö £ºĞ£Ñé¸ÃÈËÔ±ÊÇ·ñÄÜ½øĞĞĞÂÔöÏÕÖÖµÄĞÅÏ¢Â¼Èë
    ||
-   || å‚æ•°æè¿° ï¼šå‚æ•°æ ‡è¯†           è¯´æ˜
+   || ²ÎÊıÃèÊö £º²ÎÊı±êÊ¶           ËµÃ÷
    ||            --------------------------------------------------------------
    ||
    ||
-   || ä½œ    è€… ï¼šzhujing         å®Œæˆæ—¥æœŸ ï¼š2015-11-23
+   || ×÷    Õß £ºzhujing         Íê³ÉÈÕÆÚ £º2015-11-23
    ||------------------------------------------------------------------------*/
    PROCEDURE prc_p_ValidateAac002KindAdd(
-       prm_yae181          IN            VARCHAR2,     --è¯ä»¶ç±»å‹
-      prm_aac002          IN            VARCHAR2,     --è¯ä»¶å·ç 
-      prm_aab001          IN            VARCHAR2,     --å•ä½ç¼–å·
-      prm_iaa100          IN            VARCHAR2,     --æœˆåº¦
-      prm_aac001          IN           VARCHAR2,     --ä¸ªäººç¼–å·
-      prm_msg             OUT           VARCHAR2,     -- é”™è¯¯ä¿¡æ¯
-      prm_sign            OUT           VARCHAR2,     -- é”™è¯¯æ ‡å¿—
-      prm_AppCode         OUT           VARCHAR2,     --æ‰§è¡Œä»£ç 
-      prm_ErrorMsg        OUT           VARCHAR2)    --å‡ºé”™ä¿¡æ¯
+       prm_yae181          IN            VARCHAR2,     --Ö¤¼şÀàĞÍ
+      prm_aac002          IN            VARCHAR2,     --Ö¤¼şºÅÂë
+      prm_aab001          IN            VARCHAR2,     --µ¥Î»±àºÅ
+      prm_iaa100          IN            VARCHAR2,     --ÔÂ¶È
+      prm_aac001          IN           VARCHAR2,     --¸öÈË±àºÅ
+      prm_msg             OUT           VARCHAR2,     -- ´íÎóĞÅÏ¢
+      prm_sign            OUT           VARCHAR2,     -- ´íÎó±êÖ¾
+      prm_AppCode         OUT           VARCHAR2,     --Ö´ĞĞ´úÂë
+      prm_ErrorMsg        OUT           VARCHAR2)    --³ö´íĞÅÏ¢
 
    IS
    num_count        NUMBER(6);
@@ -2516,32 +2516,32 @@ AS
    var_aac001       irac01.aac001%TYPE;
    var_akc021       irac01.akc021%TYPE;
    var_aac008       irac01.aac008%TYPE;
-   var_yab013       irac01.yab013%TYPE;--åŸå•ä½ç¼–å·
+   var_yab013       irac01.yab013%TYPE;--Ô­µ¥Î»±àºÅ
    BEGIN
-    /*åˆå§‹åŒ–å˜é‡*/
+    /*³õÊ¼»¯±äÁ¿*/
       prm_AppCode  := GN_DEF_OK;
       prm_ErrorMsg := '';
       prm_msg :='';
       prm_sign :='0';
-   --æ ¡éªŒå‚æ•°
+   --Ğ£Ñé²ÎÊı
       IF prm_yae181 IS NULL  THEN
-         prm_msg :=  prm_msg||'ä¼ å…¥è¯ä»¶ç±»å‹ä¸ºç©ºï¼Œè¯·æ ¸å®ã€‚ã€‚ã€‚';
+         prm_msg :=  prm_msg||'´«ÈëÖ¤¼şÀàĞÍÎª¿Õ£¬ÇëºËÊµ¡£¡£¡£';
          prm_sign := '1';
          GOTO label_ERROR;
       END IF;
       IF prm_aab001 IS NULL  THEN
-         prm_msg :=  prm_msg||'ä¼ å…¥å•ä½ç¼–å·ä¸ºç©ºï¼Œè¯·æ ¸å®ã€‚ã€‚ã€‚';
+         prm_msg :=  prm_msg||'´«Èëµ¥Î»±àºÅÎª¿Õ£¬ÇëºËÊµ¡£¡£¡£';
          prm_sign := '1';
          GOTO label_ERROR;
       END IF;
       IF prm_aac002 IS NULL  THEN
-         prm_msg :=  prm_msg||'ä¼ å…¥è¯ä»¶å·ç ä¸ºç©ºï¼Œè¯·æ ¸å®ã€‚ã€‚ã€‚';
+         prm_msg :=  prm_msg||'´«ÈëÖ¤¼şºÅÂëÎª¿Õ£¬ÇëºËÊµ¡£¡£¡£';
          prm_sign := '1';
          GOTO label_ERROR;
       END IF;
-       --èº«ä»½è¯ç±»å‹
+       --Éí·İÖ¤ÀàĞÍ
      IF prm_yae181 = 1 THEN
-        --è·å–å„ç§å½¢å¼çš„è¯ä»¶å·ç 
+        --»ñÈ¡¸÷ÖÖĞÎÊ½µÄÖ¤¼şºÅÂë
          var_15aac002 := SUBSTR(prm_aac002,1,6)||SUBSTR(prm_aac002,9, 9);
          var_aac002Low := LOWER(prm_aac002);
 
@@ -2550,15 +2550,15 @@ AS
           FROM xasi2.ac01 A
          WHERE AAE120 = '0'
            AND A.AAC002 IN (var_15aac002, var_aac002Low, prm_aac002)
-           AND AAC003 NOT LIKE '%é‡å¤%';
+           AND AAC003 NOT LIKE '%ÖØ¸´%';
 
         IF num_count = 0 THEN
-           prm_msg := 'è¯ä»¶å·ä¸ºï¼š['||prm_aac002||']çš„äººå‘˜ä¸å­˜åœ¨ä¸ªäººä¿¡æ¯ï¼Œè¯·åœ¨æ–°å‚ä¿æ¨¡å—é‡Œæ“ä½œ1ï¼';
+           prm_msg := 'Ö¤¼şºÅÎª£º['||prm_aac002||']µÄÈËÔ±²»´æÔÚ¸öÈËĞÅÏ¢£¬ÇëÔÚĞÂ²Î±£Ä£¿éÀï²Ù×÷1£¡';
            prm_sign :='1';
            GOTO label_ERROR ;
         END IF ;
 /*        IF num_count > 1 THEN
-           prm_msg := 'è¯ä»¶å·ä¸ºï¼š['||prm_aac002||']çš„äººå‘˜å­˜åœ¨å¤šæ¡ä¸ªäººä¿¡æ¯ï¼Œè¯·åœ¨è”ç³»ç¤¾ä¿ä¸­å¿ƒï¼';
+           prm_msg := 'Ö¤¼şºÅÎª£º['||prm_aac002||']µÄÈËÔ±´æÔÚ¶àÌõ¸öÈËĞÅÏ¢£¬ÇëÔÚÁªÏµÉç±£ÖĞĞÄ£¡';
            prm_sign :='1';
            GOTO label_ERROR ;
         END IF ;
@@ -2571,9 +2571,9 @@ AS
           FROM xasi2.ac01 A
          WHERE AAE120 = '0'
            AND A.AAC001=prm_aac001
-           AND AAC003 NOT LIKE '%é‡å¤%';
+           AND AAC003 NOT LIKE '%ÖØ¸´%';
 
-             --åˆ¤æ–­æ­¤äººåœ¨æœ¬å•ä½æ˜¯å¦æ˜¯æ­£å¸¸å‚ä¿çŠ¶æ€
+             --ÅĞ¶Ï´ËÈËÔÚ±¾µ¥Î»ÊÇ·ñÊÇÕı³£²Î±£×´Ì¬
        SELECT SUM(count)
         INTO num_count
         FROM (SELECT count(*) AS count
@@ -2589,7 +2589,7 @@ AS
         AND aab001 = prm_aab001
         AND aae110 = '2');
         IF num_count = 0 THEN
-         prm_msg := 'æ­¤äººåœ¨æœ¬å•ä½æ²¡æœ‰æ­£å¸¸å‚ä¿çš„é™©ç§ï¼Œè¯·åˆ°ç»­ä¿æ¨¡å—æ“ä½œï¼';
+         prm_msg := '´ËÈËÔÚ±¾µ¥Î»Ã»ÓĞÕı³£²Î±£µÄÏÕÖÖ£¬Çëµ½Ğø±£Ä£¿é²Ù×÷£¡';
          prm_sign :='1';
          GOTO label_ERROR ;
           END IF;
@@ -2600,15 +2600,15 @@ AS
           FROM xasi2.ac01 A
          WHERE AAE120 = '0'
            AND A.AAC002 = prm_aac002
-           AND AAC003 NOT LIKE '%é‡å¤%';
+           AND AAC003 NOT LIKE '%ÖØ¸´%';
 
         IF num_count = 0 THEN
-           prm_msg := 'è¯ä»¶å·ä¸ºï¼š['||prm_aac002||']çš„äººå‘˜ä¸å­˜åœ¨ä¸ªäººä¿¡æ¯ï¼Œè¯·åœ¨æ–°å‚ä¿æ¨¡å—é‡Œæ“ä½œ2ï¼';
+           prm_msg := 'Ö¤¼şºÅÎª£º['||prm_aac002||']µÄÈËÔ±²»´æÔÚ¸öÈËĞÅÏ¢£¬ÇëÔÚĞÂ²Î±£Ä£¿éÀï²Ù×÷2£¡';
            prm_sign :='1';
            GOTO label_ERROR ;
         END IF ;
        /* IF num_count > 1 THEN
-           prm_msg := 'è¯ä»¶å·ä¸ºï¼š['||prm_aac002||']çš„äººå‘˜å­˜åœ¨å¤šæ¡ä¸ªäººä¿¡æ¯ï¼Œè¯·åœ¨è”ç³»ç¤¾ä¿ä¸­å¿ƒï¼';
+           prm_msg := 'Ö¤¼şºÅÎª£º['||prm_aac002||']µÄÈËÔ±´æÔÚ¶àÌõ¸öÈËĞÅÏ¢£¬ÇëÔÚÁªÏµÉç±£ÖĞĞÄ£¡';
            prm_sign :='1';
            GOTO label_ERROR ;
         END IF ;*/
@@ -2620,24 +2620,24 @@ AS
           FROM xasi2.ac01 A
          WHERE AAE120 = '0'
            AND A.AAC001 = prm_aac001
-           AND AAC003 NOT LIKE '%é‡å¤%';
+           AND AAC003 NOT LIKE '%ÖØ¸´%';
      END IF;
   SELECT count(1) INTO num_count FROM xasi2.kc01 WHERE aac001 = prm_aac001;
 
-  IF num_count >0 THEN--å•å·¥ä¼¤äººå‘˜æ–°å¢é™©ç§åŠ å…¥num_countå¤§äº0
+  IF num_count >0 THEN--µ¥¹¤ÉËÈËÔ±ĞÂÔöÏÕÖÖ¼ÓÈënum_count´óÓÚ0
         SELECT A.AKC021
           INTO var_akc021
           FROM xasi2.KC01 A
          WHERE A.AAC001 = prm_aac001;
        IF var_aac008 = '2' AND var_akc021 = '11' THEN
-           prm_msg := 'è¯ä»¶å·ä¸ºï¼š['||prm_aac002||']çš„äººå‘˜æ­£åœ¨åŠç†å¾…é€€ä¸šåŠ¡,ä¸èƒ½åŠç†ç»­ä¿æ‰‹ç»­ï¼Œå¦‚è¦åŠç†è”ç³»ç¤¾ä¿ä¸­å¿ƒï¼';
+           prm_msg := 'Ö¤¼şºÅÎª£º['||prm_aac002||']µÄÈËÔ±ÕıÔÚ°ìÀí´ıÍËÒµÎñ,²»ÄÜ°ìÀíĞø±£ÊÖĞø£¬ÈçÒª°ìÀíÁªÏµÉç±£ÖĞĞÄ£¡';
           prm_sign :='1';
           GOTO label_ERROR ;
        END IF;
 END IF;
 
 
-       --åœ¨åˆ«çš„å•ä½æ˜¯å¦æœ‰å‚ä¿ç¼´è´¹è®°å½•
+       --ÔÚ±ğµÄµ¥Î»ÊÇ·ñÓĞ²Î±£½É·Ñ¼ÇÂ¼
        SELECT SUM(COUNT1)
          INTO num_count
          FROM (SELECT COUNT(*) AS COUNT1
@@ -2662,7 +2662,7 @@ END IF;
            AND IAA001 = '4'
            AND IAA002 = '1';
         IF num_count > 0 THEN
-          prm_msg := 'æ­¤äººå­˜åœ¨å¾…å®¡æ ¸çš„â€œäººå‘˜é‡è¦ä¿¡æ¯å˜æ›´â€ç”³è¯·,è¯·æç¤ºæœ¬äººå°½å¿«æºå¸¦ç›¸å…³èµ„æ–™åˆ°ç¤¾ä¿ä¸­å¿ƒè¿›è¡Œå®¡æ ¸åŠç†ã€‚åŠç†æˆåŠŸåï¼Œæ–¹å¯è¿›è¡Œç»­ä¿æ“ä½œï¼';
+          prm_msg := '´ËÈË´æÔÚ´ıÉóºËµÄ¡°ÈËÔ±ÖØÒªĞÅÏ¢±ä¸ü¡±ÉêÇë,ÇëÌáÊ¾±¾ÈË¾¡¿ìĞ¯´øÏà¹Ø×ÊÁÏµ½Éç±£ÖĞĞÄ½øĞĞÉóºË°ìÀí¡£°ìÀí³É¹¦ºó£¬·½¿É½øĞĞĞø±£²Ù×÷£¡';
           prm_sign :='1';
           GOTO label_ERROR ;
         END IF;
@@ -2679,7 +2679,7 @@ END IF;
            AND A.AAC001 = prm_aac001
            AND B.AAB001 = prm_aab001;
          IF num_count > 0 THEN
-             prm_msg := 'æ­¤äººåœ¨å…¶ä»–å•ä½æœ‰é™©ç§æœªåšæš‚åœï¼Œä¸”åœ¨æœ¬å•ä½å·²å‚å·¥ä¼¤é™©ç§ï¼';
+             prm_msg := '´ËÈËÔÚÆäËûµ¥Î»ÓĞÏÕÖÖÎ´×öÔİÍ££¬ÇÒÔÚ±¾µ¥Î»ÒÑ²Î¹¤ÉËÏÕÖÖ£¡';
             prm_sign :='1';
             GOTO label_ERROR ;
          END IF;
@@ -2695,12 +2695,12 @@ END IF;
            AND A.AAC001 = prm_aac001
            AND C.YAB136 = '001';
         IF num_count > 0 THEN
-           prm_msg := 'æ­¤äººåœ¨äººäº‹ä»£ç†æœºæ„æœ‰é™©ç§æœªåšæš‚åœ,è¯·æš‚åœåå†ç»­ä¿ï¼';
+           prm_msg := '´ËÈËÔÚÈËÊÂ´úÀí»ú¹¹ÓĞÏÕÖÖÎ´×öÔİÍ£,ÇëÔİÍ£ºóÔÙĞø±££¡';
            prm_sign :='1';
            GOTO label_ERROR ;
         END IF;
 
-      prm_msg := 'æ­¤äººåœ¨å…¶ä»–å•ä½æœ‰é™©ç§æœªåšæš‚åœ,æœ¬å•ä½åªèƒ½å‚ä¿å·¥ä¼¤é™©ï¼';
+      prm_msg := '´ËÈËÔÚÆäËûµ¥Î»ÓĞÏÕÖÖÎ´×öÔİÍ£,±¾µ¥Î»Ö»ÄÜ²Î±£¹¤ÉËÏÕ£¡';
       prm_sign :='2';
       GOTO label_ERROR ;
       END IF;
@@ -2721,7 +2721,7 @@ END IF;
                  AND AAE140 = '03'
                  AND AAE002 = prm_iaa100);
       IF num_count > 0 THEN
-         prm_msg := 'æ­¤äºº'||prm_iaa100||'å­˜åœ¨åŒ»ç–—ç¼´è´¹è®°å½•ä¿¡æ¯,ä¸èƒ½ç»­ä¿ã€‚è¯¦ç»†è¯·å’¨è¯¢ç¤¾ä¿ä¸­å¿ƒ!';
+         prm_msg := '´ËÈË'||prm_iaa100||'´æÔÚÒ½ÁÆ½É·Ñ¼ÇÂ¼ĞÅÏ¢,²»ÄÜĞø±£¡£ÏêÏ¸Çë×ÉÑ¯Éç±£ÖĞĞÄ!';
          prm_sign :='1';
          GOTO label_ERROR ;
       END IF;
@@ -2733,7 +2733,7 @@ END IF;
          AND A.IAA002 = '0'
          AND A.AAC002 = prm_aac002;
       IF num_count > 0 THEN
-         prm_msg := 'æ­¤äººå­˜åœ¨å¾…ç”³æŠ¥çš„æš‚åœä¿¡æ¯,è¯·å…ˆåŠç†ç”³æŠ¥ä¸šåŠ¡!';
+         prm_msg := '´ËÈË´æÔÚ´ıÉê±¨µÄÔİÍ£ĞÅÏ¢,ÇëÏÈ°ìÀíÉê±¨ÒµÎñ!';
          prm_sign :='1';
          GOTO label_ERROR ;
       END IF;
@@ -2745,7 +2745,7 @@ END IF;
          AND A.IAA002 = '0'
          AND A.AAC001 = prm_aac001;
       IF num_count > 0 THEN
-         prm_msg := 'æ­¤äººå­˜åœ¨å¾…ç”³æŠ¥çš„ç»­ä¿ä¿¡æ¯,è¯·å…ˆåŠç†ç”³æŠ¥ä¸šåŠ¡!';
+         prm_msg := '´ËÈË´æÔÚ´ıÉê±¨µÄĞø±£ĞÅÏ¢,ÇëÏÈ°ìÀíÉê±¨ÒµÎñ!';
          prm_sign :='1';
          GOTO label_ERROR ;
       END IF;
@@ -2757,7 +2757,7 @@ END IF;
          AND A.IAA002 = '1'
          AND A.AAC001 = prm_aac001;
       IF num_count > 0 THEN
-         prm_msg := 'æ­¤äººå­˜åœ¨å·²ç”³æŠ¥çš„ç»­ä¿ä¿¡æ¯,è¯·ç­‰å¾…å®¡æ ¸é€šè¿‡!!';
+         prm_msg := '´ËÈË´æÔÚÒÑÉê±¨µÄĞø±£ĞÅÏ¢,ÇëµÈ´ıÉóºËÍ¨¹ı!!';
          prm_sign :='1';
          GOTO label_ERROR ;
       END IF;
@@ -2769,7 +2769,7 @@ END IF;
          AND A.IAA002 = '4'
          AND A.AAC001 = prm_aac001;
       IF num_count > 0 THEN
-         prm_msg := 'æ­¤äººå­˜åœ¨è¢«æ‰“å›çš„ç»­ä¿ä¿¡æ¯,è¯·åˆ°[æœˆç”³æŠ¥]åŠŸèƒ½ä¸‹ä¿®æ”¹ç›¸å…³ä¿¡æ¯ç»§ç»­ç”³æŠ¥!!';
+         prm_msg := '´ËÈË´æÔÚ±»´ò»ØµÄĞø±£ĞÅÏ¢,Çëµ½[ÔÂÉê±¨]¹¦ÄÜÏÂĞŞ¸ÄÏà¹ØĞÅÏ¢¼ÌĞøÉê±¨!!';
          prm_sign :='1';
          GOTO label_ERROR ;
       END IF;
@@ -2781,7 +2781,7 @@ END IF;
          AND A.IAA002 = '0'
          AND A.AAC001 = prm_aac001;
       IF num_count > 0 THEN
-         prm_msg := 'æ­¤äººå­˜åœ¨å¾…ç”³æŠ¥çš„é™©ç§æ–°å¢ä¿¡æ¯,è¯·å…ˆåŠç†ç”³æŠ¥ä¸šåŠ¡!';
+         prm_msg := '´ËÈË´æÔÚ´ıÉê±¨µÄÏÕÖÖĞÂÔöĞÅÏ¢,ÇëÏÈ°ìÀíÉê±¨ÒµÎñ!';
          prm_sign :='1';
          GOTO label_ERROR ;
       END IF;
@@ -2793,7 +2793,7 @@ END IF;
          AND A.IAA002 = '1'
          AND A.AAC001 = prm_aac001;
       IF num_count > 0 THEN
-         prm_msg := 'æ­¤äººå­˜åœ¨å·²ç”³æŠ¥çš„é™©ç§æ–°å¢ä¿¡æ¯,è¯·ç­‰å¾…å®¡æ ¸é€šè¿‡!';
+         prm_msg := '´ËÈË´æÔÚÒÑÉê±¨µÄÏÕÖÖĞÂÔöĞÅÏ¢,ÇëµÈ´ıÉóºËÍ¨¹ı!';
          prm_sign :='1';
          GOTO label_ERROR ;
       END IF;
@@ -2836,7 +2836,7 @@ END IF;
                    AND YAE517 = 'H01');
   /***
        IF num_count > 0 THEN
-          prm_msg := 'æ­¤äººå­˜åœ¨å¾…å®¡æ ¸çš„äººå‘˜å‡å°‘ä¿¡æ¯ï¼Œä¸èƒ½åŠç†ç»­ä¿,è¯·ç­‰å¾…å®¡æ ¸é€šè¿‡!';
+          prm_msg := '´ËÈË´æÔÚ´ıÉóºËµÄÈËÔ±¼õÉÙĞÅÏ¢£¬²»ÄÜ°ìÀíĞø±£,ÇëµÈ´ıÉóºËÍ¨¹ı!';
          prm_sign :='1';
          GOTO label_ERROR ;
        END IF;
@@ -2846,53 +2846,53 @@ END IF;
 
 
 
-      /*å¤„ç†å¤±è´¥*/
+      /*´¦ÀíÊ§°Ü*/
       <<label_ERROR>>
 
        num_count :=0;
   EXCEPTION
      WHEN OTHERS THEN
-          /*å…³é—­æ‰“å¼€çš„æ¸¸æ ‡*/
+          /*¹Ø±Õ´ò¿ªµÄÓÎ±ê*/
           prm_AppCode  := PRE_ERRCODE || GN_DEF_ERR;
-          prm_ErrorMsg := 'æ•°æ®åº“é”™è¯¯ï¼'|| SQLERRM||dbms_utility.format_error_backtrace ;
+          prm_ErrorMsg := 'Êı¾İ¿â´íÎó£¡'|| SQLERRM||dbms_utility.format_error_backtrace ;
           RETURN;
    END prc_p_ValidateAac002KindAdd;
 
     /*--------------------------------------------------------------------------
-   || ä¸šåŠ¡ç¯èŠ‚ ï¼šäººå‘˜æ–°å¢é™©ç§ç½‘å…éªŒè¯
-   || è¿‡ç¨‹åç§° prc_p_ValidateKindAddCheck
-   || åŠŸèƒ½æè¿° ï¼šæ ¡éªŒè¯¥äººå‘˜å½•å…¥çš„æ–°å¢é™©ç§ä¿¡æ¯
+   || ÒµÎñ»·½Ú £ºÈËÔ±ĞÂÔöÏÕÖÖÍøÌüÑéÖ¤
+   || ¹ı³ÌÃû³Æ prc_p_ValidateKindAddCheck
+   || ¹¦ÄÜÃèÊö £ºĞ£Ñé¸ÃÈËÔ±Â¼ÈëµÄĞÂÔöÏÕÖÖĞÅÏ¢
    ||
-   || å‚æ•°æè¿° ï¼šå‚æ•°æ ‡è¯†           è¯´æ˜
+   || ²ÎÊıÃèÊö £º²ÎÊı±êÊ¶           ËµÃ÷
    ||            --------------------------------------------------------------
    ||
    ||
-   || ä½œ    è€… ï¼šzhujing         å®Œæˆæ—¥æœŸ ï¼š2015-11-24
+   || ×÷    Õß £ºzhujing         Íê³ÉÈÕÆÚ £º2015-11-24
    ||------------------------------------------------------------------------*/
    PROCEDURE prc_p_ValidateKindAddCheck(
-       prm_iaz018          IN            VARCHAR2,     --æ‰¹æ¬¡å·
-      prm_yab139          IN            VARCHAR2,     --ç»åŠæœºæ„
-      prm_msg             OUT           VARCHAR2,     -- é”™è¯¯ä¿¡æ¯
-      prm_sign            OUT           VARCHAR2,     -- é”™è¯¯æ ‡å¿—
-      prm_AppCode         OUT           VARCHAR2,     --æ‰§è¡Œä»£ç 
-      prm_ErrorMsg        OUT           VARCHAR2)    --å‡ºé”™ä¿¡æ¯
+       prm_iaz018          IN            VARCHAR2,     --Åú´ÎºÅ
+      prm_yab139          IN            VARCHAR2,     --¾­°ì»ú¹¹
+      prm_msg             OUT           VARCHAR2,     -- ´íÎóĞÅÏ¢
+      prm_sign            OUT           VARCHAR2,     -- ´íÎó±êÖ¾
+      prm_AppCode         OUT           VARCHAR2,     --Ö´ĞĞ´úÂë
+      prm_ErrorMsg        OUT           VARCHAR2)    --³ö´íĞÅÏ¢
   IS
    num_count        NUMBER(6);
    rec_tmp_irac01a2 tmp_irac01a2%ROWTYPE;
-   dat_aac006       DATE ;--å‡ºç”Ÿæ—¥æœŸ
-   dat_aac007       DATE ;--å‚å·¥æ—¥æœŸ
-   dat_aac030       DATE ;--æœ¬ç³»ç»Ÿå‚ä¿æ—¥æœŸ
-   dat_yac033       DATE ;--ä¸ªäººåˆæ¬¡å‚ä¿æ—¥æœŸ
+   dat_aac006       DATE ;--³öÉúÈÕÆÚ
+   dat_aac007       DATE ;--²Î¹¤ÈÕÆÚ
+   dat_aac030       DATE ;--±¾ÏµÍ³²Î±£ÈÕÆÚ
+   dat_yac033       DATE ;--¸öÈË³õ´Î²Î±£ÈÕÆÚ
    var_aab001       irab01.aab001%TYPE;
    var_aae140       irab02.aae140%TYPE;
-   num_aac040       NUMBER(14,2); --ç¼´è´¹å·¥èµ„
-   num_yac004       NUMBER(14,2); --å…»è€åŸºæ•°
-   num_yac005       NUMBER(14,2); --å…¶ä»–åŸºæ•°
-   var_iaa100       VARCHAR2(6);  --ç”³æŠ¥æœˆåº¦
+   num_aac040       NUMBER(14,2); --½É·Ñ¹¤×Ê
+   num_yac004       NUMBER(14,2); --ÑøÀÏ»ùÊı
+   num_yac005       NUMBER(14,2); --ÆäËû»ùÊı
+   var_iaa100       VARCHAR2(6);  --Éê±¨ÔÂ¶È
    var_aac001       irac01.aac001%TYPE;
-   var_aac009       irac01.aac009%TYPE;  --æˆ·å£æ€§è´¨
+   var_aac009       irac01.aac009%TYPE;  --»§¿ÚĞÔÖÊ
    BEGIN
-   /*åˆå§‹åŒ–å˜é‡*/
+   /*³õÊ¼»¯±äÁ¿*/
      prm_AppCode  := GN_DEF_OK;
      prm_ErrorMsg := '';
      prm_msg :='';
@@ -2904,16 +2904,16 @@ END IF;
      INTO rec_tmp_irac01a2
      FROM wsjb.tmp_irac01a2
     WHERE iaz018 = prm_iaz018;
-     --æ ¡éªŒå‚æ•°
+     --Ğ£Ñé²ÎÊı
     IF prm_iaz018 IS NULL  THEN
-      prm_msg :=  prm_msg||'ä¼ å…¥æ ¡éªŒæµæ°´å·ä¸ºç©ºï¼Œè¯·æ ¸å®ã€‚ã€‚ã€‚';
+      prm_msg :=  prm_msg||'´«ÈëĞ£ÑéÁ÷Ë®ºÅÎª¿Õ£¬ÇëºËÊµ¡£¡£¡£';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
     var_aab001 := rec_tmp_irac01a2.aab001;
     var_aac001 := rec_tmp_irac01a2.aac001;
 
-   --åˆ¤æ–­æ˜¯å¦æ˜¯å•å…»è€å•ä½
+   --ÅĞ¶ÏÊÇ·ñÊÇµ¥ÑøÀÏµ¥Î»
     SELECT COUNT(1)
       INTO num_count
       FROM xasi2.ab02
@@ -2921,61 +2921,61 @@ END IF;
        AND AAB051 = '1';
 
     IF num_count = 0 THEN
-    --å…¶ä»–åŸºæ•°æ›´æ–°ä¸º0
+    --ÆäËû»ùÊı¸üĞÂÎª0
       UPDATE wsjb.tmp_irac01a2
          SET yac005 = 0
        WHERE iaz018 = prm_iaz018;
     END IF;
 
-    dat_aac006 := rec_tmp_irac01a2.aac006;--å‡ºç”Ÿæ—¥æœŸ
-    dat_aac007 := rec_tmp_irac01a2.aac007;--å‚å·¥æ—¥æœŸ
-    dat_aac030 := rec_tmp_irac01a2.aac030;--æœ¬ç³»ç»Ÿå‚ä¿æ—¥æœŸ
-    dat_yac033 := rec_tmp_irac01a2.yac033;--ä¸ªäººåˆæ¬¡å‚ä¿æ—¥æœŸ
-    var_iaa100 := rec_tmp_irac01a2.iaa100;--ç”³æŠ¥æœˆåº¦
+    dat_aac006 := rec_tmp_irac01a2.aac006;--³öÉúÈÕÆÚ
+    dat_aac007 := rec_tmp_irac01a2.aac007;--²Î¹¤ÈÕÆÚ
+    dat_aac030 := rec_tmp_irac01a2.aac030;--±¾ÏµÍ³²Î±£ÈÕÆÚ
+    dat_yac033 := rec_tmp_irac01a2.yac033;--¸öÈË³õ´Î²Î±£ÈÕÆÚ
+    var_iaa100 := rec_tmp_irac01a2.iaa100;--Éê±¨ÔÂ¶È
 
     IF dat_aac007 > dat_aac030 THEN
-      prm_msg :=  prm_msg||'é¦–æ¬¡å‚åŠ å·¥ä½œæ—¥æœŸä¸èƒ½æ™šäºåˆ°æœ¬å•ä½å‚ä¿æ—¥æœŸ!';
+      prm_msg :=  prm_msg||'Ê×´Î²Î¼Ó¹¤×÷ÈÕÆÚ²»ÄÜÍíÓÚµ½±¾µ¥Î»²Î±£ÈÕÆÚ!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
 --    IF dat_aac030 > SYSDATE THEN
---      prm_msg :=  prm_msg||'åˆ°æœ¬å•ä½å‚ä¿æ—¥æœŸä¸èƒ½æ™šäºç³»ç»Ÿæ—¥æœŸ'||TO_CHAR(SYSDATE,'yyyy-MM-dd')||'!';
+--      prm_msg :=  prm_msg||'µ½±¾µ¥Î»²Î±£ÈÕÆÚ²»ÄÜÍíÓÚÏµÍ³ÈÕÆÚ'||TO_CHAR(SYSDATE,'yyyy-MM-dd')||'!';
 --      prm_sign := '1';
 --      GOTO label_ERROR;
 --    END IF;
     IF TO_NUMBER(TO_CHAR(dat_aac030,'yyyyMM')) > TO_NUMBER(var_iaa100) THEN
-      prm_msg :=  prm_msg||'åˆ°æœ¬å•ä½å‚ä¿æ—¥æœŸä¸èƒ½æ™šäºå½“å‰å¯ç”³æŠ¥æœˆåº¦'||var_iaa100||'!';
+      prm_msg :=  prm_msg||'µ½±¾µ¥Î»²Î±£ÈÕÆÚ²»ÄÜÍíÓÚµ±Ç°¿ÉÉê±¨ÔÂ¶È'||var_iaa100||'!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
     IF dat_aac006 > dat_aac007 THEN
-      prm_msg :=  prm_msg||'é¦–æ¬¡å‚åŠ å·¥ä½œæ—¥æœŸä¸èƒ½æ—©äºå‡ºç”Ÿæ—¥æœŸ!';
+      prm_msg :=  prm_msg||'Ê×´Î²Î¼Ó¹¤×÷ÈÕÆÚ²»ÄÜÔçÓÚ³öÉúÈÕÆÚ!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
     IF dat_aac006 > dat_aac030 THEN
-      prm_msg :=  prm_msg||'æœ¬å•ä½å‚ä¿æ—¥æœŸä¸èƒ½æ—©äºå‡ºç”Ÿæ—¥æœŸ!';
+      prm_msg :=  prm_msg||'±¾µ¥Î»²Î±£ÈÕÆÚ²»ÄÜÔçÓÚ³öÉúÈÕÆÚ!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
 
 
-     --æ ¡éªŒè¯ä»¶ä¿¡æ¯
-     prc_p_ValidateAac002KindAdd(rec_tmp_irac01a2.yae181,     --è¯ä»¶ç±»å‹
-                                  rec_tmp_irac01a2.aac002,     --è¯ä»¶å·ç 
-                                  var_aab001,     --å•ä½ç¼–å·
-                                  var_iaa100,     --æœˆåº¦
-                                  var_aac001,     --ä¸ªäººç¼–å·
-                                  prm_msg ,     -- é”™è¯¯ä¿¡æ¯
-                                  prm_sign,     -- é”™è¯¯æ ‡å¿—
-                                  prm_AppCode,     --æ‰§è¡Œä»£ç 
-                                  prm_ErrorMsg);    --å‡ºé”™ä¿¡æ¯
+     --Ğ£ÑéÖ¤¼şĞÅÏ¢
+     prc_p_ValidateAac002KindAdd(rec_tmp_irac01a2.yae181,     --Ö¤¼şÀàĞÍ
+                                  rec_tmp_irac01a2.aac002,     --Ö¤¼şºÅÂë
+                                  var_aab001,     --µ¥Î»±àºÅ
+                                  var_iaa100,     --ÔÂ¶È
+                                  var_aac001,     --¸öÈË±àºÅ
+                                  prm_msg ,     -- ´íÎóĞÅÏ¢
+                                  prm_sign,     -- ´íÎó±êÖ¾
+                                  prm_AppCode,     --Ö´ĞĞ´úÂë
+                                  prm_ErrorMsg);    --³ö´íĞÅÏ¢
      IF prm_sign = '1' THEN
 
       GOTO label_ERROR;
      END IF ;
 
-     --é™©ç§æ ¡éªŒ
+     --ÏÕÖÖĞ£Ñé
      IF rec_tmp_irac01a2.aae110 = '0' AND
         rec_tmp_irac01a2.aae120 = '0' AND
         rec_tmp_irac01a2.aae210 = '0' AND
@@ -2985,16 +2985,16 @@ END IF;
         rec_tmp_irac01a2.aae311 = '0' AND
         rec_tmp_irac01a2.aae810 = '0' THEN
 
-        prm_msg :=  prm_msg||'æœªè·å–åˆ°å‹¾é€‰å‚ä¿çš„é™©ç§ä¿¡æ¯!';
+        prm_msg :=  prm_msg||'Î´»ñÈ¡µ½¹´Ñ¡²Î±£µÄÏÕÖÖĞÅÏ¢!';
         prm_sign := '1';
         GOTO label_ERROR;
 
      END IF;
-     --å…¬åŠ¡å‘˜è¡¥åŠ©é™©ç§æ ¡éªŒ
+     --¹«ÎñÔ±²¹ÖúÏÕÖÖĞ£Ñé
      IF rec_tmp_irac01a2.aae810 = '1' THEN
 
         IF rec_tmp_irac01a2.yac200 IS NULL THEN
-          prm_msg :=  prm_msg||'å…¬åŠ¡å‘˜èŒçº§ä¸èƒ½ä¸ºç©º!';
+          prm_msg :=  prm_msg||'¹«ÎñÔ±Ö°¼¶²»ÄÜÎª¿Õ!';
            prm_sign := '1';
            GOTO label_ERROR;
         END IF;
@@ -3003,8 +3003,8 @@ END IF;
 
 
 
-/*     --åŸºæ•°æ ¡éªŒ
-     num_aac040 := rec_tmp_irac01a2.aac040;--ç¼´è´¹å·¥èµ„
+/*     --»ùÊıĞ£Ñé
+     num_aac040 := rec_tmp_irac01a2.aac040;--½É·Ñ¹¤×Ê
 
      IF rec_tmp_irac01a2.aae110 IN ('1','10') THEN
         SELECT ROUND(pkg_common.fun_p_getcontributionbase(null,var_aab001,num_aac040,'0','01','1','1',var_iaa100,prm_yab139))
@@ -3012,7 +3012,7 @@ END IF;
           FROM  dual ;
         IF ROUND(num_yac004) <> rec_tmp_irac01a2.yac004 THEN
 
-          --ä¼ä¸šå…»è€åŸºæ•°æ›´æ–°
+          --ÆóÒµÑøÀÏ»ùÊı¸üĞÂ
           UPDATE tmp_irac01a2
              SET yac004 = ROUND(num_yac004)
            WHERE iaz018 = prm_iaz018;
@@ -3023,7 +3023,7 @@ END IF;
      IF rec_tmp_irac01a2.aae120 = '1' THEN
 
         IF num_aac040 <> rec_tmp_irac01a2.yac004 THEN
-          --æœºå…³å…»è€åŸºæ•°æ›´æ–°
+          --»ú¹ØÑøÀÏ»ùÊı¸üĞÂ
           UPDATE tmp_irac01a2
              SET yac004 = num_aac040
            WHERE iaz018 = prm_iaz018;
@@ -3036,7 +3036,7 @@ END IF;
         rec_tmp_irac01a2.aae410 = '1' OR
         rec_tmp_irac01a2.aae510 = '1' OR
         rec_tmp_irac01a2.aae810 = '1' THEN
-        --ä»¥ä¸€ä¸ªé™©ç§ä¸ºå‡†
+        --ÒÔÒ»¸öÏÕÖÖÎª×¼
         SELECT aae140
           INTO var_aae140
           FROM xasi2.AB02
@@ -3048,7 +3048,7 @@ END IF;
           INTO num_yac005
           FROM  dual ;
         IF ROUND(num_yac005) <> rec_tmp_irac01a2.yac005 THEN
-          --å…¶ä»–åŸºæ•°æ›´æ–°
+          --ÆäËû»ùÊı¸üĞÂ
           UPDATE tmp_irac01a2
              SET yac005 = ROUND(num_yac005),
                  yaa333 = ROUND(num_yac005)
@@ -3056,21 +3056,21 @@ END IF;
         END IF;
 
      END IF;  */
-     --é™©ç§çŠ¶æ€åˆ¤æ–­
+     --ÏÕÖÖ×´Ì¬ÅĞ¶Ï
 
-     --èŒå·¥å…»è€
+     --Ö°¹¤ÑøÀÏ
      IF rec_tmp_irac01a2.aae110 = '1' THEN
          UPDATE wsjb.tmp_irac01a2
-             SET aae110 = '1'  --æ–°å‚ä¿
+             SET aae110 = '1'  --ĞÂ²Î±£
            WHERE iaz018 = prm_iaz018;
 
 
     ELSIF rec_tmp_irac01a2.aae110 = '10' THEN
       UPDATE wsjb.tmp_irac01a2
-             SET aae110 = '10'  --ç»­ä¿
+             SET aae110 = '10'  --Ğø±£
            WHERE iaz018 = prm_iaz018;
      ELSIF rec_tmp_irac01a2.aae110 = '0' THEN
-        --æœªå‹¾é€‰é™©ç§
+        --Î´¹´Ñ¡ÏÕÖÖ
         SELECT count(1)
            INTO num_count
            FROM wsjb.irac01a3
@@ -3079,7 +3079,7 @@ END IF;
             AND aae110 = '2';
          IF num_count > 0 THEN
           UPDATE wsjb.tmp_irac01a2
-             SET aae110 = '2'   --å‚ä¿ç¼´è´¹
+             SET aae110 = '2'   --²Î±£½É·Ñ
            WHERE iaz018 = prm_iaz018;
         END IF;
 
@@ -3091,13 +3091,13 @@ END IF;
             AND aae110 = '0';
          IF num_count > 0 THEN
           UPDATE wsjb.tmp_irac01a2
-             SET aae110 = '0'  --æš‚åœç¼´è´¹
+             SET aae110 = '0'  --ÔİÍ£½É·Ñ
            WHERE iaz018 = prm_iaz018;
         END IF;
 
      END IF;
 
-      --æœºå…³å…»è€
+      --»ú¹ØÑøÀÏ
      IF rec_tmp_irac01a2.aae120 = '1' THEN
          SELECT count(1)
            INTO num_count
@@ -3116,7 +3116,7 @@ END IF;
                SET aae120 = '10'
              WHERE iaz018 = prm_iaz018;
           ELSE
-            prm_msg :=  prm_msg||'æœºå…³å…»è€é™©ç§ä¸ä¸ºæš‚åœç¼´è´¹çŠ¶æ€ï¼';
+            prm_msg :=  prm_msg||'»ú¹ØÑøÀÏÏÕÖÖ²»ÎªÔİÍ£½É·Ñ×´Ì¬£¡';
             prm_sign := '1';
             GOTO label_ERROR;
           END IF ;
@@ -3126,7 +3126,7 @@ END IF;
              WHERE iaz018 = prm_iaz018;
         END IF;
      ELSIF rec_tmp_irac01a2.aae120 = '0' THEN
-        --æœªå‹¾é€‰é™©ç§
+        --Î´¹´Ñ¡ÏÕÖÖ
         SELECT count(1)
            INTO num_count
            FROM xasi2.ac02
@@ -3154,7 +3154,7 @@ END IF;
         END IF;
      END IF;
 
-     --å·¥ä¼¤
+     --¹¤ÉË
      IF rec_tmp_irac01a2.aae410 = '1' THEN
          SELECT count(1)
            INTO num_count
@@ -3199,7 +3199,7 @@ END IF;
            WHERE iaz018 = prm_iaz018;
         END IF;
      END IF;
-     --å¤±ä¸š
+     --Ê§Òµ
      IF rec_tmp_irac01a2.aae210 = '1' THEN
          SELECT count(1)
            INTO num_count
@@ -3218,7 +3218,7 @@ END IF;
                SET aae210 = '10'
              WHERE iaz018 = prm_iaz018;
           ELSE
-            prm_msg :=  prm_msg||'å¤±ä¸šé™©ç§ä¸ä¸ºæš‚åœç¼´è´¹çŠ¶æ€ï¼';
+            prm_msg :=  prm_msg||'Ê§ÒµÏÕÖÖ²»ÎªÔİÍ£½É·Ñ×´Ì¬£¡';
             prm_sign := '1';
             GOTO label_ERROR;
 
@@ -3230,7 +3230,7 @@ END IF;
              WHERE iaz018 = prm_iaz018;
         END IF;
      ELSIF rec_tmp_irac01a2.aae210 = '0' THEN
-        --æœªå‹¾é€‰é™©ç§
+        --Î´¹´Ñ¡ÏÕÖÖ
         SELECT count(1)
            INTO num_count
            FROM xasi2.ac02
@@ -3258,7 +3258,7 @@ END IF;
         END IF;
      END IF;
 
-      --åŒ»ç–—
+      --Ò½ÁÆ
      IF rec_tmp_irac01a2.aae310 = '1' THEN
          SELECT count(1)
            INTO num_count
@@ -3278,7 +3278,7 @@ END IF;
              WHERE iaz018 = prm_iaz018;
 
           ELSE
-            prm_msg :=  prm_msg||'åŒ»ç–—é™©ç§ä¸ä¸ºæš‚åœç¼´è´¹çŠ¶æ€ï¼';
+            prm_msg :=  prm_msg||'Ò½ÁÆÏÕÖÖ²»ÎªÔİÍ£½É·Ñ×´Ì¬£¡';
             prm_sign := '1';
             GOTO label_ERROR;
 
@@ -3290,7 +3290,7 @@ END IF;
              WHERE iaz018 = prm_iaz018;
         END IF;
      ELSIF rec_tmp_irac01a2.aae310 = '0' THEN
-        --æœªå‹¾é€‰é™©ç§
+        --Î´¹´Ñ¡ÏÕÖÖ
         SELECT count(1)
            INTO num_count
            FROM xasi2.ac02
@@ -3318,7 +3318,7 @@ END IF;
         END IF;
      END IF;
 
-      --ç”Ÿè‚²
+      --ÉúÓı
      IF rec_tmp_irac01a2.aae510 = '1' THEN
          SELECT count(1)
            INTO num_count
@@ -3337,7 +3337,7 @@ END IF;
                SET aae510 = '10'
              WHERE iaz018 = prm_iaz018;
           ELSE
-            prm_msg :=  prm_msg||'ç”Ÿè‚²é™©ç§ä¸ä¸ºæš‚åœç¼´è´¹çŠ¶æ€ï¼';
+            prm_msg :=  prm_msg||'ÉúÓıÏÕÖÖ²»ÎªÔİÍ£½É·Ñ×´Ì¬£¡';
             prm_sign := '1';
             GOTO label_ERROR;
           END IF ;
@@ -3348,7 +3348,7 @@ END IF;
              WHERE iaz018 = prm_iaz018;
         END IF;
      ELSIF rec_tmp_irac01a2.aae510 = '0' THEN
-        --æœªå‹¾é€‰é™©ç§
+        --Î´¹´Ñ¡ÏÕÖÖ
         SELECT count(1)
            INTO num_count
            FROM xasi2.ac02
@@ -3376,7 +3376,7 @@ END IF;
         END IF;
      END IF;
 
-      --å¤§é¢
+      --´ó¶î
      IF rec_tmp_irac01a2.aae311 = '1' THEN
          SELECT count(1)
            INTO num_count
@@ -3395,7 +3395,7 @@ END IF;
                SET aae311 = '10'
              WHERE iaz018 = prm_iaz018;
           ELSE
-            prm_msg :=  prm_msg||'å¤§é¢è¡¥å……é™©ç§ä¸ä¸ºæš‚åœç¼´è´¹çŠ¶æ€ï¼';
+            prm_msg :=  prm_msg||'´ó¶î²¹³äÏÕÖÖ²»ÎªÔİÍ£½É·Ñ×´Ì¬£¡';
             prm_sign := '1';
             GOTO label_ERROR;
           END IF ;
@@ -3406,7 +3406,7 @@ END IF;
              WHERE iaz018 = prm_iaz018;
         END IF;
      ELSIF rec_tmp_irac01a2.aae311 = '0' THEN
-        --æœªå‹¾é€‰é™©ç§
+        --Î´¹´Ñ¡ÏÕÖÖ
         SELECT count(1)
            INTO num_count
            FROM xasi2.ac02
@@ -3434,7 +3434,7 @@ END IF;
         END IF;
      END IF;
 
-     --å…¬åŠ¡å‘˜è¡¥åŠ©
+     --¹«ÎñÔ±²¹Öú
      IF rec_tmp_irac01a2.aae810 = '1' THEN
          SELECT count(1)
            INTO num_count
@@ -3453,7 +3453,7 @@ END IF;
                SET aae810 = '10'
              WHERE iaz018 = prm_iaz018;
           ELSE
-            prm_msg :=  prm_msg||'å…¬åŠ¡å‘˜è¡¥åŠ©é™©ç§ä¸ä¸ºæš‚åœç¼´è´¹çŠ¶æ€ï¼';
+            prm_msg :=  prm_msg||'¹«ÎñÔ±²¹ÖúÏÕÖÖ²»ÎªÔİÍ£½É·Ñ×´Ì¬£¡';
             prm_sign := '1';
             GOTO label_ERROR;
           END IF;
@@ -3464,7 +3464,7 @@ END IF;
              WHERE iaz018 = prm_iaz018;
         END IF;
      ELSIF rec_tmp_irac01a2.aae810 = '0' THEN
-        --æœªå‹¾é€‰é™©ç§
+        --Î´¹´Ñ¡ÏÕÖÖ
         SELECT count(1)
            INTO num_count
            FROM xasi2.ac02
@@ -3494,8 +3494,8 @@ END IF;
 
 
 
-     /*æ ¡éªŒæ— è¯¯å¤„ç†*/
-      --ç»­ä¿ä¿®æ”¹æˆ·å£æ€§è´¨
+     /*Ğ£ÑéÎŞÎó´¦Àí*/
+      --Ğø±£ĞŞ¸Ä»§¿ÚĞÔÖÊ
     var_aac009 := rec_tmp_irac01a2.aac009;
     IF var_aac009 = '10' THEN
       UPDATE wsjb.tmp_irac01a2
@@ -3538,72 +3538,72 @@ END IF;
     UPDATE wsjb.tmp_irac01a2
          SET iaa100=''
        WHERE iaz018 = prm_iaz018;
-     /*å¤„ç†å¤±è´¥*/
+     /*´¦ÀíÊ§°Ü*/
       <<label_ERROR>>
 
         num_count :=0;
 
    EXCEPTION
      WHEN OTHERS THEN
-          /*å…³é—­æ‰“å¼€çš„æ¸¸æ ‡*/
+          /*¹Ø±Õ´ò¿ªµÄÓÎ±ê*/
           prm_AppCode  := PRE_ERRCODE || GN_DEF_ERR;
-          prm_ErrorMsg := 'æ•°æ®åº“é”™è¯¯ï¼'|| SQLERRM ;
+          prm_ErrorMsg := 'Êı¾İ¿â´íÎó£¡'|| SQLERRM ;
           RETURN;
    END prc_p_ValidateKindAddCheck;
 
   /*--------------------------------------------------------------------------
-   || ä¸šåŠ¡ç¯èŠ‚ ï¼šäººå‘˜æš‚åœç¼´è´¹ä¿å­˜ç½‘å…éªŒè¯
-   || è¿‡ç¨‹åç§° prc_p_ValidateKindAddCheck
-   || åŠŸèƒ½æè¿° ï¼šæ ¡éªŒè¯¥äººå‘˜ä¿¡æ¯
+   || ÒµÎñ»·½Ú £ºÈËÔ±ÔİÍ£½É·Ñ±£´æÍøÌüÑéÖ¤
+   || ¹ı³ÌÃû³Æ prc_p_ValidateKindAddCheck
+   || ¹¦ÄÜÃèÊö £ºĞ£Ñé¸ÃÈËÔ±ĞÅÏ¢
    ||
-   || å‚æ•°æè¿° ï¼šå‚æ•°æ ‡è¯†           è¯´æ˜
+   || ²ÎÊıÃèÊö £º²ÎÊı±êÊ¶           ËµÃ÷
    ||            --------------------------------------------------------------
    ||
    ||
-   || ä½œ    è€… ï¼šzhujing         å®Œæˆæ—¥æœŸ ï¼š2015-11-24
+   || ×÷    Õß £ºzhujing         Íê³ÉÈÕÆÚ £º2015-11-24
    ||------------------------------------------------------------------------*/
    PROCEDURE prc_p_ValidateReduceCheck(
-       prm_iaz018          IN            VARCHAR2,     --æ‰¹æ¬¡å·
-      prm_aac001          IN            VARCHAR2,     --ä¸ªäººç¼–å·
-      prm_yab139          IN            VARCHAR2,     --ç»åŠæœºæ„
-      prm_msg             OUT           VARCHAR2,     -- é”™è¯¯ä¿¡æ¯
-      prm_sign            OUT           VARCHAR2,     -- é”™è¯¯æ ‡å¿—
-      prm_AppCode         OUT           VARCHAR2,     --æ‰§è¡Œä»£ç 
-      prm_ErrorMsg        OUT           VARCHAR2)    --å‡ºé”™ä¿¡æ¯
+       prm_iaz018          IN            VARCHAR2,     --Åú´ÎºÅ
+      prm_aac001          IN            VARCHAR2,     --¸öÈË±àºÅ
+      prm_yab139          IN            VARCHAR2,     --¾­°ì»ú¹¹
+      prm_msg             OUT           VARCHAR2,     -- ´íÎóĞÅÏ¢
+      prm_sign            OUT           VARCHAR2,     -- ´íÎó±êÖ¾
+      prm_AppCode         OUT           VARCHAR2,     --Ö´ĞĞ´úÂë
+      prm_ErrorMsg        OUT           VARCHAR2)    --³ö´íĞÅÏ¢
   IS
    num_count        NUMBER(6);
    rec_tmp_irac01a4 tmp_irac01a4%ROWTYPE;
-   dat_aac006       DATE ;--å‡ºç”Ÿæ—¥æœŸ
-   dat_aac007       DATE ;--å‚å·¥æ—¥æœŸ
-   dat_aac030       DATE ;--æœ¬ç³»ç»Ÿå‚ä¿æ—¥æœŸ
-   dat_yac033       DATE ;--ä¸ªäººåˆæ¬¡å‚ä¿æ—¥æœŸ
+   dat_aac006       DATE ;--³öÉúÈÕÆÚ
+   dat_aac007       DATE ;--²Î¹¤ÈÕÆÚ
+   dat_aac030       DATE ;--±¾ÏµÍ³²Î±£ÈÕÆÚ
+   dat_yac033       DATE ;--¸öÈË³õ´Î²Î±£ÈÕÆÚ
    var_aab001       irab01.aab001%TYPE;
    var_aae140       irab02.aae140%TYPE;
-   num_aac040       NUMBER(14,2); --ç¼´è´¹å·¥èµ„
-   num_yac004       NUMBER(14,2); --å…»è€åŸºæ•°
-   num_yac005       NUMBER(14,2); --å…¶ä»–åŸºæ•°
-   var_iaa100       VARCHAR2(6);  --ç”³æŠ¥æœˆåº¦
+   num_aac040       NUMBER(14,2); --½É·Ñ¹¤×Ê
+   num_yac004       NUMBER(14,2); --ÑøÀÏ»ùÊı
+   num_yac005       NUMBER(14,2); --ÆäËû»ùÊı
+   var_iaa100       VARCHAR2(6);  --Éê±¨ÔÂ¶È
    var_aac001       irac01.aac001%TYPE;
-   var_aac009       irac01.aac009%TYPE;  --æˆ·å£æ€§è´¨
+   var_aac009       irac01.aac009%TYPE;  --»§¿ÚĞÔÖÊ
    dat_iaa100        DATE;
-   dat_AAE030     DATE;--å¹´å®¡æ—¶é—´ 20190808
-   var_aab019      xasi2.ab01.aab019%TYPE;     --å•ä½æ€§è´¨
+   dat_AAE030     DATE;--ÄêÉóÊ±¼ä 20190808
+   var_aab019      xasi2.ab01.aab019%TYPE;     --µ¥Î»ĞÔÖÊ
 
    BEGIN
-   /*åˆå§‹åŒ–å˜é‡*/
+   /*³õÊ¼»¯±äÁ¿*/
      prm_AppCode  := GN_DEF_OK;
      prm_ErrorMsg := '';
      prm_msg :='';
      prm_sign :='0';
-       --æ ¡éªŒå‚æ•°
+       --Ğ£Ñé²ÎÊı
     IF prm_iaz018 IS NULL  THEN
-      prm_msg :=  prm_msg||'ä¼ å…¥æ ¡éªŒæµæ°´å·ä¸ºç©ºï¼Œè¯·æ ¸å®ã€‚ã€‚ã€‚';
+      prm_msg :=  prm_msg||'´«ÈëĞ£ÑéÁ÷Ë®ºÅÎª¿Õ£¬ÇëºËÊµ¡£¡£¡£';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
-     --æ ¡éªŒå‚æ•°
+     --Ğ£Ñé²ÎÊı
     IF prm_aac001 IS NULL  THEN
-      prm_msg :=  prm_msg||'ä¼ å…¥ä¸ªäººç¼–å·ä¸ºç©ºï¼Œè¯·æ ¸å®ã€‚ã€‚ã€‚';
+      prm_msg :=  prm_msg||'´«Èë¸öÈË±àºÅÎª¿Õ£¬ÇëºËÊµ¡£¡£¡£';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
@@ -3622,23 +3622,23 @@ END IF;
     var_iaa100 := rec_tmp_irac01a4.iaa100;
     SELECT TO_DATE(rec_tmp_irac01a4.iaa100||'01','yyyy-MM-dd HH:MI:SS') INTO dat_iaa100 FROM dual;
     IF dat_aac030 > dat_iaa100 THEN
-      prm_msg :=  prm_msg||'åœä¿æ—¥æœŸä¸èƒ½æ™šäºç”³æŠ¥æœˆåº¦'||TO_CHAR(SYSDATE,'yyyy-MM-dd')||'!';
+      prm_msg :=  prm_msg||'Í£±£ÈÕÆÚ²»ÄÜÍíÓÚÉê±¨ÔÂ¶È'||TO_CHAR(SYSDATE,'yyyy-MM-dd')||'!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
     IF TO_NUMBER(TO_CHAR(dat_aac030,'yyyyMM')) > TO_NUMBER(var_iaa100) THEN
-      prm_msg :=  prm_msg||'åœä¿æ—¥æœŸä¸èƒ½æ™šäºå½“å‰å¯ç”³æŠ¥æœˆåº¦'||var_iaa100||'!';
+      prm_msg :=  prm_msg||'Í£±£ÈÕÆÚ²»ÄÜÍíÓÚµ±Ç°¿ÉÉê±¨ÔÂ¶È'||var_iaa100||'!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
 
     IF TO_NUMBER(TO_CHAR(dat_aac030,'yyyyMM')) <> TO_NUMBER(var_iaa100) THEN
-      prm_msg :=  prm_msg||'åœä¿æœˆåº¦å’Œç”³æŠ¥æœˆåº¦ä¸ä¸€è‡´'||var_iaa100||'!';
+      prm_msg :=  prm_msg||'Í£±£ÔÂ¶ÈºÍÉê±¨ÔÂ¶È²»Ò»ÖÂ'||var_iaa100||'!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
 
-    --æ˜¯å¦å·²ç»å­˜åœ¨ç”³æŠ¥è®°å½•
+    --ÊÇ·ñÒÑ¾­´æÔÚÉê±¨¼ÇÂ¼
     SELECT count(1)
       INTO num_count
       FROM wsjb.irac01  a
@@ -3646,12 +3646,12 @@ END IF;
        AND a.iaa002 = '0'
        AND a.aab001 = var_aab001;
     IF num_count > 0 THEN
-      prm_msg :=  prm_msg||'è¯¥äººå‘˜å·²å­˜åœ¨å¾…ç”³æŠ¥ä¿¡æ¯!';
+      prm_msg :=  prm_msg||'¸ÃÈËÔ±ÒÑ´æÔÚ´ıÉê±¨ĞÅÏ¢!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
 
-    --æ˜¯å¦å·²ç»å­˜åœ¨ç”³æŠ¥è®°å½•
+    --ÊÇ·ñÒÑ¾­´æÔÚÉê±¨¼ÇÂ¼
     SELECT count(1)
       INTO num_count
       FROM wsjb.irac01  a
@@ -3659,11 +3659,11 @@ END IF;
        AND a.iaa002 = '1'
        AND a.aab001 = var_aab001;
     IF num_count > 0 THEN
-      prm_msg :=  prm_msg||'è¯¥äººå‘˜å·²å­˜åœ¨ç”³æŠ¥ä¿¡æ¯!';
+      prm_msg :=  prm_msg||'¸ÃÈËÔ±ÒÑ´æÔÚÉê±¨ĞÅÏ¢!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
-  --æ˜¯å¦å·²ç»å­˜åœ¨ç”³æŠ¥è®°å½•
+  --ÊÇ·ñÒÑ¾­´æÔÚÉê±¨¼ÇÂ¼
     SELECT count(1)
       INTO num_count
       FROM wsjb.irac01  a
@@ -3671,21 +3671,21 @@ END IF;
        AND a.iaa002 = '4'
        AND a.aab001 = var_aab001;
     IF num_count > 0 THEN
-      prm_msg :=  prm_msg||'è¯¥äººå‘˜å·²å­˜åœ¨æ‰“å›çš„ç”³æŠ¥ä¿¡æ¯ï¼Œè¯·åˆ°æœˆç”³æŠ¥åŠŸèƒ½ä¸‹æ“ä½œï¼Œä¸èƒ½å†åšå‡å°‘ï¼';
+      prm_msg :=  prm_msg||'¸ÃÈËÔ±ÒÑ´æÔÚ´ò»ØµÄÉê±¨ĞÅÏ¢£¬Çëµ½ÔÂÉê±¨¹¦ÄÜÏÂ²Ù×÷£¬²»ÄÜÔÙ×ö¼õÉÙ£¡';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
 
-    --æ˜¯å¦å·²ç»å­˜åœ¨ç”³æŠ¥è®°å½•
+    --ÊÇ·ñÒÑ¾­´æÔÚÉê±¨¼ÇÂ¼
 
     IF rec_tmp_irac01a4.aae013 = '251' THEN
-      prm_msg :=  prm_msg||'äººå‘˜åœ¨èŒè½¬é€€ä¼‘è¯·åˆ°ä¸“ç”¨çš„æ¨¡å—ä¸‹è¿›è¡Œï¼';
+      prm_msg :=  prm_msg||'ÈËÔ±ÔÚÖ°×ªÍËĞİÇëµ½×¨ÓÃµÄÄ£¿éÏÂ½øĞĞ£¡';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
 
 
-   --æš‚åœç¼´è´¹åŸºæ•°
+   --ÔİÍ£½É·Ñ»ùÊı
     IF rec_tmp_irac01a4.aae110 = '2' THEN
         SELECT yac004
           INTO num_yac004
@@ -3695,7 +3695,7 @@ END IF;
            AND aae110 = '2';
 
 
-          --ä¼ä¸šå…»è€åŸºæ•°æ›´æ–°
+          --ÆóÒµÑøÀÏ»ùÊı¸üĞÂ
           UPDATE wsjb.tmp_irac01a4
              SET yac004 = ROUND(num_yac004),
                  aae110 = '3'
@@ -3703,7 +3703,7 @@ END IF;
            AND aab001 = var_aab001;
 
    --  ELSIF rec_tmp_irac01a4.aae110 = '0' THEN
-          --ä¼ä¸šå…»è€åŸºæ•°æ›´æ–°
+          --ÆóÒµÑøÀÏ»ùÊı¸üĞÂ
     --      UPDATE tmp_irac01a4
     --         SET yac004 = '',
     --             aae110 = '0'
@@ -3720,7 +3720,7 @@ END IF;
            AND aac031 = '1'
            AND aae140 = '06';
 
-          --æœºå…³å…»è€åŸºæ•°æ›´æ–°
+          --»ú¹ØÑøÀÏ»ùÊı¸üĞÂ
           UPDATE wsjb.tmp_irac01a4
              SET yac004 = num_aac040,
                  aae120 = '3'
@@ -3737,9 +3737,9 @@ END IF;
         rec_tmp_irac01a4.aae311 = '2' OR
         rec_tmp_irac01a4.aae810 = '2' OR
         rec_tmp_irac01a4.aae120 = '2' THEN
-        
-         
-------åŒç¤¾è¯„ å…»è€ã€å¤±ä¸šã€å·¥ä¼¤åŒåŸºæ•°ï¼ŒåŒ»ç–—ã€ç”Ÿè‚²åŒåŸºæ•°   20190807 modify by yujj
+
+
+------Ë«ÉçÆÀ ÑøÀÏ¡¢Ê§Òµ¡¢¹¤ÉËÍ¬»ùÊı£¬Ò½ÁÆ¡¢ÉúÓıÍ¬»ùÊı   20190807 modify by yujj
   SELECT COUNT(1)
              INTO  num_count
              FROM xasi2.ab05
@@ -3747,7 +3747,7 @@ END IF;
               AND  AAE001 = 2019
               AND YAB007='03';
   IF num_count < 1 AND var_iaa100<201901    THEN
-        --ä»¥ä¸€ä¸ªé™©ç§ä¸ºå‡†
+        --ÒÔÒ»¸öÏÕÖÖÎª×¼
         SELECT yac004
           INTO num_yac005
           FROM xasi2.Ac02
@@ -3756,20 +3756,20 @@ END IF;
            AND aab001 = var_aab001
            AND aac001 = var_aac001
            AND ROWNUM = 1;
-          --å…¶ä»–åŸºæ•°æ›´æ–°
+          --ÆäËû»ùÊı¸üĞÂ
           UPDATE wsjb.tmp_irac01a4
              SET yac005 = ROUND(num_yac005),
                  yaa333 = ROUND(num_yac005)
            WHERE aac001 = var_aac001
            AND aab001 = var_aab001;
-     
-ELSE   
-    SELECT aae030 
-    INTO  dat_AAE030 
-    FROM xasi2.aa35 
+
+ELSE
+    SELECT aae030
+    INTO  dat_AAE030
+    FROM xasi2.aa35
     WHERE aae001=2019 ;
-   IF     var_iaa100>201812 AND  SYSDATE >dat_AAE030  THEN 
-       ----ä»¥ä¸€ä¸ªé™©ç§ä¸ºå‡†
+   IF     var_iaa100>201812 AND  SYSDATE >dat_AAE030  THEN
+       ----ÒÔÒ»¸öÏÕÖÖÎª×¼
            SELECT yac004
           INTO num_yac005
           FROM xasi2.Ac02
@@ -3778,14 +3778,14 @@ ELSE
            AND aab001 = var_aab001
            AND aac001 = var_aac001
            AND ROWNUM = 1;
-          --å…¶ä»–åŸºæ•°æ›´æ–°
+          --ÆäËû»ùÊı¸üĞÂ
           UPDATE wsjb.tmp_irac01a4
              SET yac005 = ROUND(num_yac005),
                  yaa333 = ROUND(num_yac005)
            WHERE aac001 = var_aac001
            AND aab001 = var_aab001;
-       ----ä»¥åŒ»ç–—é™©ç§ä¸ºå‡†
-       ----ä»¥ä¸€ä¸ªé™©ç§ä¸ºå‡†
+       ----ÒÔÒ½ÁÆÏÕÖÖÎª×¼
+       ----ÒÔÒ»¸öÏÕÖÖÎª×¼
            SELECT yac004
           INTO num_yac004
           FROM xasi2.Ac02
@@ -3794,16 +3794,16 @@ ELSE
            AND aab001 = var_aab001
            AND aac001 = var_aac001
            AND ROWNUM = 1;
-          --å…¶ä»–åŸºæ•°æ›´æ–°
+          --ÆäËû»ùÊı¸üĞÂ
           UPDATE wsjb.tmp_irac01a4
              SET yac004 = ROUND(num_yac004)
            WHERE aac001 = var_aac001
            AND aab001 = var_aab001;
       END IF;
      END IF;
- 
-   /**     
-        --ä»¥ä¸€ä¸ªé™©ç§ä¸ºå‡†
+
+   /**
+        --ÒÔÒ»¸öÏÕÖÖÎª×¼
         SELECT yac004
           INTO num_yac005
           FROM xasi2.Ac02
@@ -3814,7 +3814,7 @@ ELSE
            AND ROWNUM = 1;
 
 
-          --å…¶ä»–åŸºæ•°æ›´æ–°
+          --ÆäËû»ùÊı¸üĞÂ
           UPDATE wsjb.tmp_irac01a4
              SET yac005 = ROUND(num_yac005),
                  yaa333 = ROUND(num_yac005)
@@ -3822,7 +3822,7 @@ ELSE
            AND aab001 = var_aab001;
 */
 
-        --æ­£å¸¸å‚ä¿çš„é™©ç§å˜æ›´æˆå‡å°‘
+        --Õı³£²Î±£µÄÏÕÖÖ±ä¸ü³É¼õÉÙ
         IF rec_tmp_irac01a4.aae210 = '2' THEN
           UPDATE wsjb.tmp_irac01a4
              SET aae210 = '3'
@@ -3864,64 +3864,64 @@ ELSE
      UPDATE wsjb.tmp_irac01a4  SET iaa100=''
             WHERE aac001 = var_aac001
            AND aab001 = var_aab001;
-     /*å¤„ç†å¤±è´¥*/
+     /*´¦ÀíÊ§°Ü*/
       <<label_ERROR>>
         num_count :=0;
 
   EXCEPTION
      WHEN OTHERS THEN
-          /*å…³é—­æ‰“å¼€çš„æ¸¸æ ‡*/
+          /*¹Ø±Õ´ò¿ªµÄÓÎ±ê*/
           prm_AppCode  := PRE_ERRCODE || GN_DEF_ERR;
-          prm_ErrorMsg := 'æ•°æ®åº“é”™è¯¯ï¼'|| SQLERRM ;
+          prm_ErrorMsg := 'Êı¾İ¿â´íÎó£¡'|| SQLERRM ;
 
           RETURN;
   END prc_p_ValidateReduceCheck;
   /*--------------------------------------------------------------------------
-   || ä¸šåŠ¡ç¯èŠ‚ ï¼šäººå‘˜æ‰¹é‡æš‚åœç¼´è´¹ç½‘å…éªŒè¯
-   || è¿‡ç¨‹åç§° prc_p_ValidateKindAddCheck
-   || åŠŸèƒ½æè¿° ï¼šæ ¡éªŒè¯¥äººå‘˜ä¿¡æ¯
+   || ÒµÎñ»·½Ú £ºÈËÔ±ÅúÁ¿ÔİÍ£½É·ÑÍøÌüÑéÖ¤
+   || ¹ı³ÌÃû³Æ prc_p_ValidateKindAddCheck
+   || ¹¦ÄÜÃèÊö £ºĞ£Ñé¸ÃÈËÔ±ĞÅÏ¢
    ||
-   || å‚æ•°æè¿° ï¼šå‚æ•°æ ‡è¯†           è¯´æ˜
+   || ²ÎÊıÃèÊö £º²ÎÊı±êÊ¶           ËµÃ÷
    ||            --------------------------------------------------------------
    ||
    ||
-   || ä½œ    è€… ï¼šzhujing         å®Œæˆæ—¥æœŸ ï¼š2015-11-24
+   || ×÷    Õß £ºzhujing         Íê³ÉÈÕÆÚ £º2015-11-24
    ||------------------------------------------------------------------------*/
   PROCEDURE prc_p_ValidateBatchReduceCheck(
-      prm_iaz018          IN            VARCHAR2,     --æ‰¹æ¬¡å·
-      prm_yab139          IN            VARCHAR2,     --ç»åŠæœºæ„
-      prm_msg             OUT           VARCHAR2,     -- é”™è¯¯ä¿¡æ¯
-      prm_sign            OUT           VARCHAR2,     -- é”™è¯¯æ ‡å¿—
-      prm_AppCode         OUT           VARCHAR2,     --æ‰§è¡Œä»£ç 
-      prm_ErrorMsg        OUT           VARCHAR2)    --å‡ºé”™ä¿¡æ¯
+      prm_iaz018          IN            VARCHAR2,     --Åú´ÎºÅ
+      prm_yab139          IN            VARCHAR2,     --¾­°ì»ú¹¹
+      prm_msg             OUT           VARCHAR2,     -- ´íÎóĞÅÏ¢
+      prm_sign            OUT           VARCHAR2,     -- ´íÎó±êÖ¾
+      prm_AppCode         OUT           VARCHAR2,     --Ö´ĞĞ´úÂë
+      prm_ErrorMsg        OUT           VARCHAR2)    --³ö´íĞÅÏ¢
    IS
    num_count        NUMBER(6);
    rec_tmp_irac01a4 tmp_irac01a4%ROWTYPE;
-   dat_aac006       DATE ;--å‡ºç”Ÿæ—¥æœŸ
-   dat_aac007       DATE ;--å‚å·¥æ—¥æœŸ
-   dat_aac030       DATE ;--æœ¬ç³»ç»Ÿå‚ä¿æ—¥æœŸ
-   dat_yac033       DATE ;--ä¸ªäººåˆæ¬¡å‚ä¿æ—¥æœŸ
+   dat_aac006       DATE ;--³öÉúÈÕÆÚ
+   dat_aac007       DATE ;--²Î¹¤ÈÕÆÚ
+   dat_aac030       DATE ;--±¾ÏµÍ³²Î±£ÈÕÆÚ
+   dat_yac033       DATE ;--¸öÈË³õ´Î²Î±£ÈÕÆÚ
    var_aab001       irac01.aab001%TYPE;
    var_aae140       irab02.aae140%TYPE;
-   num_aac040       NUMBER(14,2); --ç¼´è´¹å·¥èµ„
-   num_yac004       NUMBER(14,2); --å…»è€åŸºæ•°
-   num_yac005       NUMBER(14,2); --å…¶ä»–åŸºæ•°
-   var_iaa100       VARCHAR2(6);  --ç”³æŠ¥æœˆåº¦
+   num_aac040       NUMBER(14,2); --½É·Ñ¹¤×Ê
+   num_yac004       NUMBER(14,2); --ÑøÀÏ»ùÊı
+   num_yac005       NUMBER(14,2); --ÆäËû»ùÊı
+   var_iaa100       VARCHAR2(6);  --Éê±¨ÔÂ¶È
    var_aac001       irac01.aac001%TYPE;
-   var_aac009       irac01.aac009%TYPE;  --æˆ·å£æ€§è´¨
+   var_aac009       irac01.aac009%TYPE;  --»§¿ÚĞÔÖÊ
    var_yae181       irac01.yae181%TYPE;
    var_aac004       irac01.aac004%TYPE;
    var_yac168       irac01.yac168%TYPE;
 
 
-   var_aae110       irac01.aae110%TYPE;--èŒå·¥å…»è€
-   var_aae120       irac01.aae120%TYPE;--æœºå…³å…»è€
-   var_aae210       irac01.aae210%TYPE;--å¤±ä¸š
-   var_aae310       irac01.aae310%TYPE;--åŒ»ç–—
-   var_aae410       irac01.aae410%TYPE;--å·¥ä¼¤
-   var_aae510       irac01.aae510%TYPE;--ç”Ÿè‚²
-   var_aae311       irac01.aae311%TYPE;--å¤§é¢
-   var_aae810       irac01.aae810%TYPE;--å…¬åŠ¡å‘˜è¡¥åŠ©
+   var_aae110       irac01.aae110%TYPE;--Ö°¹¤ÑøÀÏ
+   var_aae120       irac01.aae120%TYPE;--»ú¹ØÑøÀÏ
+   var_aae210       irac01.aae210%TYPE;--Ê§Òµ
+   var_aae310       irac01.aae310%TYPE;--Ò½ÁÆ
+   var_aae410       irac01.aae410%TYPE;--¹¤ÉË
+   var_aae510       irac01.aae510%TYPE;--ÉúÓı
+   var_aae311       irac01.aae311%TYPE;--´ó¶î
+   var_aae810       irac01.aae810%TYPE;--¹«ÎñÔ±²¹Öú
 
    cursor cur_tmp_irac01a4 IS
    SELECT iaz018,
@@ -4007,26 +4007,26 @@ ELSE
 
 
    BEGIN
-   /*åˆå§‹åŒ–å˜é‡*/
+   /*³õÊ¼»¯±äÁ¿*/
      prm_AppCode  := GN_DEF_OK;
      prm_ErrorMsg := '';
      prm_msg :='';
      prm_sign :='0';
-    --æ ¡éªŒå‚æ•°
+    --Ğ£Ñé²ÎÊı
     IF prm_iaz018 IS NULL  THEN
       prm_AppCode  := GN_DEF_ERR;
-      prm_ErrorMsg :=  prm_msg||'ä¼ å…¥æ ¡éªŒæµæ°´å·iaz018ä¸ºç©ºï¼Œè¯·æ ¸å®ã€‚ã€‚ã€‚';
+      prm_ErrorMsg :=  prm_msg||'´«ÈëĞ£ÑéÁ÷Ë®ºÅiaz018Îª¿Õ£¬ÇëºËÊµ¡£¡£¡£';
       RETURN;
     END IF;
     FOR rec_tmp_irac01a4 IN cur_tmp_irac01a4 LOOP
-    --å…»è€æ ¡éªŒæ˜¯å¦é€šè¿‡
+    --ÑøÀÏĞ£ÑéÊÇ·ñÍ¨¹ı
      IF rec_tmp_irac01a4.errormsg IS NOT  NULL  THEN
        prm_sign := '1';
        prm_msg := rec_tmp_irac01a4.errormsg;
        GOTO label_ERROR;
       RETURN;
     END IF;
-     --æŸ¥è¯¢ä¸ªäººç¼–å·
+     --²éÑ¯¸öÈË±àºÅ
      SELECT count(1)
         INTO num_count
         FROM xasi2.ac01
@@ -4034,7 +4034,7 @@ ELSE
          AND aac003 = rec_tmp_irac01a4.aac003
          AND aae120 = '0';
      IF num_count <> 1 THEN
-        prm_msg :=  prm_msg||rec_tmp_irac01a4.aac002||'äººå‘˜ä¿¡æ¯æ²¡æœ‰æ‰¾åˆ°ï¼Œè¯·æ ¸å¯¹ä¿¡æ¯ï¼';
+        prm_msg :=  prm_msg||rec_tmp_irac01a4.aac002||'ÈËÔ±ĞÅÏ¢Ã»ÓĞÕÒµ½£¬ÇëºË¶ÔĞÅÏ¢£¡';
        prm_sign := '1';
        GOTO label_ERROR;
      END IF ;
@@ -4052,7 +4052,7 @@ ELSE
 
      var_aab001 := rec_tmp_irac01a4.aab001;
 
-      --æŸ¥è¯¢å‚ä¿ä¿¡æ¯
+      --²éÑ¯²Î±£ĞÅÏ¢
       SELECT count(1)
         INTO num_count
         FROM xasi2.AC01 A, xasi2.AC02 B
@@ -4165,13 +4165,13 @@ ELSE
                       and a.aac008 = '1'
                       and a.aac001 = var_aac001;
         ELSE
-          prm_msg :=  prm_msg||rec_tmp_irac01a4.aac002||'äººå‘˜æ²¡æœ‰å‚ä¿é™©ç§ï¼';
+          prm_msg :=  prm_msg||rec_tmp_irac01a4.aac002||'ÈËÔ±Ã»ÓĞ²Î±£ÏÕÖÖ£¡';
           prm_sign := '1';
           GOTO label_ERROR;
         END IF;
 
       END IF;
-      --æ›´æ–°æ ¡éªŒå¿…è¦ä¿¡æ¯
+      --¸üĞÂĞ£Ñé±ØÒªĞÅÏ¢
       UPDATE wsjb.tmp_irac01a4
          SET yae181 = var_yae181,
              aac004 = var_aac004,
@@ -4188,13 +4188,13 @@ ELSE
        WHERE iaz018 = prm_iaz018
          AND aac001 =var_aac001;
 
-      prc_p_ValidateReduceCheck(prm_iaz018  ,     --æ‰¹æ¬¡å·
-                                 var_aac001  ,     --ä¸ªäººç¼–å·
-                                prm_yab139  ,     --ç»åŠæœºæ„
-                                prm_msg     ,     -- é”™è¯¯ä¿¡æ¯
-                                prm_sign    ,     -- é”™è¯¯æ ‡å¿—
-                                prm_AppCode ,     --æ‰§è¡Œä»£ç 
-                                prm_ErrorMsg);    --å‡ºé”™ä¿¡æ¯
+      prc_p_ValidateReduceCheck(prm_iaz018  ,     --Åú´ÎºÅ
+                                 var_aac001  ,     --¸öÈË±àºÅ
+                                prm_yab139  ,     --¾­°ì»ú¹¹
+                                prm_msg     ,     -- ´íÎóĞÅÏ¢
+                                prm_sign    ,     -- ´íÎó±êÖ¾
+                                prm_AppCode ,     --Ö´ĞĞ´úÂë
+                                prm_ErrorMsg);    --³ö´íĞÅÏ¢
       IF prm_sign <> '0' THEN
           prm_msg :=  prm_msg;
           prm_sign := '1';
@@ -4213,60 +4213,60 @@ ELSE
 
   EXCEPTION
      WHEN OTHERS THEN
-          /*å…³é—­æ‰“å¼€çš„æ¸¸æ ‡*/
+          /*¹Ø±Õ´ò¿ªµÄÓÎ±ê*/
           prm_AppCode  := PRE_ERRCODE || GN_DEF_ERR;
-          prm_ErrorMsg := 'æ•°æ®åº“é”™è¯¯ï¼'|| SQLERRM ;
+          prm_ErrorMsg := 'Êı¾İ¿â´íÎó£¡'|| SQLERRM ;
           RETURN;
   END prc_p_ValidateBatchReduceCheck;
  /*--------------------------------------------------------------------------
-   || ä¸šåŠ¡ç¯èŠ‚ ï¼šäººå‘˜åœ¨èŒè½¬å¾…é€€ä¿å­˜ç½‘å…éªŒè¯
-   || è¿‡ç¨‹åç§° prc_p_ValidateRetireCheck
-   || åŠŸèƒ½æè¿° ï¼šæ ¡éªŒè¯¥äººå‘˜ä¿¡æ¯
+   || ÒµÎñ»·½Ú £ºÈËÔ±ÔÚÖ°×ª´ıÍË±£´æÍøÌüÑéÖ¤
+   || ¹ı³ÌÃû³Æ prc_p_ValidateRetireCheck
+   || ¹¦ÄÜÃèÊö £ºĞ£Ñé¸ÃÈËÔ±ĞÅÏ¢
    ||
-   || å‚æ•°æè¿° ï¼šå‚æ•°æ ‡è¯†           è¯´æ˜
+   || ²ÎÊıÃèÊö £º²ÎÊı±êÊ¶           ËµÃ÷
    ||            --------------------------------------------------------------
    ||
    ||
-   || ä½œ    è€… ï¼šzhujing         å®Œæˆæ—¥æœŸ ï¼š2015-11-24
+   || ×÷    Õß £ºzhujing         Íê³ÉÈÕÆÚ £º2015-11-24
    ||------------------------------------------------------------------------*/
    PROCEDURE prc_p_ValidateRetireCheck(
-       prm_iaz018          IN            VARCHAR2,     --æ‰¹æ¬¡å·
-       prm_aac001          IN            VARCHAR2,     --ä¸ªäººç¼–å·
-      prm_yab139          IN            VARCHAR2,     --ç»åŠæœºæ„
-      prm_msg             OUT           VARCHAR2,     -- é”™è¯¯ä¿¡æ¯
-      prm_sign            OUT           VARCHAR2,     -- é”™è¯¯æ ‡å¿—
-      prm_AppCode         OUT           VARCHAR2,     --æ‰§è¡Œä»£ç 
-      prm_ErrorMsg        OUT           VARCHAR2)    --å‡ºé”™ä¿¡æ¯
+       prm_iaz018          IN            VARCHAR2,     --Åú´ÎºÅ
+       prm_aac001          IN            VARCHAR2,     --¸öÈË±àºÅ
+      prm_yab139          IN            VARCHAR2,     --¾­°ì»ú¹¹
+      prm_msg             OUT           VARCHAR2,     -- ´íÎóĞÅÏ¢
+      prm_sign            OUT           VARCHAR2,     -- ´íÎó±êÖ¾
+      prm_AppCode         OUT           VARCHAR2,     --Ö´ĞĞ´úÂë
+      prm_ErrorMsg        OUT           VARCHAR2)    --³ö´íĞÅÏ¢
   IS
    num_count        NUMBER(6);
    rec_tmp_irac01a2 tmp_irac01a2%ROWTYPE;
-   dat_aac006       DATE ;--å‡ºç”Ÿæ—¥æœŸ
-   dat_aac007       DATE ;--å‚å·¥æ—¥æœŸ
-   dat_aac030       DATE ;--æœ¬ç³»ç»Ÿå‚ä¿æ—¥æœŸ
-   dat_yac033       DATE ;--ä¸ªäººåˆæ¬¡å‚ä¿æ—¥æœŸ
+   dat_aac006       DATE ;--³öÉúÈÕÆÚ
+   dat_aac007       DATE ;--²Î¹¤ÈÕÆÚ
+   dat_aac030       DATE ;--±¾ÏµÍ³²Î±£ÈÕÆÚ
+   dat_yac033       DATE ;--¸öÈË³õ´Î²Î±£ÈÕÆÚ
    var_aab001       irac01.aab001%TYPE;
    var_aae140       irab02.aae140%TYPE;
-   num_aac040       NUMBER(14,2); --ç¼´è´¹å·¥èµ„
-   num_yac004       NUMBER(14,2); --å…»è€åŸºæ•°
-   num_yac005       NUMBER(14,2); --å…¶ä»–åŸºæ•°
-   var_iaa100       VARCHAR2(6);  --ç”³æŠ¥æœˆåº¦
+   num_aac040       NUMBER(14,2); --½É·Ñ¹¤×Ê
+   num_yac004       NUMBER(14,2); --ÑøÀÏ»ùÊı
+   num_yac005       NUMBER(14,2); --ÆäËû»ùÊı
+   var_iaa100       VARCHAR2(6);  --Éê±¨ÔÂ¶È
    var_aac001       irac01.aac001%TYPE;
-   var_aac009       irac01.aac009%TYPE;  --æˆ·å£æ€§è´¨
+   var_aac009       irac01.aac009%TYPE;  --»§¿ÚĞÔÖÊ
    BEGIN
-   /*åˆå§‹åŒ–å˜é‡*/
+   /*³õÊ¼»¯±äÁ¿*/
      prm_AppCode  := GN_DEF_OK;
      prm_ErrorMsg := '';
      prm_msg :='';
      prm_sign :='0';
-       --æ ¡éªŒå‚æ•°
+       --Ğ£Ñé²ÎÊı
     IF prm_iaz018 IS NULL  THEN
-      prm_msg :=  prm_msg||'ä¼ å…¥æ ¡éªŒæµæ°´å·ä¸ºç©ºï¼Œè¯·æ ¸å®ã€‚ã€‚ã€‚';
+      prm_msg :=  prm_msg||'´«ÈëĞ£ÑéÁ÷Ë®ºÅÎª¿Õ£¬ÇëºËÊµ¡£¡£¡£';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
-     --æ ¡éªŒå‚æ•°
+     --Ğ£Ñé²ÎÊı
     IF prm_aac001 IS NULL  THEN
-      prm_msg :=  prm_msg||'ä¼ å…¥ä¸ªäººç¼–å·ä¸ºç©ºï¼Œè¯·æ ¸å®ã€‚ã€‚ã€‚';
+      prm_msg :=  prm_msg||'´«Èë¸öÈË±àºÅÎª¿Õ£¬ÇëºËÊµ¡£¡£¡£';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
@@ -4285,23 +4285,23 @@ ELSE
     var_iaa100 := rec_tmp_irac01a2.iaa100;
 
     IF dat_aac030 > SYSDATE THEN
-      prm_msg :=  prm_msg||'åœä¿æ—¥æœŸä¸èƒ½æ™šäºç³»ç»Ÿæ—¥æœŸ'||TO_CHAR(SYSDATE,'yyyy-MM-dd')||'!';
+      prm_msg :=  prm_msg||'Í£±£ÈÕÆÚ²»ÄÜÍíÓÚÏµÍ³ÈÕÆÚ'||TO_CHAR(SYSDATE,'yyyy-MM-dd')||'!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
     IF TO_NUMBER(TO_CHAR(dat_aac030,'yyyyMM')) > TO_NUMBER(var_iaa100) THEN
-      prm_msg :=  prm_msg||'åœä¿æ—¥æœŸä¸èƒ½æ™šäºå½“å‰å¯ç”³æŠ¥æœˆåº¦'||var_iaa100||'!';
+      prm_msg :=  prm_msg||'Í£±£ÈÕÆÚ²»ÄÜÍíÓÚµ±Ç°¿ÉÉê±¨ÔÂ¶È'||var_iaa100||'!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
 
     IF TO_NUMBER(TO_CHAR(dat_aac030,'yyyyMM')) <> TO_NUMBER(var_iaa100) THEN
-      prm_msg :=  prm_msg||'åœä¿æœˆåº¦å’Œç”³æŠ¥æœˆåº¦ä¸ä¸€è‡´'||var_iaa100||'!';
+      prm_msg :=  prm_msg||'Í£±£ÔÂ¶ÈºÍÉê±¨ÔÂ¶È²»Ò»ÖÂ'||var_iaa100||'!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
 
-    --æ˜¯å¦å·²ç»å­˜åœ¨ç”³æŠ¥è®°å½•
+    --ÊÇ·ñÒÑ¾­´æÔÚÉê±¨¼ÇÂ¼
     SELECT count(1)
       INTO num_count
       FROM wsjb.irac01  a
@@ -4309,12 +4309,12 @@ ELSE
        AND a.iaa002 = '0'
        AND a.aab001 = var_aab001;
     IF num_count > 0 THEN
-      prm_msg :=  prm_msg||'è¯¥äººå‘˜å·²å­˜åœ¨å¾…ç”³æŠ¥ä¿¡æ¯!';
+      prm_msg :=  prm_msg||'¸ÃÈËÔ±ÒÑ´æÔÚ´ıÉê±¨ĞÅÏ¢!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
 
-    --æ˜¯å¦å·²ç»å­˜åœ¨ç”³æŠ¥è®°å½•
+    --ÊÇ·ñÒÑ¾­´æÔÚÉê±¨¼ÇÂ¼
     SELECT count(1)
       INTO num_count
       FROM wsjb.irac01  a
@@ -4322,11 +4322,11 @@ ELSE
        AND a.iaa002 = '1'
        AND a.aab001 = var_aab001;
     IF num_count > 0 THEN
-      prm_msg :=  prm_msg||'è¯¥äººå‘˜å·²å­˜åœ¨ç”³æŠ¥ä¿¡æ¯!';
+      prm_msg :=  prm_msg||'¸ÃÈËÔ±ÒÑ´æÔÚÉê±¨ĞÅÏ¢!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
-  --æ˜¯å¦å·²ç»å­˜åœ¨ç”³æŠ¥è®°å½•
+  --ÊÇ·ñÒÑ¾­´æÔÚÉê±¨¼ÇÂ¼
     SELECT count(1)
       INTO num_count
       FROM wsjb.irac01  a
@@ -4334,21 +4334,21 @@ ELSE
        AND a.iaa002 = '4'
        AND a.aab001 = var_aab001;
     IF num_count > 0 THEN
-      prm_msg :=  prm_msg||'è¯¥äººå‘˜å·²å­˜åœ¨æ‰“å›çš„ç”³æŠ¥ä¿¡æ¯ï¼Œè¯·åˆ°æœˆç”³æŠ¥åŠŸèƒ½ä¸‹æ“ä½œï¼Œä¸èƒ½å†åšå¾…é€€æ“ä½œï¼';
+      prm_msg :=  prm_msg||'¸ÃÈËÔ±ÒÑ´æÔÚ´ò»ØµÄÉê±¨ĞÅÏ¢£¬Çëµ½ÔÂÉê±¨¹¦ÄÜÏÂ²Ù×÷£¬²»ÄÜÔÙ×ö´ıÍË²Ù×÷£¡';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
 
-    --æ˜¯å¦å·²ç»å­˜åœ¨ç”³æŠ¥è®°å½•
+    --ÊÇ·ñÒÑ¾­´æÔÚÉê±¨¼ÇÂ¼
 
     IF rec_tmp_irac01a2.aae013 <> '251' THEN
-      prm_msg :=  prm_msg||'äººå‘˜åœä¿åŸå› ä¸ä¸ºåœ¨èŒè½¬å¾…é€€ï¼Œè¯·æ£€æŸ¥ï¼';
+      prm_msg :=  prm_msg||'ÈËÔ±Í£±£Ô­Òò²»ÎªÔÚÖ°×ª´ıÍË£¬Çë¼ì²é£¡';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
 
 
-   --æš‚åœç¼´è´¹åŸºæ•°
+   --ÔİÍ£½É·Ñ»ùÊı
     IF rec_tmp_irac01a2.aae110 = '2' THEN
         SELECT yac004
           INTO num_yac004
@@ -4358,7 +4358,7 @@ ELSE
            AND aae110 = '2';
 
 
-          --ä¼ä¸šå…»è€åŸºæ•°æ›´æ–°
+          --ÆóÒµÑøÀÏ»ùÊı¸üĞÂ
           UPDATE wsjb.tmp_irac01a2
              SET yac004 = ROUND(num_yac004),
                  aae110 = '3'
@@ -4375,7 +4375,7 @@ ELSE
            AND aab001 = var_aab001
            AND aac031 = '1';
 
-          --æœºå…³å…»è€åŸºæ•°æ›´æ–°
+          --»ú¹ØÑøÀÏ»ùÊı¸üĞÂ
           UPDATE wsjb.tmp_irac01a2
              SET yac004 = num_aac040,
                  aae120 = '3'
@@ -4390,7 +4390,7 @@ ELSE
         rec_tmp_irac01a2.aae510 = '2' OR
         rec_tmp_irac01a2.aae311 = '2' OR
         rec_tmp_irac01a2.aae810 = '2' THEN
-        --ä»¥ä¸€ä¸ªé™©ç§ä¸ºå‡†
+        --ÒÔÒ»¸öÏÕÖÖÎª×¼
         SELECT yac004
           INTO num_yac005
           FROM xasi2.Ac02
@@ -4401,14 +4401,14 @@ ELSE
            AND ROWNUM = 1;
 
 
-          --å…¶ä»–åŸºæ•°æ›´æ–°
+          --ÆäËû»ùÊı¸üĞÂ
           UPDATE wsjb.tmp_irac01a2
              SET yac005 = ROUND(num_yac005),
                  yaa333 = ROUND(num_yac005)
            WHERE iaz018 = prm_iaz018;
 
 
-        --æ­£å¸¸å‚ä¿çš„é™©ç§å˜æ›´æˆå‡å°‘
+        --Õı³£²Î±£µÄÏÕÖÖ±ä¸ü³É¼õÉÙ
         IF rec_tmp_irac01a2.aae210 = '2' THEN
           UPDATE wsjb.tmp_irac01a2
              SET aae210 = '3'
@@ -4429,7 +4429,7 @@ ELSE
              SET aae510 = '3'
            WHERE iaz018 = prm_iaz018;
         END IF;
-        IF rec_tmp_irac01a2.aae311 = '2' THEN --å¤§é¢ä¸åœä¿
+        IF rec_tmp_irac01a2.aae311 = '2' THEN --´ó¶î²»Í£±£
           UPDATE wsjb.tmp_irac01a2
              SET aae311 = '2'
            WHERE iaz018 = prm_iaz018;
@@ -4442,67 +4442,67 @@ ELSE
 
      END IF;
 
-     /*å¤„ç†å¤±è´¥*/
+     /*´¦ÀíÊ§°Ü*/
       <<label_ERROR>>
         num_count :=0;
 
   EXCEPTION
      WHEN OTHERS THEN
-          /*å…³é—­æ‰“å¼€çš„æ¸¸æ ‡*/
+          /*¹Ø±Õ´ò¿ªµÄÓÎ±ê*/
           prm_AppCode  := PRE_ERRCODE || GN_DEF_ERR;
-          prm_ErrorMsg := 'æ•°æ®åº“é”™è¯¯ï¼'|| SQLERRM ;
+          prm_ErrorMsg := 'Êı¾İ¿â´íÎó£¡'|| SQLERRM ;
           RETURN;
   END prc_p_ValidateRetireCheck;
    /*--------------------------------------------------------------------------
-   || ä¸šåŠ¡ç¯èŠ‚ ï¼šé€€ä¼‘äººå‘˜æ­»äº¡ä¿å­˜ç½‘å…éªŒè¯
-   || è¿‡ç¨‹åç§° prc_p_ValidateDeathCheck
-   || åŠŸèƒ½æè¿° ï¼šæ ¡éªŒè¯¥äººå‘˜ä¿¡æ¯
+   || ÒµÎñ»·½Ú £ºÍËĞİÈËÔ±ËÀÍö±£´æÍøÌüÑéÖ¤
+   || ¹ı³ÌÃû³Æ prc_p_ValidateDeathCheck
+   || ¹¦ÄÜÃèÊö £ºĞ£Ñé¸ÃÈËÔ±ĞÅÏ¢
    ||
-   || å‚æ•°æè¿° ï¼šå‚æ•°æ ‡è¯†           è¯´æ˜
+   || ²ÎÊıÃèÊö £º²ÎÊı±êÊ¶           ËµÃ÷
    ||            --------------------------------------------------------------
    ||
    ||
-   || ä½œ    è€… ï¼šzhujing         å®Œæˆæ—¥æœŸ ï¼š2015-11-24
+   || ×÷    Õß £ºzhujing         Íê³ÉÈÕÆÚ £º2015-11-24
    ||------------------------------------------------------------------------*/
    PROCEDURE prc_p_ValidateDeathCheck(
-       prm_iaz018          IN            VARCHAR2,     --æ‰¹æ¬¡å·
-       prm_aac001          IN            VARCHAR2,     --ä¸ªäººç¼–å·
-      prm_yab139          IN            VARCHAR2,     --ç»åŠæœºæ„
-      prm_msg             OUT           VARCHAR2,     -- é”™è¯¯ä¿¡æ¯
-      prm_sign            OUT           VARCHAR2,     -- é”™è¯¯æ ‡å¿—
-      prm_AppCode         OUT           VARCHAR2,     --æ‰§è¡Œä»£ç 
-      prm_ErrorMsg        OUT           VARCHAR2)    --å‡ºé”™ä¿¡æ¯
+       prm_iaz018          IN            VARCHAR2,     --Åú´ÎºÅ
+       prm_aac001          IN            VARCHAR2,     --¸öÈË±àºÅ
+      prm_yab139          IN            VARCHAR2,     --¾­°ì»ú¹¹
+      prm_msg             OUT           VARCHAR2,     -- ´íÎóĞÅÏ¢
+      prm_sign            OUT           VARCHAR2,     -- ´íÎó±êÖ¾
+      prm_AppCode         OUT           VARCHAR2,     --Ö´ĞĞ´úÂë
+      prm_ErrorMsg        OUT           VARCHAR2)    --³ö´íĞÅÏ¢
   IS
    num_count        NUMBER(6);
    rec_tmp_irac01a2 tmp_irac01a2%ROWTYPE;
-   dat_aac006       DATE ;--å‡ºç”Ÿæ—¥æœŸ
-   dat_aac007       DATE ;--å‚å·¥æ—¥æœŸ
-   dat_aac030       DATE ;--æœ¬ç³»ç»Ÿå‚ä¿æ—¥æœŸ
-   dat_yac033       DATE ;--ä¸ªäººåˆæ¬¡å‚ä¿æ—¥æœŸ
+   dat_aac006       DATE ;--³öÉúÈÕÆÚ
+   dat_aac007       DATE ;--²Î¹¤ÈÕÆÚ
+   dat_aac030       DATE ;--±¾ÏµÍ³²Î±£ÈÕÆÚ
+   dat_yac033       DATE ;--¸öÈË³õ´Î²Î±£ÈÕÆÚ
    var_aab001       irac01.aab001%TYPE;
    var_aae140       irab02.aae140%TYPE;
-   num_aac040       NUMBER(14,2); --ç¼´è´¹å·¥èµ„
-   num_yac004       NUMBER(14,2); --å…»è€åŸºæ•°
-   num_yac005       NUMBER(14,2); --å…¶ä»–åŸºæ•°
-   var_iaa100       VARCHAR2(6);  --ç”³æŠ¥æœˆåº¦
+   num_aac040       NUMBER(14,2); --½É·Ñ¹¤×Ê
+   num_yac004       NUMBER(14,2); --ÑøÀÏ»ùÊı
+   num_yac005       NUMBER(14,2); --ÆäËû»ùÊı
+   var_iaa100       VARCHAR2(6);  --Éê±¨ÔÂ¶È
    var_aac001       irac01.aac001%TYPE;
-   var_aac009       irac01.aac009%TYPE;  --æˆ·å£æ€§è´¨
-   
+   var_aac009       irac01.aac009%TYPE;  --»§¿ÚĞÔÖÊ
+
    BEGIN
-   /*åˆå§‹åŒ–å˜é‡*/
+   /*³õÊ¼»¯±äÁ¿*/
      prm_AppCode  := GN_DEF_OK;
      prm_ErrorMsg := '';
      prm_msg :='';
      prm_sign :='0';
-       --æ ¡éªŒå‚æ•°
+       --Ğ£Ñé²ÎÊı
     IF prm_iaz018 IS NULL  THEN
-      prm_msg :=  prm_msg||'ä¼ å…¥æ ¡éªŒæµæ°´å·ä¸ºç©ºï¼Œè¯·æ ¸å®ã€‚ã€‚ã€‚';
+      prm_msg :=  prm_msg||'´«ÈëĞ£ÑéÁ÷Ë®ºÅÎª¿Õ£¬ÇëºËÊµ¡£¡£¡£';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
-     --æ ¡éªŒå‚æ•°
+     --Ğ£Ñé²ÎÊı
     IF prm_aac001 IS NULL  THEN
-      prm_msg :=  prm_msg||'ä¼ å…¥ä¸ªäººç¼–å·ä¸ºç©ºï¼Œè¯·æ ¸å®ã€‚ã€‚ã€‚';
+      prm_msg :=  prm_msg||'´«Èë¸öÈË±àºÅÎª¿Õ£¬ÇëºËÊµ¡£¡£¡£';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
@@ -4521,23 +4521,23 @@ ELSE
     var_iaa100 := rec_tmp_irac01a2.iaa100;
 
     IF dat_aac030 > SYSDATE THEN
-      prm_msg :=  prm_msg||'åœä¿æ—¥æœŸä¸èƒ½æ™šäºç³»ç»Ÿæ—¥æœŸ'||TO_CHAR(SYSDATE,'yyyy-MM-dd')||'!';
+      prm_msg :=  prm_msg||'Í£±£ÈÕÆÚ²»ÄÜÍíÓÚÏµÍ³ÈÕÆÚ'||TO_CHAR(SYSDATE,'yyyy-MM-dd')||'!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
     IF TO_NUMBER(TO_CHAR(dat_aac030,'yyyyMM')) > TO_NUMBER(var_iaa100) THEN
-      prm_msg :=  prm_msg||'åœä¿æ—¥æœŸä¸èƒ½æ™šäºå½“å‰å¯ç”³æŠ¥æœˆåº¦'||var_iaa100||'!';
+      prm_msg :=  prm_msg||'Í£±£ÈÕÆÚ²»ÄÜÍíÓÚµ±Ç°¿ÉÉê±¨ÔÂ¶È'||var_iaa100||'!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
 
     IF TO_NUMBER(TO_CHAR(dat_aac030,'yyyyMM')) <> TO_NUMBER(var_iaa100) THEN
-      prm_msg :=  prm_msg||'åœä¿æœˆåº¦å’Œç”³æŠ¥æœˆåº¦ä¸ä¸€è‡´'||var_iaa100||'!';
+      prm_msg :=  prm_msg||'Í£±£ÔÂ¶ÈºÍÉê±¨ÔÂ¶È²»Ò»ÖÂ'||var_iaa100||'!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
 
-    --æ˜¯å¦å·²ç»å­˜åœ¨ç”³æŠ¥è®°å½•
+    --ÊÇ·ñÒÑ¾­´æÔÚÉê±¨¼ÇÂ¼
     SELECT count(1)
       INTO num_count
       FROM wsjb.irac01  a
@@ -4545,12 +4545,12 @@ ELSE
        AND a.iaa002 = '0'
        AND a.aab001 = var_aab001;
     IF num_count > 0 THEN
-      prm_msg :=  prm_msg||'è¯¥äººå‘˜å·²å­˜åœ¨å¾…ç”³æŠ¥ä¿¡æ¯!';
+      prm_msg :=  prm_msg||'¸ÃÈËÔ±ÒÑ´æÔÚ´ıÉê±¨ĞÅÏ¢!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
 
-    --æ˜¯å¦å·²ç»å­˜åœ¨ç”³æŠ¥è®°å½•
+    --ÊÇ·ñÒÑ¾­´æÔÚÉê±¨¼ÇÂ¼
     SELECT count(1)
       INTO num_count
       FROM wsjb.irac01  a
@@ -4558,11 +4558,11 @@ ELSE
        AND a.iaa002 = '1'
        AND a.aab001 = var_aab001;
     IF num_count > 0 THEN
-      prm_msg :=  prm_msg||'è¯¥äººå‘˜å·²å­˜åœ¨ç”³æŠ¥ä¿¡æ¯!';
+      prm_msg :=  prm_msg||'¸ÃÈËÔ±ÒÑ´æÔÚÉê±¨ĞÅÏ¢!';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
-  --æ˜¯å¦å·²ç»å­˜åœ¨ç”³æŠ¥è®°å½•
+  --ÊÇ·ñÒÑ¾­´æÔÚÉê±¨¼ÇÂ¼
     SELECT count(1)
       INTO num_count
       FROM wsjb.irac01  a
@@ -4570,21 +4570,21 @@ ELSE
        AND a.iaa002 = '4'
        AND a.aab001 = var_aab001;
     IF num_count > 0 THEN
-      prm_msg :=  prm_msg||'è¯¥äººå‘˜å·²å­˜åœ¨æ‰“å›çš„ç”³æŠ¥ä¿¡æ¯ï¼Œè¯·åˆ°æœˆç”³æŠ¥åŠŸèƒ½ä¸‹æ“ä½œï¼Œä¸èƒ½å†åšå¾…é€€æ“ä½œï¼';
+      prm_msg :=  prm_msg||'¸ÃÈËÔ±ÒÑ´æÔÚ´ò»ØµÄÉê±¨ĞÅÏ¢£¬Çëµ½ÔÂÉê±¨¹¦ÄÜÏÂ²Ù×÷£¬²»ÄÜÔÙ×ö´ıÍË²Ù×÷£¡';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
 
-    --æ˜¯å¦å·²ç»å­˜åœ¨ç”³æŠ¥è®°å½•
+    --ÊÇ·ñÒÑ¾­´æÔÚÉê±¨¼ÇÂ¼
 
     IF rec_tmp_irac01a2.aae013 <> '211' THEN
-      prm_msg :=  prm_msg||'äººå‘˜åœä¿åŸå› ä¸ä¸ºåœ¨èŒäººå‘˜æ­»äº¡ï¼Œè¯·æ£€æŸ¥ï¼';
+      prm_msg :=  prm_msg||'ÈËÔ±Í£±£Ô­Òò²»ÎªÔÚÖ°ÈËÔ±ËÀÍö£¬Çë¼ì²é£¡';
       prm_sign := '1';
       GOTO label_ERROR;
     END IF;
 
 
-   --æš‚åœç¼´è´¹åŸºæ•°
+   --ÔİÍ£½É·Ñ»ùÊı
     IF rec_tmp_irac01a2.aae110 = '2' THEN
         SELECT yac004
           INTO num_yac004
@@ -4594,7 +4594,7 @@ ELSE
            AND aae110 = '2';
 
 
-          --ä¼ä¸šå…»è€åŸºæ•°æ›´æ–°
+          --ÆóÒµÑøÀÏ»ùÊı¸üĞÂ
           UPDATE wsjb.tmp_irac01a2
              SET yac004 = ROUND(num_yac004),
                  aae110 = '3'
@@ -4611,7 +4611,7 @@ ELSE
            AND aab001 = var_aab001
            AND aac031 = '1';
 
-          --æœºå…³å…»è€åŸºæ•°æ›´æ–°
+          --»ú¹ØÑøÀÏ»ùÊı¸üĞÂ
           UPDATE wsjb.tmp_irac01a2
              SET yac004 = num_aac040,
                  aae120 = '3'
@@ -4626,7 +4626,7 @@ ELSE
         rec_tmp_irac01a2.aae510 = '2' OR
         rec_tmp_irac01a2.aae311 = '2' OR
         rec_tmp_irac01a2.aae810 = '2' THEN
-        --ä»¥ä¸€ä¸ªé™©ç§ä¸ºå‡†
+        --ÒÔÒ»¸öÏÕÖÖÎª×¼
         SELECT yac004
           INTO num_yac005
           FROM xasi2.Ac02
@@ -4637,14 +4637,14 @@ ELSE
            AND ROWNUM = 1;
 
 
-          --å…¶ä»–åŸºæ•°æ›´æ–°
+          --ÆäËû»ùÊı¸üĞÂ
           UPDATE wsjb.tmp_irac01a2
              SET yac005 = ROUND(num_yac005),
                  yaa333 = ROUND(num_yac005)
            WHERE iaz018 = prm_iaz018;
 
 
-        --æ­£å¸¸å‚ä¿çš„é™©ç§å˜æ›´æˆå‡å°‘
+        --Õı³£²Î±£µÄÏÕÖÖ±ä¸ü³É¼õÉÙ
         IF rec_tmp_irac01a2.aae210 = '2' THEN
           UPDATE wsjb.tmp_irac01a2
              SET aae210 = '3'
@@ -4665,7 +4665,7 @@ ELSE
              SET aae510 = '3'
            WHERE iaz018 = prm_iaz018;
         END IF;
-        IF rec_tmp_irac01a2.aae311 = '2' THEN --å¤§é¢åœä¿
+        IF rec_tmp_irac01a2.aae311 = '2' THEN --´ó¶îÍ£±£
           UPDATE wsjb.tmp_irac01a2
              SET aae311 = '3'
            WHERE iaz018 = prm_iaz018;
@@ -4678,34 +4678,34 @@ ELSE
 
      END IF;
 
-     /*å¤„ç†å¤±è´¥*/
+     /*´¦ÀíÊ§°Ü*/
       <<label_ERROR>>
         num_count :=0;
 
   EXCEPTION
      WHEN OTHERS THEN
-          /*å…³é—­æ‰“å¼€çš„æ¸¸æ ‡*/
+          /*¹Ø±Õ´ò¿ªµÄÓÎ±ê*/
           prm_AppCode  := PRE_ERRCODE || GN_DEF_ERR;
-          prm_ErrorMsg := 'æ•°æ®åº“é”™è¯¯ï¼'|| SQLERRM ;
+          prm_ErrorMsg := 'Êı¾İ¿â´íÎó£¡'|| SQLERRM ;
           RETURN;
   END prc_p_ValidateDeathCheck;
    /*****************************************************************************
-   ** è¿‡ç¨‹åç§° : prc_batchImportView
-   ** è¿‡ç¨‹ç¼–å· ï¼š
-   ** ä¸šåŠ¡ç¯èŠ‚ ï¼š
-   ** åŠŸèƒ½æè¿° ï¼šæ‰¹é‡æ–°å‚ä¿å¯¼å…¥é¢„è§ˆ
+   ** ¹ı³ÌÃû³Æ : prc_batchImportView
+   ** ¹ı³Ì±àºÅ £º
+   ** ÒµÎñ»·½Ú £º
+   ** ¹¦ÄÜÃèÊö £ºÅúÁ¿ĞÂ²Î±£µ¼ÈëÔ¤ÀÀ
    ******************************************************************************
-   ** å‚æ•°æè¿° ï¼šå‚æ•°æ ‡è¯†        è¾“å…¥/è¾“å‡º         ç±»å‹                 åç§°
+   ** ²ÎÊıÃèÊö £º²ÎÊı±êÊ¶        ÊäÈë/Êä³ö         ÀàĞÍ                 Ãû³Æ
    ******************************************************************************
-   **           prm_aab001     IN     irab01.aab001%TYPE,--å•ä½ç¼–å·
+   **           prm_aab001     IN     irab01.aab001%TYPE,--µ¥Î»±àºÅ
    ******************************************************************************
-   ** ä½œ    è€…ï¼šyh         ä½œæˆæ—¥æœŸ ï¼š2012-09-17   ç‰ˆæœ¬ç¼–å· ï¼šVer 1.0.0
-   ** ä¿®    æ”¹ï¼š
+   ** ×÷    Õß£ºyh         ×÷³ÉÈÕÆÚ £º2012-09-17   °æ±¾±àºÅ £ºVer 1.0.0
+   ** ĞŞ    ¸Ä£º
    *****************************************************************************/
-   PROCEDURE prc_batchImportView(prm_aab001     IN     irac01.aab001%TYPE,--å•ä½ç¼–å·
-                                 prm_iaa100     IN     irac01.iaa100%TYPE,--ç”³æŠ¥æœˆåº¦
-                                  prm_iaz018     IN     irac01a2.iaz018%TYPE,  --æ‰¹é‡å¯¼å…¥æ‰¹æ¬¡ID
-                                  prm_yab139     IN     irac01.yab139%TYPE,--ç»åŠä¸­å¿ƒ
+   PROCEDURE prc_batchImportView(prm_aab001     IN     irac01.aab001%TYPE,--µ¥Î»±àºÅ
+                                 prm_iaa100     IN     irac01.iaa100%TYPE,--Éê±¨ÔÂ¶È
+                                  prm_iaz018     IN     irac01a2.iaz018%TYPE,  --ÅúÁ¿µ¼ÈëÅú´ÎID
+                                  prm_yab139     IN     irac01.yab139%TYPE,--¾­°ìÖĞĞÄ
                                   prm_AppCode    OUT    VARCHAR2  ,
                                   prm_ErrorMsg   OUT    VARCHAR2 )
 
@@ -4745,11 +4745,11 @@ ELSE
      v_aac012   irac01.aac012%TYPE;
      v_aac008   irac01.aac012%TYPE;
      dat_aac006  irac01.aac006%TYPE;
-     dat_yearAge      DATE;  --åˆ°é¾„æ—¥æœŸ
-     dat_AAE030     DATE;--å¹´å®¡æ—¶é—´ 20190808
-     var_aab019      xasi2.ab01.aab019%TYPE;     --å•ä½æ€§è´¨
+     dat_yearAge      DATE;  --µ½ÁäÈÕÆÚ
+     dat_AAE030     DATE;--ÄêÉóÊ±¼ä 20190808
+     var_aab019      xasi2.ab01.aab019%TYPE;     --µ¥Î»ĞÔÖÊ
 
-    
+
       CURSOR impCur IS
              SELECT
               iaz018,
@@ -4828,70 +4828,70 @@ ELSE
              WHERE iaz018 = prm_iaz018;
 
    BEGIN
-     /*åˆå§‹åŒ–å˜é‡*/
+     /*³õÊ¼»¯±äÁ¿*/
      prm_AppCode  := PKG_Constant.GN_DEF_OK;
     prm_ErrorMsg := '';
      n_count := 0;
-     /*å‚æ•°åˆ¤ç©º*/
+     /*²ÎÊıÅĞ¿Õ*/
      IF prm_aab001 IS NULL THEN
         prm_AppCode  :=  gn_def_ERR;
-       prm_ErrorMsg := 'æ²¡æœ‰è·å–åˆ°å•ä½ç¼–å·ï¼';
+       prm_ErrorMsg := 'Ã»ÓĞ»ñÈ¡µ½µ¥Î»±àºÅ£¡';
        RETURN;
     END IF;
 
 
-     --åˆ¤æ–­æ˜¯å¦å­˜åœ¨è¯¥å•ä½
+     --ÅĞ¶ÏÊÇ·ñ´æÔÚ¸Ãµ¥Î»
      SELECT COUNT(1)
        into n_count
        FROM wsjb.irab01
        WHERE iab001 = prm_aab001;
     IF n_count = 0 THEN
        prm_AppCode  :=  gn_def_ERR;
-       prm_ErrorMsg := 'å•ä½ç¼–å·ä¸º['|| prm_aab001 ||']çš„å•ä½ä¿¡æ¯ä¸å­˜åœ¨!';
+       prm_ErrorMsg := 'µ¥Î»±àºÅÎª['|| prm_aab001 ||']µÄµ¥Î»ĞÅÏ¢²»´æÔÚ!';
        RETURN;
     END IF;
 
-    --åˆ¤æ–­æ˜¯å¦å­˜åœ¨æ‰¹é‡å¯¼å…¥ä¿¡æ¯
+    --ÅĞ¶ÏÊÇ·ñ´æÔÚÅúÁ¿µ¼ÈëĞÅÏ¢
     SELECT COUNT(1)
       INTO  n_count
       FROM IRAC01A2
      WHERE iaz018 = prm_iaz018;
     IF n_count = 0 THEN
        prm_AppCode  :=  gn_def_ERR;
-       prm_ErrorMsg := 'å¯¼å…¥æ‰¹æ¬¡IDä¸º['|| prm_iaz018 ||']çš„ä¿¡æ¯ä¸å­˜åœ¨!';
+       prm_ErrorMsg := 'µ¼ÈëÅú´ÎIDÎª['|| prm_iaz018 ||']µÄĞÅÏ¢²»´æÔÚ!';
        RETURN;
     END IF;
 
 
-    --å¾ªç¯æ£€éªŒæå–æ•°æ®
+    --Ñ­»·¼ìÑéÌáÈ¡Êı¾İ
     FOR REC_TMP_PERSON IN impCur LOOP
 
-      --åˆå§‹åŒ–æ ‡å¿—ä½
+      --³õÊ¼»¯±êÖ¾Î»
        var_flag := 0;
        v_message := '';
-       -- æ ¡éªŒå¹²éƒ¨å·¥äºº
-       v_aac012 := REC_TMP_PERSON.Aac012; 
+       -- Ğ£Ñé¸É²¿¹¤ÈË
+       v_aac012 := REC_TMP_PERSON.Aac012;
        v_aac008 := REC_TMP_PERSON.aac008;
        v_aac004 := REC_TMP_PERSON.aac004;
-       dat_aac006 := REC_TMP_PERSON.aac006;--å‡ºç”Ÿæ—¥æœŸ
-       
-       /**å…»è€æ¥å£æ ¡éªŒæ˜¯å¦é€šè¿‡**/
+       dat_aac006 := REC_TMP_PERSON.aac006;--³öÉúÈÕÆÚ
+
+       /**ÑøÀÏ½Ó¿ÚĞ£ÑéÊÇ·ñÍ¨¹ı**/
        IF REC_TMP_PERSON.aae100 ='0' AND REC_TMP_PERSON.errormsg IS NOT NULL THEN
        v_message := REC_TMP_PERSON.errormsg;
        var_flag  := 1;
        END IF;
-      /**æ£€éªŒæ•°æ®**/
-      --èº«ä»½è¯éç©ºæ ¡éªŒ
+      /**¼ìÑéÊı¾İ**/
+      --Éí·İÖ¤·Ç¿ÕĞ£Ñé
        IF REC_TMP_PERSON.aac002 IS NULL THEN
-         v_message := v_message||'èº«ä»½è¯å·ç ä¸èƒ½ä¸ºç©ºï¼';
+         v_message := v_message||'Éí·İÖ¤ºÅÂë²»ÄÜÎª¿Õ£¡';
          var_flag  := 1;
        END IF;
-      --èº«ä»½è¯ä½æ•°å¤„ç†
+      --Éí·İÖ¤Î»Êı´¦Àí
        IF LENGTH(trim(REC_TMP_PERSON.aac002)) = 18  THEN
-          xasi2.pkg_P_Comm_CZ.prc_P_getID( UPPER(REC_TMP_PERSON.aac002),   --ä¼ å…¥èº«ä»½è¯
-                                  v_aac002,   --ä¼ å‡ºèº«ä»½è¯
-                                  prm_AppCode,   --é”™è¯¯ä»£ç 
-                                  prm_ErrorMsg) ;  --é”™è¯¯å†…å®¹
+          xasi2.pkg_P_Comm_CZ.prc_P_getID( UPPER(REC_TMP_PERSON.aac002),   --´«ÈëÉí·İÖ¤
+                                  v_aac002,   --´«³öÉí·İÖ¤
+                                  prm_AppCode,   --´íÎó´úÂë
+                                  prm_ErrorMsg) ;  --´íÎóÄÚÈİ
           IF prm_AppCode <> PKG_Constant.GN_DEF_OK THEN
               v_message :=  v_message||prm_ErrorMsg;
               prm_AppCode := PKG_Constant.GN_DEF_OK;
@@ -4911,10 +4911,10 @@ ELSE
             INTO  v_aac002_l
             FROM  dual;
 --       ElSIF LENGTH(trim(REC_TMP_PERSON.aac002)) = 15 THEN
---               xasi2.pkg_P_Comm_CZ.prc_P_getID( UPPER(REC_TMP_PERSON.aac002),   --ä¼ å…¥èº«ä»½è¯
---                                       v_aac002,   --ä¼ å‡ºèº«ä»½è¯
---                                       prm_AppCode,   --é”™è¯¯ä»£ç 
---                                       prm_ErrorMsg) ;  --é”™è¯¯å†…å®¹
+--               xasi2.pkg_P_Comm_CZ.prc_P_getID( UPPER(REC_TMP_PERSON.aac002),   --´«ÈëÉí·İÖ¤
+--                                       v_aac002,   --´«³öÉí·İÖ¤
+--                                       prm_AppCode,   --´íÎó´úÂë
+--                                       prm_ErrorMsg) ;  --´íÎóÄÚÈİ
 --               IF prm_AppCode <> PKG_Constant.GN_DEF_OK THEN
 --                   v_message :=  v_message||prm_ErrorMsg;
 --                   prm_AppCode := PKG_Constant.GN_DEF_OK;
@@ -4930,68 +4930,68 @@ ELSE
 --            FROM  dual;
 --              v_aac002d := trim(REC_TMP_PERSON.aac002);
        ELSE
-             v_message := v_message||REC_TMP_PERSON.aac002||'èº«ä»½è¯ä½æ•°ä¸åˆæ³•;';
+             v_message := v_message||REC_TMP_PERSON.aac002||'Éí·İÖ¤Î»Êı²»ºÏ·¨;';
              var_flag   := 1;
        END IF;
 
-      --æ£€æŸ¥æ˜¯å¦å­˜åœ¨é‡å¤èº«ä»½å·ç 
+      --¼ì²éÊÇ·ñ´æÔÚÖØ¸´Éí·İºÅÂë
       select count(1)
         into n_count
         from IRAC01A2
        where iaz018 = prm_iaz018
          and aac002 in (v_aac002,v_aac002_l,v_aac002_u,v_aac002d);
       IF n_count > 1 THEN
-         v_message := v_message||'å¯¼å…¥æ•°æ®ä¸­èº«ä»½è¯å·ç æœ‰é‡å¤;';
+         v_message := v_message||'µ¼ÈëÊı¾İÖĞÉí·İÖ¤ºÅÂëÓĞÖØ¸´;';
          var_flag   := 1;
       END IF;
 
 
-      --18ä½èº«ä»½è¯å·æ˜¯å¦æ–°å‚ä¿æ ¡éªŒ(é«˜æ–°)
+      --18Î»Éí·İÖ¤ºÅÊÇ·ñĞÂ²Î±£Ğ£Ñé(¸ßĞÂ)
       SELECT COUNT(1)
         INTO n_count
         FROM xasi2.ac01 a
        WHERE a.aac002 in (v_aac002,v_aac002_l,v_aac002_u,v_aac002d)
          AND a.aae120 = '0'
-         AND a.aac003 NOT LIKE '%é‡å¤%';
+         AND a.aac003 NOT LIKE '%ÖØ¸´%';
         IF n_count >1 THEN
-           v_message := 'è¯¥èº«ä»½è¯å·å·²ç»å­˜åœ¨å¤šä¸ªåŒ»ä¿ç¼–å·ï¼Œä¸èƒ½æ–°å‚ä¿ï¼';
+           v_message := '¸ÃÉí·İÖ¤ºÅÒÑ¾­´æÔÚ¶à¸öÒ½±£±àºÅ£¬²»ÄÜĞÂ²Î±££¡';
            var_flag :='1';
            GOTO label_ERROR ;
         END IF;
-             
-       -- begin 20190708 wangz å¤„ç† å•ä½ å·¥äºº
+
+       -- begin 20190708 wangz ´¦Àí µ¥Î» ¹¤ÈË
         IF v_aac008 = '1' THEN
 
-         IF v_aac004 = '1' THEN --ç”· 60å²
+         IF v_aac004 = '1' THEN --ÄĞ 60Ëê
            dat_yearAge := ADD_MONTHS(dat_aac006,60*12);
-         ELSIF v_aac004 = '2' AND v_aac012 = '4' THEN --å¥³å¹²éƒ¨ 55å²
+         ELSIF v_aac004 = '2' AND v_aac012 = '4' THEN --Å®¸É²¿ 55Ëê
            dat_yearAge := ADD_MONTHS(dat_aac006,55*12);
-         ELSIF v_aac004 = '2' AND v_aac012 = '1' THEN --å¥³å·¥äºº 50å²
+         ELSIF v_aac004 = '2' AND v_aac012 = '1' THEN --Å®¹¤ÈË 50Ëê
            dat_yearAge := ADD_MONTHS(dat_aac006,50*12);
          ELSE
-           v_message := 'æ€§åˆ«è·å–å¤±è´¥';
+           v_message := 'ĞÔ±ğ»ñÈ¡Ê§°Ü';
            var_flag := '1';
            GOTO label_ERROR;
          END IF;
          IF dat_yearAge < SYSDATE THEN
-           v_message :=  v_message||'æ‚¨å¥½ï¼Œæ­¤å‘˜å·¥å·²è¶…è¿‡é€€ä¼‘å¹´é¾„ï¼Œè¯·æ ¸å®å› ä½•ç§æƒ…å†µéœ€ä¸ºæ­¤äººç¼´çº³ç¤¾ä¼šä¿é™©ã€‚ç¡®æœ‰ç‰¹æ®Šæƒ…å†µï¼Œè¯·æä¾›ç›¸å…³è¯´æ˜ææ–™è‡³ç¤¾ä¿ä¸­å¿ƒç½‘ä¸Šå®¡æ ¸çª—å£å¤‡æ¡ˆ!';
+           v_message :=  v_message||'ÄúºÃ£¬´ËÔ±¹¤ÒÑ³¬¹ıÍËĞİÄêÁä£¬ÇëºËÊµÒòºÎÖÖÇé¿öĞèÎª´ËÈË½ÉÄÉÉç»á±£ÏÕ¡£È·ÓĞÌØÊâÇé¿ö£¬ÇëÌá¹©Ïà¹ØËµÃ÷²ÄÁÏÖÁÉç±£ÖĞĞÄÍøÉÏÉóºË´°¿Ú±¸°¸!';
             var_flag := '1';
            GOTO label_ERROR;
          END IF;
 
      END IF;
-        
-        
-        
+
+
+
     -- end 20190708 wangz
-        
+
         IF n_count =1 THEN
          SELECT AAC001
            INTO v_aac001
            FROM XASI2.AC01
           WHERE AAE120 = '0'
             AND aac002 in (v_aac002,v_aac002_l,v_aac002_u,v_aac002d)
-            AND AAC003 NOT LIKE '%é‡å¤%';
+            AND AAC003 NOT LIKE '%ÖØ¸´%';
          SELECT COUNT(1)
         INTO COUNT_JM
         FROM XASI2.AC02K1
@@ -5005,7 +5005,7 @@ ELSE
                           FROM XASI2.AC02K1
                          WHERE AAC001 = v_aac001
                            AND AAC031 = '1');
-        v_message  := V_MESSAGE ||'æ­¤èº«ä»½è¯å·ç äººå‘˜åŒ»ç–—ä¿é™©å…³ç³»ç›®å‰åœ¨ç¤¾åŒºï¼š' || V_AAB004 || 'å‚åŠ å±…æ°‘åŒ»ä¿ï¼Œå§“å:'  ||'ä¸ªäººç¼–å·ï¼š'||v_aac001|| ',å‚ä¿çŠ¶æ€:å‚ä¿ç¼´è´¹ã€‚';
+        v_message  := V_MESSAGE ||'´ËÉí·İÖ¤ºÅÂëÈËÔ±Ò½ÁÆ±£ÏÕ¹ØÏµÄ¿Ç°ÔÚÉçÇø£º' || V_AAB004 || '²Î¼Ó¾ÓÃñÒ½±££¬ĞÕÃû:'  ||'¸öÈË±àºÅ£º'||v_aac001|| ',²Î±£×´Ì¬:²Î±£½É·Ñ¡£';
         var_flag := '1';
       END IF;
 
@@ -5016,7 +5016,7 @@ ELSE
                FROM xasi2.ac01
               WHERE AAE120 = '0'
               AND aac002 in (v_aac002,v_aac002_l,v_aac002_u,v_aac002d)
-              AND AAC003 NOT LIKE '%é‡å¤%';
+              AND AAC003 NOT LIKE '%ÖØ¸´%';
         BEGIN
           SELECT AAB001, AAC031
             INTO V_AAB001, V_AAC031
@@ -5056,13 +5056,13 @@ ELSE
         END;
 
         IF V_AAC031 = '1' THEN
-          V_AAC031 := 'å‚ä¿ç¼´è´¹';
+          V_AAC031 := '²Î±£½É·Ñ';
         ELSIF V_AAC031 = '2' THEN
-          V_AAC031 := 'æš‚åœç¼´è´¹';
+          V_AAC031 := 'ÔİÍ£½É·Ñ';
         ELSIF V_AAC031 = '3' THEN
-          V_AAC031 := 'ç»ˆæ­¢ç¼´è´¹';
+          V_AAC031 := 'ÖÕÖ¹½É·Ñ';
         END IF;
-          --  æ£€éªŒ V_AAB001  æ˜¯å¦å­˜åœ¨
+          --  ¼ìÑé V_AAB001  ÊÇ·ñ´æÔÚ
         IF  V_AAB001 IS NOT NULL OR V_AAB001 != '' THEN
 
 
@@ -5071,23 +5071,23 @@ ELSE
             FROM XASI2.AB01
           WHERE AAB001 = V_AAB001;
 
-          V_MESSAGE := V_MESSAGE || 'äººå‘˜æ–°å‚ä¿ç™»è®°éªŒè¯ä¸é€šè¿‡ï¼æ­¤èº«ä»½è¯å·ç äººå‘˜åŒ»ç–—ä¿é™©å…³ç³»ç›®å‰åœ¨å•ä½åç§°ï¼š' ||
-                       V_AAB004 || ',å‚ä¿å§“åï¼š' || V_AAC003 || ',å‚ä¿çŠ¶æ€:' ||
-                       V_AAC031 || 'ã€‚';
+          V_MESSAGE := V_MESSAGE || 'ÈËÔ±ĞÂ²Î±£µÇ¼ÇÑéÖ¤²»Í¨¹ı£¡´ËÉí·İÖ¤ºÅÂëÈËÔ±Ò½ÁÆ±£ÏÕ¹ØÏµÄ¿Ç°ÔÚµ¥Î»Ãû³Æ£º' ||
+                       V_AAB004 || ',²Î±£ĞÕÃû£º' || V_AAC003 || ',²Î±£×´Ì¬:' ||
+                       V_AAC031 || '¡£';
           VAR_FLAG  := 1;
            END IF;
         END IF;
-        
-   
-        
-        
-        
-        
-        
-        
-        
-        
-        --18ä½èº«ä»½è¯å·æ˜¯å¦æ–°å‚ä¿æ ¡éªŒ(å¸‚å±€)
+
+
+
+
+
+
+
+
+
+
+        --18Î»Éí·İÖ¤ºÅÊÇ·ñĞÂ²Î±£Ğ£Ñé(ÊĞ¾Ö)
       /*SELECT count(1)
            INTO sj_acount
            FROM sjxt.ac01
@@ -5098,11 +5098,11 @@ ELSE
          IF sj_count > 0 THEN
           SELECT aab001,aac031 INTO v_aab001,v_aac031 FROM sjxt.ac02 WHERE aac001 = v_aac001 and aac031='1' AND ROWNUM =1;
           IF v_aac031='1' THEN
-             v_aac031 :='å‚ä¿ç¼´è´¹';
+             v_aac031 :='²Î±£½É·Ñ';
          ELSIF v_aac031='2' THEN
-             v_aac031 :='æš‚åœç¼´è´¹';
+             v_aac031 :='ÔİÍ£½É·Ñ';
          ELSIF v_aac031='3' THEN
-             v_aac031 :='ç»ˆæ­¢ç¼´è´¹';
+             v_aac031 :='ÖÕÖ¹½É·Ñ';
          END IF;
          IF v_aab001 IS NOT NULL THEN
           BEGIN
@@ -5114,18 +5114,18 @@ ELSE
                 END;
                 END;
          END IF;
-                v_message := v_message|| 'äººå‘˜æ–°å‚ä¿ç™»è®°éªŒè¯ä¸é€šè¿‡ï¼æ­¤èº«ä»½è¯å·ç äººå‘˜åŒ»ç–—ä¿é™©å…³ç³»ç›®å‰åœ¨è¥¿å®‰å¸‚ç¤¾ä¿ä¸­å¿ƒ,å§“å'||v_aac003||',å•ä½åç§°ï¼š'||v_aab004||'å‚ä¿ï¼Œå‚ä¿çŠ¶æ€:'||v_aac031||'ã€‚';
+                v_message := v_message|| 'ÈËÔ±ĞÂ²Î±£µÇ¼ÇÑéÖ¤²»Í¨¹ı£¡´ËÉí·İÖ¤ºÅÂëÈËÔ±Ò½ÁÆ±£ÏÕ¹ØÏµÄ¿Ç°ÔÚÎ÷°²ÊĞÉç±£ÖĞĞÄ,ĞÕÃû'||v_aac003||',µ¥Î»Ãû³Æ£º'||v_aab004||'²Î±££¬²Î±£×´Ì¬:'||v_aac031||'¡£';
                var_flag :='1';
           ELSIF sj_count = 0 THEN
           SELECT count(DISTINCT aab001) INTO sj_count1 FROM sjxt.ac02 WHERE aac001 = v_aac001 AND aac031='2';
           IF sj_count1 > 0 THEN
            SELECT aab001,aac031 INTO v_aab001,v_aac031 FROM sjxt.ac02 WHERE aac001 = v_aac001 and aac031='2' AND ROWNUM =1;
            IF v_aac031='1' THEN
-             v_aac031 :='å‚ä¿ç¼´è´¹';
+             v_aac031 :='²Î±£½É·Ñ';
          ELSIF v_aac031='2' THEN
-             v_aac031 :='æš‚åœç¼´è´¹';
+             v_aac031 :='ÔİÍ£½É·Ñ';
          ELSIF v_aac031='3' THEN
-             v_aac031 :='ç»ˆæ­¢ç¼´è´¹';
+             v_aac031 :='ÖÕÖ¹½É·Ñ';
          END IF;
          IF v_aab001 IS NOT NULL THEN
           BEGIN
@@ -5137,16 +5137,16 @@ ELSE
                 END;
                 END;
          END IF;
-                v_message := v_message|| 'äººå‘˜æ–°å‚ä¿ç™»è®°éªŒè¯ä¸é€šè¿‡ï¼æ­¤èº«ä»½è¯å·ç äººå‘˜åŒ»ç–—ä¿é™©å…³ç³»ç›®å‰åœ¨è¥¿å®‰å¸‚ç¤¾ä¿ä¸­å¿ƒ,å§“å'||v_aac003||',å•ä½åç§°ï¼š'||v_aab004||'å‚ä¿ï¼Œå‚ä¿çŠ¶æ€:'||v_aac031||'ã€‚';
+                v_message := v_message|| 'ÈËÔ±ĞÂ²Î±£µÇ¼ÇÑéÖ¤²»Í¨¹ı£¡´ËÉí·İÖ¤ºÅÂëÈËÔ±Ò½ÁÆ±£ÏÕ¹ØÏµÄ¿Ç°ÔÚÎ÷°²ÊĞÉç±£ÖĞĞÄ,ĞÕÃû'||v_aac003||',µ¥Î»Ãû³Æ£º'||v_aab004||'²Î±££¬²Î±£×´Ì¬:'||v_aac031||'¡£';
                var_flag :='1';
             elsif sj_count1 = 0 then
-                v_message := v_message|| 'äººå‘˜æ–°å‚ä¿ç™»è®°éªŒè¯ä¸é€šè¿‡ï¼æ­¤èº«ä»½è¯å·ç äººå‘˜åŒ»ç–—ä¿é™©å…³ç³»ç›®å‰åœ¨è¥¿å®‰å¸‚ç¤¾ä¿ä¸­å¿ƒ,å§“å'||v_aac003;
+                v_message := v_message|| 'ÈËÔ±ĞÂ²Î±£µÇ¼ÇÑéÖ¤²»Í¨¹ı£¡´ËÉí·İÖ¤ºÅÂëÈËÔ±Ò½ÁÆ±£ÏÕ¹ØÏµÄ¿Ç°ÔÚÎ÷°²ÊĞÉç±£ÖĞĞÄ,ĞÕÃû'||v_aac003;
                var_flag :='1';
           END IF;
           END IF;
 
              END IF;*/
-             --18ä½èº«ä»½è¯å·æ˜¯å¦æ–°å‚ä¿æ ¡éªŒ
+             --18Î»Éí·İÖ¤ºÅÊÇ·ñĞÂ²Î±£Ğ£Ñé
       SELECT COUNT(1)
         INTO n_count
         FROM  wsjb.irac01  a
@@ -5172,12 +5172,12 @@ ELSE
              WHERE iab001 = v_aab001
                AND rownum = 1;
         END IF;
-        v_message := v_message||'è¯¥äººå‘˜åœ¨'||v_aab004||'['||v_aab001||']æœ‰ç”³æŠ¥è®°å½•ï¼Œè¯·åœ¨ç»­ä¿æ¨¡å—é‡Œæ“ä½œï¼';
+        v_message := v_message||'¸ÃÈËÔ±ÔÚ'||v_aab004||'['||v_aab001||']ÓĞÉê±¨¼ÇÂ¼£¬ÇëÔÚĞø±£Ä£¿éÀï²Ù×÷£¡';
         var_flag  := 1;
       END IF;
 
        IF REC_TMP_PERSON.aab001 IS NULL THEN
-         v_message := v_message||'æ²¡æœ‰æ‰¾åˆ°å•ä½ç¼–å·ï¼';
+         v_message := v_message||'Ã»ÓĞÕÒµ½µ¥Î»±àºÅ£¡';
          var_flag  := 1;
        END IF;
 
@@ -5187,220 +5187,220 @@ ELSE
         FROM wsjb.irab01
        WHERE iab001 = REC_TMP_PERSON.aab001;
        IF n_count = 0 THEN
-         v_message := v_message||'æ²¡æœ‰æ‰¾åˆ°ç½‘æŠ¥å•ä½ä¿¡æ¯';
+         v_message := v_message||'Ã»ÓĞÕÒµ½Íø±¨µ¥Î»ĞÅÏ¢';
          var_flag  := 1;
        END IF;
 
        IF REC_TMP_PERSON.aac003 IS NULL THEN
-         v_message := v_message||'å¯¼å…¥å§“åä¸èƒ½ä¸ºç©ºï¼';
+         v_message := v_message||'µ¼ÈëĞÕÃû²»ÄÜÎª¿Õ£¡';
          var_flag  := 1;
        END IF;
        IF REC_TMP_PERSON.aac004 IS NULL THEN
-       v_message := v_message||'æ€§åˆ«ä¸èƒ½ä¸ºç©ºï¼';
+       v_message := v_message||'ĞÔ±ğ²»ÄÜÎª¿Õ£¡';
          var_flag  := 1;
        END IF;
        IF REC_TMP_PERSON.aac004 IS NOT NULL THEN
           IF REC_TMP_PERSON.aac004 <> '1' AND REC_TMP_PERSON.aac004 <> '2' AND REC_TMP_PERSON.aac004 <> '9' THEN
-                v_message := v_message||'æ€§åˆ«ç å€¼å‡ºé”™!';
+                v_message := v_message||'ĞÔ±ğÂëÖµ³ö´í!';
                 var_flag  := 1;
           END IF;
        END IF;
        IF REC_TMP_PERSON.aac005 IS   NULL THEN
-          v_message := v_message||'æ°‘æ—ä¸èƒ½ä¸ºç©º!';
+          v_message := v_message||'Ãñ×å²»ÄÜÎª¿Õ!';
                 var_flag  := 1;
        END IF;
        IF REC_TMP_PERSON.aac005 IS  NOT  NULL THEN
           IF  LENGTH(trim(REC_TMP_PERSON.aac005)) <> 2 THEN
-                v_message := v_message||'æ°‘æ—ç å€¼å‡ºé”™!';
+                v_message := v_message||'Ãñ×åÂëÖµ³ö´í!';
                 var_flag  := 1;
           END IF;
        END IF;
 
        IF REC_TMP_PERSON.aac009 IS NULL THEN
-         v_message := v_message||'æˆ·å£æ€§è´¨ä¸èƒ½ä¸ºç©ºï¼';
+         v_message := v_message||'»§¿ÚĞÔÖÊ²»ÄÜÎª¿Õ£¡';
          var_flag  := 1;
        ELSE
             IF REC_TMP_PERSON.aac009 <> '10' AND REC_TMP_PERSON.aac009 <> '20' AND REC_TMP_PERSON.aac009 <> '30' AND REC_TMP_PERSON.aac009 <> '40' AND REC_TMP_PERSON.aac009 <> '90' THEN
-                  v_message := v_message||'æˆ·å£æ€§è´¨ç å€¼å‡ºé”™!';
+                  v_message := v_message||'»§¿ÚĞÔÖÊÂëÖµ³ö´í!';
                   var_flag  :=1;
             END IF;
        END IF;
 
        IF REC_TMP_PERSON.aac010 IS NULL OR LENGTH(REC_TMP_PERSON.aac010)< 8 THEN
-         v_message := v_message||'æˆ·ç±åœ°å€ä¸èƒ½ä¸ºç©º,æˆ–å­—æ•°ä¸è¾¾8ä½ï¼';
+         v_message := v_message||'»§¼®µØÖ·²»ÄÜÎª¿Õ,»ò×ÖÊı²»´ï8Î»£¡';
          var_flag  := 1;
        END IF;
 
        IF REC_TMP_PERSON.aae006 IS NULL OR LENGTH(REC_TMP_PERSON.aae006)< 8 THEN
-         v_message := v_message||'è”ç³»åœ°å€ä¸èƒ½ä¸ºç©º,æˆ–å­—æ•°ä¸è¾¾8ä½ï¼';
+         v_message := v_message||'ÁªÏµµØÖ·²»ÄÜÎª¿Õ,»ò×ÖÊı²»´ï8Î»£¡';
          var_flag  := 1;
        END IF;
 
        IF REC_TMP_PERSON.aac011 IS NULL THEN
-         v_message := v_message||'å­¦å†ä¸èƒ½ä¸ºç©ºï¼';
+         v_message := v_message||'Ñ§Àú²»ÄÜÎª¿Õ£¡';
          var_flag  := 1;
        ELSE
             IF REC_TMP_PERSON.aac011 <> '11' AND REC_TMP_PERSON.aac011 <> '12' AND REC_TMP_PERSON.aac011 <> '21'
                AND REC_TMP_PERSON.aac011 <> '31' AND REC_TMP_PERSON.aac011 <> '40' AND REC_TMP_PERSON.aac011 <> '50'
                AND REC_TMP_PERSON.aac011 <> '61' AND REC_TMP_PERSON.aac011 <> '62' AND REC_TMP_PERSON.aac011 <> '70'
                AND REC_TMP_PERSON.aac011 <> '80' AND REC_TMP_PERSON.aac011 <> '90' AND REC_TMP_PERSON.aac011 <> '99' THEN
-                  v_message := v_message||'å­¦å†ç å€¼å‡ºé”™!';
+                  v_message := v_message||'Ñ§ÀúÂëÖµ³ö´í!';
                   var_flag  :=1;
             END IF;
        END IF;
 
        IF REC_TMP_PERSON.aac021 IS NULL THEN
-         v_message := v_message||'æ¯•ä¸šæ—¶é—´ä¸èƒ½ä¸ºç©ºï¼';
+         v_message := v_message||'±ÏÒµÊ±¼ä²»ÄÜÎª¿Õ£¡';
          var_flag  := 1;
        END IF;
 
        IF REC_TMP_PERSON.aac022 IS NULL THEN
-         v_message := v_message||'æ¯•ä¸šé™¢æ ¡ä¸èƒ½ä¸ºç©ºï¼';
+         v_message := v_message||'±ÏÒµÔºĞ£²»ÄÜÎª¿Õ£¡';
          var_flag  := 1;
        END IF;
 
         IF REC_TMP_PERSON.aac025 IS NULL THEN
-         v_message := v_message||'å©šå§»çŠ¶å†µä¸èƒ½ä¸ºç©ºï¼';
+         v_message := v_message||'»éÒö×´¿ö²»ÄÜÎª¿Õ£¡';
          var_flag  := 1;
          ELSE
             IF REC_TMP_PERSON.aac025 <> '1' AND REC_TMP_PERSON.aac025 <> '2' AND REC_TMP_PERSON.aac025 <> '3'
                AND REC_TMP_PERSON.aac025 <> '4' AND REC_TMP_PERSON.aac025 <> '9' THEN
-                  v_message := v_message||'å©šå§»çŠ¶å†µç å€¼å‡ºé”™!';
+                  v_message := v_message||'»éÒö×´¿öÂëÖµ³ö´í!';
                   var_flag  :=1;
             END IF;
        END IF;
 
        IF REC_TMP_PERSON.aac026 IS NULL THEN
-         v_message := v_message||'æ˜¯å¦æœå½¹ä¸èƒ½ä¸ºç©ºï¼';
+         v_message := v_message||'ÊÇ·ñ·şÒÛ²»ÄÜÎª¿Õ£¡';
          var_flag  := 1;
          ELSE
             IF REC_TMP_PERSON.aac026 <> '0' AND REC_TMP_PERSON.aac026 <> '1' THEN
-                   v_message := v_message||'æ˜¯å¦æœå½¹ç å€¼å‡ºé”™!';
+                   v_message := v_message||'ÊÇ·ñ·şÒÛÂëÖµ³ö´í!';
                   var_flag  :=1;
             END IF;
        END IF;
 
        IF REC_TMP_PERSON.aac012 IS NULL THEN
-         v_message := v_message||'ä¸ªäººèº«ä»½ä¸èƒ½ä¸ºç©ºï¼';
+         v_message := v_message||'¸öÈËÉí·İ²»ÄÜÎª¿Õ£¡';
          var_flag  := 1;
          ELSE
             IF REC_TMP_PERSON.aac012 NOT IN ('1','4') THEN
-                   v_message := v_message||'ä¸ªäººèº«ä»½ç å€¼å‡ºé”™!';
+                   v_message := v_message||'¸öÈËÉí·İÂëÖµ³ö´í!';
                   var_flag  :=1;
             END IF;
        END IF;
 
        IF REC_TMP_PERSON.yac168 IS NULL THEN
-         v_message := v_message||'å¤–æ¥åŠ¡å·¥æ ‡å¿—ä¸èƒ½ä¸ºç©ºï¼';
+         v_message := v_message||'ÍâÀ´Îñ¹¤±êÖ¾²»ÄÜÎª¿Õ£¡';
          var_flag  := 1;
        ELSE
             IF REC_TMP_PERSON.yac168 NOT IN ('0','1') THEN
-                    v_message := v_message||'å†œæ°‘å·¥æ ‡å¿—ç å€¼å‡ºé”™!';
+                    v_message := v_message||'Å©Ãñ¹¤±êÖ¾ÂëÖµ³ö´í!';
                     var_flag  := 1;
             END IF;
        END IF;
 
        IF REC_TMP_PERSON.aac030 IS NULL THEN
-         v_message := v_message||'å‚ä¿æ—¶é—´ä¸èƒ½ä¸ºç©ºï¼';
+         v_message := v_message||'²Î±£Ê±¼ä²»ÄÜÎª¿Õ£¡';
          var_flag  := 1;
        END IF;
 
        IF REC_TMP_PERSON.aac007 IS NULL THEN
-         v_message := v_message||'å‚å·¥æ—¶é—´ä¸èƒ½ä¸ºç©ºï¼';
+         v_message := v_message||'²Î¹¤Ê±¼ä²»ÄÜÎª¿Õ£¡';
          var_flag  := 1;
        END IF;
 
        IF REC_TMP_PERSON.yac503 IS NULL THEN
-         v_message := v_message||'å·¥èµ„ç±»åˆ«ä¸èƒ½ä¸ºç©ºï¼';
+         v_message := v_message||'¹¤×ÊÀà±ğ²»ÄÜÎª¿Õ£¡';
          var_flag  := 1;
        END IF;
 
        IF REC_TMP_PERSON.aac040 IS NULL THEN
-         v_message := v_message||'ç”³æŠ¥å·¥èµ„ä¸èƒ½ä¸ºç©ºï¼';
+         v_message := v_message||'Éê±¨¹¤×Ê²»ÄÜÎª¿Õ£¡';
          var_flag  := 1;
        END IF;
 
        IF REC_TMP_PERSON.aae110 IS NULL THEN
-         v_message := v_message||'ä¼ä¸šèŒå·¥å…»è€ä¿é™©ä¸èƒ½å¯¼å…¥ç©ºé¡¹ï¼';
+         v_message := v_message||'ÆóÒµÖ°¹¤ÑøÀÏ±£ÏÕ²»ÄÜµ¼Èë¿ÕÏî£¡';
          var_flag  := 1;
        ELSE
             IF REC_TMP_PERSON.aae110 <> '0' AND REC_TMP_PERSON.aae110 <> '1' THEN
-                v_message := v_message||'ä¼ä¸šèŒå·¥å…»è€ä¿é™©ç å€¼å‡ºé”™!';
+                v_message := v_message||'ÆóÒµÖ°¹¤ÑøÀÏ±£ÏÕÂëÖµ³ö´í!';
                 var_flag  := 1;
              END IF;
        END IF;
 
        IF REC_TMP_PERSON.aae120 IS NULL THEN
-         v_message := v_message||'æœºå…³äº‹ä¸šå…»è€ä¿é™©ä¸èƒ½å¯¼å…¥ç©ºé¡¹ï¼';
+         v_message := v_message||'»ú¹ØÊÂÒµÑøÀÏ±£ÏÕ²»ÄÜµ¼Èë¿ÕÏî£¡';
          var_flag  := 1;
        ELSE
             IF REC_TMP_PERSON.aae120 <> '0' AND REC_TMP_PERSON.aae120 <> '1' THEN
-                v_message := v_message||'æœºå…³äº‹ä¸šå…»è€ä¿é™©ç å€¼å‡ºé”™!';
+                v_message := v_message||'»ú¹ØÊÂÒµÑøÀÏ±£ÏÕÂëÖµ³ö´í!';
                 var_flag  := 1;
              END IF;
        END IF;
 
        IF REC_TMP_PERSON.aae210 IS NULL THEN
-         v_message := v_message||'å¤±ä¸šä¿é™©ä¸èƒ½å¯¼å…¥ç©ºé¡¹ï¼';
+         v_message := v_message||'Ê§Òµ±£ÏÕ²»ÄÜµ¼Èë¿ÕÏî£¡';
          var_flag  := 1;
        ELSE
             IF REC_TMP_PERSON.aae210 <> '0' AND REC_TMP_PERSON.aae210 <> '1' THEN
-                v_message := v_message||'å¤±ä¸šä¿é™©ç å€¼å‡ºé”™!';
+                v_message := v_message||'Ê§Òµ±£ÏÕÂëÖµ³ö´í!';
                 var_flag  := 1;
              END IF;
        END IF;
 
        IF REC_TMP_PERSON.aae310 IS NULL THEN
-         v_message := v_message||'åŸºæœ¬åŒ»ç–—ä¿é™©ä¸èƒ½å¯¼å…¥ç©ºé¡¹ï¼';
+         v_message := v_message||'»ù±¾Ò½ÁÆ±£ÏÕ²»ÄÜµ¼Èë¿ÕÏî£¡';
          var_flag  := 1;
        ELSE
             IF REC_TMP_PERSON.aae310 <> '0' AND REC_TMP_PERSON.aae310 <> '1' THEN
-                v_message := v_message||'åŸºæœ¬åŒ»ç–—ä¿é™©ç å€¼å‡ºé”™!';
+                v_message := v_message||'»ù±¾Ò½ÁÆ±£ÏÕÂëÖµ³ö´í!';
                 var_flag  := 1;
              END IF;
        END IF;
 
        IF REC_TMP_PERSON.aae410 IS NULL THEN
-         v_message := v_message||'å·¥ä¼¤ä¿é™©ä¸èƒ½å¯¼å…¥ç©ºé¡¹ï¼';
+         v_message := v_message||'¹¤ÉË±£ÏÕ²»ÄÜµ¼Èë¿ÕÏî£¡';
          var_flag  := 1;
        ELSE
             IF REC_TMP_PERSON.aae410 <> '0' AND REC_TMP_PERSON.aae410 <> '1' THEN
-                v_message := v_message||'å·¥ä¼¤ä¿é™©ç å€¼å‡ºé”™!';
+                v_message := v_message||'¹¤ÉË±£ÏÕÂëÖµ³ö´í!';
                 var_flag  := 1;
              END IF;
        END IF;
 
        IF REC_TMP_PERSON.aae510 IS NULL THEN
-         v_message := v_message||'ç”Ÿè‚²ä¿é™©ä¸èƒ½å¯¼å…¥ç©ºé¡¹ï¼';
+         v_message := v_message||'ÉúÓı±£ÏÕ²»ÄÜµ¼Èë¿ÕÏî£¡';
          var_flag  := 1;
        ELSE
             IF REC_TMP_PERSON.aae510 <> '0' AND REC_TMP_PERSON.aae510 <> '1' THEN
-                v_message := v_message||'ç”Ÿè‚²ä¿é™©ç å€¼å‡ºé”™!';
+                v_message := v_message||'ÉúÓı±£ÏÕÂëÖµ³ö´í!';
                 var_flag  := 1;
              END IF;
        END IF;
 
        IF REC_TMP_PERSON.aae311 IS NULL THEN
-         v_message := v_message||'å¤§ç—…è¡¥å……åŒ»ç–—ä¿é™©ä¸èƒ½å¯¼å…¥ç©ºé¡¹ï¼';
+         v_message := v_message||'´ó²¡²¹³äÒ½ÁÆ±£ÏÕ²»ÄÜµ¼Èë¿ÕÏî£¡';
          var_flag  := 1;
        ELSE
             IF REC_TMP_PERSON.aae311 <> '0' AND REC_TMP_PERSON.aae311 <> '1' THEN
-                v_message := v_message||'å¤§é¢è¡¥å……åŒ»ç–—ä¿é™©ç å€¼å‡ºé”™!';
+                v_message := v_message||'´ó¶î²¹³äÒ½ÁÆ±£ÏÕÂëÖµ³ö´í!';
                 var_flag  := 1;
              END IF;
        END IF;
 
       IF REC_TMP_PERSON.aae810 IS NULL THEN
-         v_message := v_message||'å…¬åŠ¡å‘˜è¡¥åŠ©ä¿é™©ä¸èƒ½å¯¼å…¥ç©ºé¡¹ï¼';
+         v_message := v_message||'¹«ÎñÔ±²¹Öú±£ÏÕ²»ÄÜµ¼Èë¿ÕÏî£¡';
          var_flag  := 1;
        ELSE
             IF REC_TMP_PERSON.aae810 <> '0' AND REC_TMP_PERSON.aae810 <> '1' THEN
-                v_message := v_message||'å…¬åŠ¡å‘˜è¡¥åŠ©ä¿é™©ç å€¼å‡ºé”™!';
+                v_message := v_message||'¹«ÎñÔ±²¹Öú±£ÏÕÂëÖµ³ö´í!';
                 var_flag  := 1;
              END IF;
        END IF;
        num_aac040 := REC_TMP_PERSON.aac040;
-        --ä¼ä¸šèŒå·¥å…»è€ä¿é™©æ ¡éªŒ
+        --ÆóÒµÖ°¹¤ÑøÀÏ±£ÏÕĞ£Ñé
        IF REC_TMP_PERSON.aae110 IS NOT NULL THEN
              SELECT COUNT(1)
                INTO n_count
@@ -5419,10 +5419,10 @@ ELSE
                     v_aae110 := '0';
              END IF;
            IF  (v_aae110 = '0' AND REC_TMP_PERSON.aae110 = '1') THEN
-             v_message := v_message||'æ‰€åœ¨å•ä½æ²¡æœ‰å‚åŠ ä¼ä¸šèŒå·¥å…»è€ä¿é™©!';
+             v_message := v_message||'ËùÔÚµ¥Î»Ã»ÓĞ²Î¼ÓÆóÒµÖ°¹¤ÑøÀÏ±£ÏÕ!';
              var_flag := 1;
            END IF;
-         
+
            IF (v_aae110 = '1' AND REC_TMP_PERSON.aae110 = '1') THEN
                SELECT ROUND(pkg_common.fun_p_getcontributionbase(null,prm_aab001,num_aac040,'0','01','1','1',prm_iaa100,prm_yab139))
                 INTO num_yac004
@@ -5436,7 +5436,7 @@ ELSE
 
        END IF;
 
-      --æœºå…³äº‹ä¸šå…»è€ä¿é™©æ ¡éªŒ
+      --»ú¹ØÊÂÒµÑøÀÏ±£ÏÕĞ£Ñé
        IF REC_TMP_PERSON.aae120 IS NOT NULL THEN
            SELECT COUNT(1)
              INTO  n_count
@@ -5455,7 +5455,7 @@ ELSE
             END IF;
 
            IF  (v_aae120 = '0' AND REC_TMP_PERSON.aae120 = '1') THEN
-             v_message := v_message||'æ‰€åœ¨å•ä½æ²¡æœ‰å‚åŠ æœºå…³äº‹ä¸šå…»è€ä¿é™©!';
+             v_message := v_message||'ËùÔÚµ¥Î»Ã»ÓĞ²Î¼Ó»ú¹ØÊÂÒµÑøÀÏ±£ÏÕ!';
              var_flag := 1;
            END IF;
            IF (v_aae120 = '1' AND REC_TMP_PERSON.aae120 = '1') THEN
@@ -5469,7 +5469,7 @@ ELSE
 
        END IF;
        /**
-       ----ä»¥ä¸€ä¸ªé™©ç§ä¸ºå‡†
+       ----ÒÔÒ»¸öÏÕÖÖÎª×¼
         SELECT aae140
           INTO var_aae140
           FROM xasi2.AB02
@@ -5477,7 +5477,7 @@ ELSE
            AND (aae140 = '02' OR aae140 = '03' OR aae140 = '04' OR aae140 = '05' )
            AND aab001 = prm_aab001
            AND ROWNUM = 1;
-       --è·å–å…¶ä»–åŸºæ•°
+       --»ñÈ¡ÆäËû»ùÊı
         SELECT ROUND(pkg_common.fun_p_getcontributionbase(null,prm_aab001,num_aac040,'0',var_aae140,'1','1',prm_iaa100,prm_yab139))
           INTO num_yac005
           FROM  dual ;
@@ -5488,7 +5488,7 @@ ELSE
            AND aac003 = REC_TMP_PERSON.aac003
            AND iaz018 = prm_iaz018;
 */
-             --è·å–å•ä½çš„ç¤¾ä¼šä¿é™©æ‰§è¡ŒåŠæ³•
+             --»ñÈ¡µ¥Î»µÄÉç»á±£ÏÕÖ´ĞĞ°ì·¨
 
       BEGIN
          SELECT  aab019
@@ -5506,12 +5506,12 @@ ELSE
               EXCEPTION
             WHEN OTHERS THEN
                prm_AppCode := Pre_Errcode||'getContributionBase01';
-               v_message  := 'å•ä½ç¼–ç :'||prm_aab001||'æ²¡æœ‰è·å–åˆ°å•ä½åŸºæœ¬ä¿¡æ¯'||SQLERRM;
+               v_message  := 'µ¥Î»±àÂë:'||prm_aab001||'Ã»ÓĞ»ñÈ¡µ½µ¥Î»»ù±¾ĞÅÏ¢'||SQLERRM;
                GOTO label_ERROR;
             END;
       END;
-   
-------åŒç¤¾è¯„ å…»è€ã€å¤±ä¸šã€å·¥ä¼¤åŒåŸºæ•°ï¼ŒåŒ»ç–—ã€ç”Ÿè‚²åŒåŸºæ•°   20190807 modify by yujj
+
+------Ë«ÉçÆÀ ÑøÀÏ¡¢Ê§Òµ¡¢¹¤ÉËÍ¬»ùÊı£¬Ò½ÁÆ¡¢ÉúÓıÍ¬»ùÊı   20190807 modify by yujj
   SELECT COUNT(1)
              INTO  n_count
              FROM xasi2.ab05
@@ -5526,7 +5526,7 @@ ELSE
            AND (aae140 = '02' OR aae140 = '03' OR aae140 = '04' OR aae140 = '05' )
            AND aab001 = prm_aab001
            AND ROWNUM = 1;
-       --è·å–å…¶ä»–åŸºæ•°
+       --»ñÈ¡ÆäËû»ùÊı
         SELECT ROUND(pkg_common.fun_p_getcontributionbase(null,prm_aab001,num_aac040,'0',var_aae140,'1','1',prm_iaa100,prm_yab139))
           INTO num_yac005
           FROM  dual ;
@@ -5536,14 +5536,14 @@ ELSE
          WHERE aac002 = REC_TMP_PERSON.aac002
            AND aac003 = REC_TMP_PERSON.aac003
            AND iaz018 = prm_iaz018;
-     
-ELSE   
-    SELECT aae030 
-    INTO  dat_AAE030 
-    FROM xasi2.aa35 
+
+ELSE
+    SELECT aae030
+    INTO  dat_AAE030
+    FROM xasi2.aa35
     WHERE aae001=2019 ;
-   IF     prm_iaa100>201812 AND  SYSDATE >dat_AAE030  THEN 
-       ----ä»¥ä¸€ä¸ªé™©ç§ä¸ºå‡†
+   IF     prm_iaa100>201812 AND  SYSDATE >dat_AAE030  THEN
+       ----ÒÔÒ»¸öÏÕÖÖÎª×¼
         SELECT aae140
           INTO var_aae140
           FROM xasi2.AB02
@@ -5551,7 +5551,7 @@ ELSE
            AND (aae140 = '02'  OR aae140 = '04'   )
            AND aab001 = prm_aab001
            AND ROWNUM = 1;
-       --è·å–å¤±ä¸šã€å·¥ä¼¤åŸºæ•°
+       --»ñÈ¡Ê§Òµ¡¢¹¤ÉË»ùÊı
         SELECT ROUND(pkg_common.fun_p_getcontributionbase(null,prm_aab001,num_aac040,'0',var_aae140,'1','1',prm_iaa100,prm_yab139))
           INTO num_yac004
           FROM  dual ;
@@ -5559,8 +5559,8 @@ ELSE
            SET yac004 = ROUND(num_yac004)
          WHERE aac002 = REC_TMP_PERSON.aac002
            AND aac003 = REC_TMP_PERSON.aac003
-           AND iaz018 = prm_iaz018; 
-       ----ä»¥åŒ»ç–—é™©ç§ä¸ºå‡†
+           AND iaz018 = prm_iaz018;
+       ----ÒÔÒ½ÁÆÏÕÖÖÎª×¼
         SELECT aae140
           INTO var_aae140
           FROM xasi2.AB02
@@ -5569,7 +5569,7 @@ ELSE
            AND aab001 = prm_aab001
            AND ROWNUM = 1;
       IF REC_TMP_PERSON.aae310 = '1' THEN
-       --è·å–å…¶ä»–åŸºæ•°
+       --»ñÈ¡ÆäËû»ùÊı
         SELECT ROUND(pkg_common.fun_p_getcontributionbase(null,prm_aab001,num_aac040,'0',var_aae140,'1','1',prm_iaa100,prm_yab139))
           INTO num_yac005
           FROM  dual ;
@@ -5592,7 +5592,7 @@ ELSE
            AND aac003 = REC_TMP_PERSON.aac003
            AND iaz018 = prm_iaz018;
    END IF;
-      --å¤±ä¸šä¿é™©æ ¡éªŒ
+      --Ê§Òµ±£ÏÕĞ£Ñé
        IF REC_TMP_PERSON.aae210 IS NOT NULL THEN
            SELECT COUNT(1)
            INTO  n_count
@@ -5611,13 +5611,13 @@ ELSE
             END IF;
 
            IF  (v_aae210 = '0' AND REC_TMP_PERSON.aae210 = '1') THEN
-             v_message := v_message||'æ‰€åœ¨å•ä½æ²¡æœ‰å‚å¤±ä¸šä¿é™©!';
+             v_message := v_message||'ËùÔÚµ¥Î»Ã»ÓĞ²ÎÊ§Òµ±£ÏÕ!';
              var_flag := 1;
            END IF;
 
        END IF;
 
-      --åŸºæœ¬åŒ»ç–—ä¿é™©æ ¡éªŒ
+      --»ù±¾Ò½ÁÆ±£ÏÕĞ£Ñé
        IF REC_TMP_PERSON.aae310 IS NOT NULL THEN
            SELECT COUNT(1)
            INTO  n_count
@@ -5636,13 +5636,13 @@ ELSE
             END IF;
 
            IF  (v_aae310 = '0' AND REC_TMP_PERSON.aae310 = '1') THEN
-             v_message := v_message||'æ‰€åœ¨å•ä½æ²¡æœ‰å‚åŠ åŸºæœ¬åŒ»ç–—ä¿é™©!';
+             v_message := v_message||'ËùÔÚµ¥Î»Ã»ÓĞ²Î¼Ó»ù±¾Ò½ÁÆ±£ÏÕ!';
              var_flag := 1;
            END IF;
 
        END IF;
 
-      --å·¥ä¼¤ä¿é™©æ ¡éªŒ
+      --¹¤ÉË±£ÏÕĞ£Ñé
        IF REC_TMP_PERSON.aae410 IS NOT NULL THEN
            SELECT COUNT(1)
            INTO  n_count
@@ -5661,13 +5661,13 @@ ELSE
             END IF;
 
            IF  (v_aae410 = '0' AND REC_TMP_PERSON.aae410 = '1') THEN
-             v_message := v_message||'æ‰€åœ¨å•ä½æ²¡æœ‰å‚åŠ æœºå·¥ä¼¤ä¿é™©!';
+             v_message := v_message||'ËùÔÚµ¥Î»Ã»ÓĞ²Î¼Ó»ú¹¤ÉË±£ÏÕ!';
              var_flag := 1;
            END IF;
 
        END IF;
 
-       --ç”Ÿè‚²ä¿é™©æ ¡éªŒ
+       --ÉúÓı±£ÏÕĞ£Ñé
        IF REC_TMP_PERSON.aae510 IS NOT NULL THEN
            SELECT COUNT(1)
            INTO  n_count
@@ -5686,13 +5686,13 @@ ELSE
             END IF;
 
            IF  (v_aae510 = '0' AND REC_TMP_PERSON.aae510 = '1') THEN
-             v_message := v_message||'æ‰€åœ¨å•ä½æ²¡æœ‰å‚åŠ ç”Ÿè‚²ä¿é™©!';
+             v_message := v_message||'ËùÔÚµ¥Î»Ã»ÓĞ²Î¼ÓÉúÓı±£ÏÕ!';
              var_flag := 1;
            END IF;
 
        END IF;
 
-      --å¤§é¢è¡¥å……åŒ»ç–—ä¿é™©æ ¡éªŒ
+      --´ó¶î²¹³äÒ½ÁÆ±£ÏÕĞ£Ñé
        IF REC_TMP_PERSON.aae311 IS NOT NULL THEN
            SELECT COUNT(1)
            INTO  n_count
@@ -5711,13 +5711,13 @@ ELSE
             END IF;
 
            IF  (v_aae311 = '0' AND REC_TMP_PERSON.aae311 = '1') THEN
-             v_message := v_message||'æ‰€åœ¨å•ä½æ²¡æœ‰å‚åŠ å¤§é¢è¡¥å……åŒ»ç–—ä¿é™©!';
+             v_message := v_message||'ËùÔÚµ¥Î»Ã»ÓĞ²Î¼Ó´ó¶î²¹³äÒ½ÁÆ±£ÏÕ!';
              var_flag := 1;
            END IF;
 
        END IF;
 
-       --å…¬åŠ¡å‘˜è¡¥åŠ©ä¿é™©æ ¡éªŒ
+       --¹«ÎñÔ±²¹Öú±£ÏÕĞ£Ñé
        IF REC_TMP_PERSON.aae810 IS NOT NULL THEN
            SELECT COUNT(1)
            INTO  n_count
@@ -5736,84 +5736,84 @@ ELSE
             END IF;
 
            IF  (v_aae810 = '0' AND REC_TMP_PERSON.aae810 = '1') THEN
-             v_message := v_message||'æ‰€åœ¨å•ä½æ²¡æœ‰å‚åŠ å…¬åŠ¡å‘˜è¡¥åŠ©ä¿é™©!';
+             v_message := v_message||'ËùÔÚµ¥Î»Ã»ÓĞ²Î¼Ó¹«ÎñÔ±²¹Öú±£ÏÕ!';
              var_flag := 1;
            END IF;
 
            IF v_aae810 = '1' AND NVL(REC_TMP_PERSON.yaa333,0) <= 0 THEN
-               v_message := v_message||'è´¦æˆ·åŸºæ•°ä¸èƒ½ä¸ºç©º!';
+               v_message := v_message||'ÕË»§»ùÊı²»ÄÜÎª¿Õ!';
               var_flag := 1;
            END IF;
 
        END IF;
 
-       --é™©ç§äº’æ–¥æ ¡éªŒ
+       --ÏÕÖÖ»¥³âĞ£Ñé
        IF REC_TMP_PERSON.aae110 = '1' AND REC_TMP_PERSON.aae120 = '1' THEN
-               v_message:= v_message||'ä¼ä¸šèŒå·¥å…»è€ä¿é™©å’Œæœºå…³å…»è€ä¿é™©ä¸èƒ½ä¸€èµ·å‚ä¿!';
+               v_message:= v_message||'ÆóÒµÖ°¹¤ÑøÀÏ±£ÏÕºÍ»ú¹ØÑøÀÏ±£ÏÕ²»ÄÜÒ»Æğ²Î±£!';
               var_flag := 1;
        END IF;
        IF REC_TMP_PERSON.aae410 = '0' AND v_aae410 = '2' THEN
-               v_message:= v_message||'å·¥ä¼¤ä¿é™©ä¸ºå¿…å‚é¡¹!';
+               v_message:= v_message||'¹¤ÉË±£ÏÕÎª±Ø²ÎÏî!';
               var_flag := 1;
        END IF;
-       /*æ ¹æ®å•ä½é™©ç§ç»‘å®šä¸ªäººå‚ä¿é™©ç§*/
-       --å•ä½å‚ä¿é™©ç§æœ‰ï¼šåŒ»ç–—ã€å¤±ä¸šã€ç”Ÿè‚²ã€å¤§é¢
+       /*¸ù¾İµ¥Î»ÏÕÖÖ°ó¶¨¸öÈË²Î±£ÏÕÖÖ*/
+       --µ¥Î»²Î±£ÏÕÖÖÓĞ£ºÒ½ÁÆ¡¢Ê§Òµ¡¢ÉúÓı¡¢´ó¶î
        IF  v_aae510 = '2' AND v_aae311 = '2' AND v_aae310 = '2' THEN
 
              IF REC_TMP_PERSON.aae310 = '1' THEN
                    IF   REC_TMP_PERSON.aae510 = '0' OR REC_TMP_PERSON.aae311 = '0' THEN
-                         v_message := v_message||'åŒ»ç–—ã€ç”Ÿè‚²ã€å¤§é¢è¡¥å……å››é™©ç§å¿…é¡»ä¸€èµ·å‚ä¿!';
+                         v_message := v_message||'Ò½ÁÆ¡¢ÉúÓı¡¢´ó¶î²¹³äËÄÏÕÖÖ±ØĞëÒ»Æğ²Î±£!';
                          var_flag  := 1;
                     END IF;
              END IF;
 /*
              IF REC_TMP_PERSON.aae210 = '1' THEN
                    IF  REC_TMP_PERSON.aae310 = '0' OR REC_TMP_PERSON.aae510 = '0' OR REC_TMP_PERSON.aae311 = '0' THEN
-                         v_message := v_message||'åŒ»ç–—ã€ç”Ÿè‚²ã€å¤§é¢è¡¥å……å››é™©ç§å¿…é¡»ä¸€èµ·å‚ä¿!';
+                         v_message := v_message||'Ò½ÁÆ¡¢ÉúÓı¡¢´ó¶î²¹³äËÄÏÕÖÖ±ØĞëÒ»Æğ²Î±£!';
                          var_flag  := 1;
                     END IF;
              END IF;
 */
              IF REC_TMP_PERSON.aae510 = '1' THEN
                    IF  REC_TMP_PERSON.aae310 = '0'  OR REC_TMP_PERSON.aae311 = '0' THEN
-                         v_message := v_message||'åŒ»ç–—ã€ç”Ÿè‚²ã€å¤§é¢è¡¥å……å››é™©ç§å¿…é¡»ä¸€èµ·å‚ä¿!';
+                         v_message := v_message||'Ò½ÁÆ¡¢ÉúÓı¡¢´ó¶î²¹³äËÄÏÕÖÖ±ØĞëÒ»Æğ²Î±£!';
                          var_flag  := 1;
                     END IF;
              END IF;
 
              IF REC_TMP_PERSON.aae311 = '1' THEN
                    IF  REC_TMP_PERSON.aae310 = '0'  OR REC_TMP_PERSON.aae510 = '0' THEN
-                         v_message := v_message||'åŒ»ç–—ã€ç”Ÿè‚²ã€å¤§é¢è¡¥å……å››é™©ç§å¿…é¡»ä¸€èµ·å‚ä¿!';
+                         v_message := v_message||'Ò½ÁÆ¡¢ÉúÓı¡¢´ó¶î²¹³äËÄÏÕÖÖ±ØĞëÒ»Æğ²Î±£!';
                          var_flag  := 1;
                     END IF;
              END IF;
 
        END IF;
-       --å•ä½å‚ä¿é™©ç§æœ‰ï¼šåŒ»ç–—ã€ç”Ÿè‚²ã€å¤§é¢
+       --µ¥Î»²Î±£ÏÕÖÖÓĞ£ºÒ½ÁÆ¡¢ÉúÓı¡¢´ó¶î
        IF v_aae510 = '2' AND v_aae311 = '2' AND v_aae310 = '2' THEN
 
              IF REC_TMP_PERSON.aae510 = '1' THEN
                    IF  REC_TMP_PERSON.aae310 = '0' OR REC_TMP_PERSON.aae311 = '0' THEN
-                         v_message := v_message||'æ²¡æœ‰å‚åŠ åŸºæœ¬åŒ»ç–—å’Œå¤§é¢è¡¥å……,ä¸èƒ½å‚åŠ ç”Ÿè‚²!';
+                         v_message := v_message||'Ã»ÓĞ²Î¼Ó»ù±¾Ò½ÁÆºÍ´ó¶î²¹³ä,²»ÄÜ²Î¼ÓÉúÓı!';
                          var_flag  := 1;
                     END IF;
              END IF;
 
              IF REC_TMP_PERSON.aae311 = '1' THEN
                    IF  REC_TMP_PERSON.aae310 = '0'  THEN
-                         v_message := v_message||'æ²¡æœ‰å‚åŠ åŸºæœ¬åŒ»ç–—ä¿é™©,ä¸èƒ½å‚åŠ å¤§é¢è¡¥å……åŒ»ç–—!';
+                         v_message := v_message||'Ã»ÓĞ²Î¼Ó»ù±¾Ò½ÁÆ±£ÏÕ,²»ÄÜ²Î¼Ó´ó¶î²¹³äÒ½ÁÆ!';
                          var_flag  := 1;
                     END IF;
              END IF;
 
        END IF;
 
-       --å•ä½å‚ä¿é™©ç§æœ‰ï¼šåŒ»ç–—ã€å¤§é¢
+       --µ¥Î»²Î±£ÏÕÖÖÓĞ£ºÒ½ÁÆ¡¢´ó¶î
        IF  v_aae311 = '2' AND v_aae310 = '2' THEN
 
              IF REC_TMP_PERSON.aae311 = '1' THEN
                    IF  REC_TMP_PERSON.aae310 = '0'  THEN
-                         v_message := v_message||'æ²¡æœ‰å‚åŠ åŸºæœ¬åŒ»ç–—ä¿é™©,ä¸èƒ½å‚åŠ å¤§é¢è¡¥å……åŒ»ç–—!';
+                         v_message := v_message||'Ã»ÓĞ²Î¼Ó»ù±¾Ò½ÁÆ±£ÏÕ,²»ÄÜ²Î¼Ó´ó¶î²¹³äÒ½ÁÆ!';
                          var_flag  := 1;
                     END IF;
              END IF;
@@ -5821,51 +5821,51 @@ ELSE
        END IF;
 
        IF REC_TMP_PERSON.aac009 = '20' AND REC_TMP_PERSON.yac168 = '0' THEN
-               v_message:= v_message||'æˆ·å£æ€§è´¨ä¸ºå†œä¸šæˆ·å£,å†œæ°‘å·¥æ ‡å¿—ä¸èƒ½ä¸ºâ€˜å¦â€™!';
+               v_message:= v_message||'»§¿ÚĞÔÖÊÎªÅ©Òµ»§¿Ú,Å©Ãñ¹¤±êÖ¾²»ÄÜÎª¡®·ñ¡¯!';
               var_flag := 1;
        END IF;
        IF REC_TMP_PERSON.aac009 <> '20' AND REC_TMP_PERSON.yac168 = '1' THEN
-               v_message:= v_message||'å†œæ°‘å·¥æ ‡å¿—ä¸ºâ€˜å¦â€™,æˆ·å£æ€§è´¨å¿…é¡»ä¸ºå†œä¸šæˆ·å£!';
+               v_message:= v_message||'Å©Ãñ¹¤±êÖ¾Îª¡®·ñ¡¯,»§¿ÚĞÔÖÊ±ØĞëÎªÅ©Òµ»§¿Ú!';
               var_flag := 1;
        END IF;
 
-            --å‚ä¿æ—¶é—´ã€å‚å·¥æ—¶é—´ã€é¦–æ¬¡å‚ä¿æ—¶é—´æ ¡éªŒ
+            --²Î±£Ê±¼ä¡¢²Î¹¤Ê±¼ä¡¢Ê×´Î²Î±£Ê±¼äĞ£Ñé
        IF REC_TMP_PERSON.aac030 IS NOT NULL THEN
           IF REC_TMP_PERSON.aac030 >  last_day(to_date(prm_iaa100,'yyyymm')) THEN
-                  v_message:= v_message||'æœ¬å•ä½å‚ä¿æ—¶é—´ä¸èƒ½æ™šäºç³»ç»Ÿæ—¶é—´!';
+                  v_message:= v_message||'±¾µ¥Î»²Î±£Ê±¼ä²»ÄÜÍíÓÚÏµÍ³Ê±¼ä!';
                   var_flag := 1;
           END IF;
        END IF;
 
       IF REC_TMP_PERSON.yac033 IS NOT NULL THEN
           IF REC_TMP_PERSON.yac033 > last_day(to_date(prm_iaa100,'yyyymm'))  THEN
-                  v_message:= v_message||'åˆæ¬¡å‚ä¿æ—¶é—´ä¸èƒ½æ™šäºç³»ç»Ÿæ—¶é—´!';
+                  v_message:= v_message||'³õ´Î²Î±£Ê±¼ä²»ÄÜÍíÓÚÏµÍ³Ê±¼ä!';
                   var_flag := 1;
           END IF;
        END IF;
 
         IF REC_TMP_PERSON.aac007 IS NOT NULL THEN
             IF REC_TMP_PERSON.aac007 > last_day(to_date(prm_iaa100,'yyyymm'))  THEN
-                  v_message:= v_message||'å‚å·¥æ—¶é—´ä¸èƒ½æ™šäºç³»ç»Ÿæ—¶é—´!';
+                  v_message:= v_message||'²Î¹¤Ê±¼ä²»ÄÜÍíÓÚÏµÍ³Ê±¼ä!';
                   var_flag := 1;
           END IF;
       END IF;
 
         IF REC_TMP_PERSON.aac007 IS NOT NULL AND REC_TMP_PERSON.aac030 IS NOT NULL THEN
             IF REC_TMP_PERSON.aac007 > REC_TMP_PERSON.aac030 THEN
-                  v_message:= v_message||'å‚å·¥æ—¶é—´ä¸èƒ½æ™šäºå‚ä¿æ—¶é—´!';
+                  v_message:= v_message||'²Î¹¤Ê±¼ä²»ÄÜÍíÓÚ²Î±£Ê±¼ä!';
                   var_flag := 1;
           END IF;
       END IF;
 
       IF REC_TMP_PERSON.aac030 IS NOT NULL THEN
           IF TO_NUMBER(TO_CHAR(REC_TMP_PERSON.aac030,'yyyyMM')) > TO_NUMBER(prm_iaa100) THEN
-                  v_message:= v_message||'æœ¬å•ä½å‚ä¿æ—¶é—´ä¸èƒ½æ™šäºç”³æŠ¥æœˆåº¦!';
+                  v_message:= v_message||'±¾µ¥Î»²Î±£Ê±¼ä²»ÄÜÍíÓÚÉê±¨ÔÂ¶È!';
                   var_flag := 1;
           END IF;
       END IF;
 
-      --æ–°å¢é‡å¤æ ¡éªŒ
+      --ĞÂÔöÖØ¸´Ğ£Ñé
         IF REC_TMP_PERSON.aac002 IS NOT NULL THEN
           SELECT COUNT(1)
             INTO n_count
@@ -5874,7 +5874,7 @@ ELSE
             AND a.aac002 = v_aac002
             AND a.iaa001 = PKG_Constant.IAA001_ADD ;
           IF n_count>0 THEN
-          v_message := v_message||'å·²ç»å­˜åœ¨äººå‘˜æ–°å‚ä¿ç”³è¯·ä¿¡æ¯,ä¸èƒ½ç»§ç»­æ–°å¢!';
+          v_message := v_message||'ÒÑ¾­´æÔÚÈËÔ±ĞÂ²Î±£ÉêÇëĞÅÏ¢,²»ÄÜ¼ÌĞøĞÂÔö!';
           var_flag  := 1;
         END IF;
       END IF;
@@ -5887,7 +5887,7 @@ ELSE
             AND a.aac002 = v_aac002
             AND a.iaa001 = PKG_Constant.IAA001_IAD ;
           IF n_count>0 THEN
-          v_message := v_message||'å·²ç»å­˜åœ¨æ‰¹é‡æ–°å‚ä¿ç”³è¯·ä¿¡æ¯,ä¸èƒ½ç»§ç»­æ–°å¢!';
+          v_message := v_message||'ÒÑ¾­´æÔÚÅúÁ¿ĞÂ²Î±£ÉêÇëĞÅÏ¢,²»ÄÜ¼ÌĞøĞÂÔö!';
           var_flag  := 1;
         END IF;
       END IF;
@@ -5900,7 +5900,7 @@ ELSE
             AND a.aac002 = v_aac002
             AND a.iaa001 = PKG_Constant.IAA001_MIN;
           IF n_count>0 THEN
-          v_message := v_message||'å·²ç»å­˜åœ¨æš‚åœç¼´è´¹ç”³è¯·ä¿¡æ¯,ä¸èƒ½ç»§ç»­æ–°å¢!';
+          v_message := v_message||'ÒÑ¾­´æÔÚÔİÍ£½É·ÑÉêÇëĞÅÏ¢,²»ÄÜ¼ÌĞøĞÂÔö!';
           var_flag  := 1;
         END IF;
       END IF;
@@ -5913,7 +5913,7 @@ ELSE
             AND a.aac002 = v_aac002
             AND a.iaa001 = PKG_Constant.IAA001_PMI;
           IF n_count>0 THEN
-          v_message := v_message||'å·²ç»å­˜åœ¨æ‰¹é‡æš‚åœç”³è¯·ä¿¡æ¯,ä¸èƒ½ç»§ç»­æ–°å¢!';
+          v_message := v_message||'ÒÑ¾­´æÔÚÅúÁ¿ÔİÍ£ÉêÇëĞÅÏ¢,²»ÄÜ¼ÌĞøĞÂÔö!';
           var_flag  := 1;
         END IF;
       END IF;
@@ -5926,11 +5926,11 @@ ELSE
             AND a.aac002 = v_aac002
             AND a.iaa001 = PKG_Constant.IAA001_RTR;
           IF n_count>0 THEN
-          v_message := v_message||'å·²ç»å­˜åœ¨åœ¨èŒè½¬é€€ä¼‘ç”³è¯·ä¿¡æ¯,ä¸èƒ½ç»§ç»­æ–°å¢!';
+          v_message := v_message||'ÒÑ¾­´æÔÚÔÚÖ°×ªÍËĞİÉêÇëĞÅÏ¢,²»ÄÜ¼ÌĞøĞÂÔö!';
           var_flag  := 1;
         END IF;
       END IF;
-      --æ ¹æ®èº«ä»½è¯å·æˆªå–å‡ºç”Ÿæ—¥æœŸ
+      --¸ù¾İÉí·İÖ¤ºÅ½ØÈ¡³öÉúÈÕÆÚ
       IF LENGTH(TRIM(v_aac002)) = 18 THEN
              SELECT to_date( substr(TRIM(v_aac002),7,8 ),'yyyy-mm-dd')
               INTO  d_aac006
@@ -5973,12 +5973,12 @@ ELSE
           AND a.aac003 = REC_TMP_PERSON.aac003;
      <<label_ERROR>>
      IF var_flag = 0 THEN
-        --æå–IRAC01A2çš„æ•°æ®åˆ°IRAC01
+        --ÌáÈ¡IRAC01A2µÄÊı¾İµ½IRAC01
         --  v_iac001 := PKG_COMMON.FUN_GETSEQUENCE(NULL,'IAC001');
          BEGIN
-          --å›å†™irac01a2 åŸå› ä¸ºæˆåŠŸ
+          --»ØĞ´irac01a2 Ô­ÒòÎª³É¹¦
              UPDATE IRAC01A2  a
-                SET  a.errormsg = 'æ•°æ®å¯ä»¥å¯¼å…¥ä¿å­˜',
+                SET  a.errormsg = 'Êı¾İ¿ÉÒÔµ¼Èë±£´æ',
                      a.aae100 = '2'
               WHERE a.iaz018 = prm_iaz018
                 AND a.aac002 = REC_TMP_PERSON.aac002
@@ -5986,7 +5986,7 @@ ELSE
 
        END;
      ELSIF var_flag = 1 THEN
-          --å›å†™irac01a2 å›å†™å¤±è´¥åŸå› 
+          --»ØĞ´irac01a2 »ØĞ´Ê§°ÜÔ­Òò
              UPDATE IRAC01A2  a
                 SET  a.errormsg = v_message,
                      a.aae100 = '0'
@@ -5998,31 +5998,31 @@ ELSE
       END LOOP;
    EXCEPTION
    WHEN OTHERS THEN
-   /*å…³é—­æ‰“å¼€çš„æ¸¸æ ‡*/
+   /*¹Ø±Õ´ò¿ªµÄÓÎ±ê*/
    ROLLBACK;
    prm_AppCode  :=  gn_def_ERR;
-   prm_ErrorMsg := 'æ•°æ®åº“é”™è¯¯:'|| SQLERRM ;
+   prm_ErrorMsg := 'Êı¾İ¿â´íÎó:'|| SQLERRM ;
    RETURN;
    END prc_batchImportView;
     /*****************************************************************************
-   ** è¿‡ç¨‹åç§° : prc_batchImport
-   ** è¿‡ç¨‹ç¼–å· ï¼š
-   ** ä¸šåŠ¡ç¯èŠ‚ ï¼š
-   ** åŠŸèƒ½æè¿° ï¼šæ‰¹é‡æ–°å‚ä¿å¯¼å…¥ä¿å­˜
+   ** ¹ı³ÌÃû³Æ : prc_batchImport
+   ** ¹ı³Ì±àºÅ £º
+   ** ÒµÎñ»·½Ú £º
+   ** ¹¦ÄÜÃèÊö £ºÅúÁ¿ĞÂ²Î±£µ¼Èë±£´æ
    ******************************************************************************
-   ** å‚æ•°æè¿° ï¼šå‚æ•°æ ‡è¯†        è¾“å…¥/è¾“å‡º         ç±»å‹                 åç§°
+   ** ²ÎÊıÃèÊö £º²ÎÊı±êÊ¶        ÊäÈë/Êä³ö         ÀàĞÍ                 Ãû³Æ
    ******************************************************************************
-   **           prm_aab001     IN     irab01.aab001%TYPE,--å•ä½ç¼–å·
-   **           prm_aae011     IN     ab08.aae011%TYPE,  --ç»åŠäººå‘˜
+   **           prm_aab001     IN     irab01.aab001%TYPE,--µ¥Î»±àºÅ
+   **           prm_aae011     IN     ab08.aae011%TYPE,  --¾­°ìÈËÔ±
    ******************************************************************************
-   ** ä½œ    è€…ï¼šyh         ä½œæˆæ—¥æœŸ ï¼š2012-09-17   ç‰ˆæœ¬ç¼–å· ï¼šVer 1.0.0
-   ** ä¿®    æ”¹ï¼š
+   ** ×÷    Õß£ºyh         ×÷³ÉÈÕÆÚ £º2012-09-17   °æ±¾±àºÅ £ºVer 1.0.0
+   ** ĞŞ    ¸Ä£º
    *****************************************************************************/
-   PROCEDURE prc_batchImport(prm_aab001     IN     irac01.aab001%TYPE,--å•ä½ç¼–å·
-                             prm_aae011     IN     ae02.aae011%TYPE,  --ç»åŠäººå‘˜
-                             prm_iaa100     IN     VARCHAR2,--ç”³æŠ¥æœˆåº¦
-                             prm_iaz018     IN     irac01a2.iaz018%TYPE,  --æ‰¹é‡å¯¼å…¥æ‰¹æ¬¡ID
-                             prm_yab139     IN     irac01.yab139%TYPE,--ç»åŠä¸­å¿ƒ
+   PROCEDURE prc_batchImport(prm_aab001     IN     irac01.aab001%TYPE,--µ¥Î»±àºÅ
+                             prm_aae011     IN     ae02.aae011%TYPE,  --¾­°ìÈËÔ±
+                             prm_iaa100     IN     VARCHAR2,--Éê±¨ÔÂ¶È
+                             prm_iaz018     IN     irac01a2.iaz018%TYPE,  --ÅúÁ¿µ¼ÈëÅú´ÎID
+                             prm_yab139     IN     irac01.yab139%TYPE,--¾­°ìÖĞĞÄ
                              prm_AppCode    OUT    VARCHAR2  ,
                              prm_ErrorMsg   OUT    VARCHAR2 )
 
@@ -6074,8 +6074,8 @@ ELSE
               aac011,
               aac021,
               aac022,
-              aac025,--å©šå§»çŠ¶å†µ
-              aac026,--æ˜¯å¦å©šå¦
+              aac025,--»éÒö×´¿ö
+              aac026,--ÊÇ·ñ»é·ñ
               aac012,
               aac013,
               aac014,
@@ -6133,60 +6133,60 @@ ELSE
                AND aae100 = '2';
 
    BEGIN
-     /*åˆå§‹åŒ–å˜é‡*/
+     /*³õÊ¼»¯±äÁ¿*/
      prm_AppCode  := PKG_Constant.GN_DEF_OK;
     prm_ErrorMsg := '';
      n_count := 0;
      v_aaz002 := PKG_COMMON.FUN_GETSEQUENCE(NULL,'AAZ002');
-     /*å‚æ•°åˆ¤ç©º*/
+     /*²ÎÊıÅĞ¿Õ*/
      IF prm_aab001 IS NULL THEN
         prm_AppCode  :=  gn_def_ERR;
-       prm_ErrorMsg := 'æ²¡æœ‰è·å–åˆ°å•ä½ç¼–å·ï¼';
+       prm_ErrorMsg := 'Ã»ÓĞ»ñÈ¡µ½µ¥Î»±àºÅ£¡';
        RETURN;
     END IF;
 
     IF prm_aae011 IS NULL THEN
         prm_AppCode  :=  gn_def_ERR;
-       prm_ErrorMsg := 'æ²¡æœ‰è·å–åˆ°ç»åŠäººå‘˜ç¼–å·ï¼';
+       prm_ErrorMsg := 'Ã»ÓĞ»ñÈ¡µ½¾­°ìÈËÔ±±àºÅ£¡';
        RETURN;
     END IF;
 
-     --åˆ¤æ–­æ˜¯å¦å­˜åœ¨è¯¥å•ä½
+     --ÅĞ¶ÏÊÇ·ñ´æÔÚ¸Ãµ¥Î»
      SELECT COUNT(1)
        into n_count
        FROM wsjb.irab01
        WHERE aab001 = prm_aab001;
     IF n_count = 0 THEN
        prm_AppCode  :=  gn_def_ERR;
-       prm_ErrorMsg := 'å•ä½ç¼–å·ä¸º['|| prm_aab001 ||']çš„å•ä½ä¿¡æ¯ä¸å­˜åœ¨!';
+       prm_ErrorMsg := 'µ¥Î»±àºÅÎª['|| prm_aab001 ||']µÄµ¥Î»ĞÅÏ¢²»´æÔÚ!';
        RETURN;
     END IF;
 
 
 
-    --åˆ¤æ–­æ˜¯å¦å­˜åœ¨è¯¥ä¸“ç®¡å‘˜
+    --ÅĞ¶ÏÊÇ·ñ´æÔÚ¸Ã×¨¹ÜÔ±
       SELECT COUNT(1)
        INTO n_count
        FROM IRAA01
        WHERE yae092 = prm_aae011;
     IF n_count = 0 THEN
        prm_AppCode  :=  gn_def_ERR;
-       prm_ErrorMsg := 'ä¸“ç®¡å‘˜ç¼–å·ä¸º['|| prm_aae011 ||']çš„ä¿¡æ¯ä¸å­˜åœ¨!';
+       prm_ErrorMsg := '×¨¹ÜÔ±±àºÅÎª['|| prm_aae011 ||']µÄĞÅÏ¢²»´æÔÚ!';
        RETURN;
     END IF;
 
-    --åˆ¤æ–­æ˜¯å¦å­˜åœ¨æ‰¹é‡å¯¼å…¥ä¿¡æ¯
+    --ÅĞ¶ÏÊÇ·ñ´æÔÚÅúÁ¿µ¼ÈëĞÅÏ¢
      SELECT COUNT(1)
        INTO n_count
        FROM IRAC01A2
       WHERE iaz018 = prm_iaz018;
     IF n_count = 0 THEN
        prm_AppCode  :=  gn_def_ERR;
-       prm_ErrorMsg := 'å¯¼å…¥æ‰¹æ¬¡IDä¸º['|| prm_iaz018 ||']çš„ä¿¡æ¯ä¸å­˜åœ¨!';
+       prm_ErrorMsg := 'µ¼ÈëÅú´ÎIDÎª['|| prm_iaz018 ||']µÄĞÅÏ¢²»´æÔÚ!';
        RETURN;
     END IF;
 
-          --æ—¥å¿—è®°å½•
+          --ÈÕÖ¾¼ÇÂ¼
     INSERT INTO AE02
            (
             AAZ002,
@@ -6211,32 +6211,32 @@ ELSE
             sysdate,
             sysdate,
             sysdate,
-            prm_aab001||'å•ä½æ‰¹é‡å¯¼å…¥'
+            prm_aab001||'µ¥Î»ÅúÁ¿µ¼Èë'
            );
 
 
-    --å¾ªç¯æ£€éªŒæå–æ•°æ®
+    --Ñ­»·¼ìÑéÌáÈ¡Êı¾İ
     FOR REC_TMP_PERSON IN impCur LOOP
-      --åˆå§‹åŒ–æ ‡å¿—ä½
+      --³õÊ¼»¯±êÖ¾Î»
        var_flag := 0;
        v_message := '';
-       /**å…»è€æ¥å£è¿”å›ä¿¡æ¯ï¼ˆå¦‚æœä¸ä¸ºç©ºåˆ™ä¸èƒ½ä¿å­˜ï¼‰**/
+       /**ÑøÀÏ½Ó¿Ú·µ»ØĞÅÏ¢£¨Èç¹û²»Îª¿ÕÔò²»ÄÜ±£´æ£©**/
        IF REC_TMP_PERSON.AAE100 = '0' THEN
        v_message := REC_TMP_PERSON.ERRORMSG;
        var_flag :=1;
        END IF;
-      /**æ£€éªŒæ•°æ®**/
-      --èº«ä»½è¯éç©ºæ ¡éªŒ
+      /**¼ìÑéÊı¾İ**/
+      --Éí·İÖ¤·Ç¿ÕĞ£Ñé
        IF REC_TMP_PERSON.aac002 IS NULL THEN
-         v_message := v_message||'èº«ä»½è¯å·ç ä¸èƒ½ä¸ºç©ºï¼';
+         v_message := v_message||'Éí·İÖ¤ºÅÂë²»ÄÜÎª¿Õ£¡';
          var_flag  := 1;
        END IF;
-      --èº«ä»½è¯ä½æ•°å¤„ç†
+      --Éí·İÖ¤Î»Êı´¦Àí
        IF LENGTH(trim(REC_TMP_PERSON.aac002)) = 18  THEN
-          xasi2.pkg_P_Comm_CZ.prc_P_getID( UPPER(REC_TMP_PERSON.aac002),   --ä¼ å…¥èº«ä»½è¯
-                                  v_aac002,   --ä¼ å‡ºèº«ä»½è¯
-                                  prm_AppCode,   --é”™è¯¯ä»£ç 
-                                  prm_ErrorMsg) ;  --é”™è¯¯å†…å®¹
+          xasi2.pkg_P_Comm_CZ.prc_P_getID( UPPER(REC_TMP_PERSON.aac002),   --´«ÈëÉí·İÖ¤
+                                  v_aac002,   --´«³öÉí·İÖ¤
+                                  prm_AppCode,   --´íÎó´úÂë
+                                  prm_ErrorMsg) ;  --´íÎóÄÚÈİ
           IF prm_AppCode <> PKG_Constant.GN_DEF_OK THEN
               v_message :=  v_message||prm_ErrorMsg;
               prm_AppCode := PKG_Constant.GN_DEF_OK;
@@ -6256,10 +6256,10 @@ ELSE
             INTO  v_aac002_l
             FROM  dual;
 --       ElSIF LENGTH(trim(REC_TMP_PERSON.aac002)) = 15 THEN
---               xasi2.pkg_P_Comm_CZ.prc_P_getID( UPPER(REC_TMP_PERSON.aac002),   --ä¼ å…¥èº«ä»½è¯
---                                       v_aac002,   --ä¼ å‡ºèº«ä»½è¯
---                                       prm_AppCode,   --é”™è¯¯ä»£ç 
---                                       prm_ErrorMsg) ;  --é”™è¯¯å†…å®¹
+--               xasi2.pkg_P_Comm_CZ.prc_P_getID( UPPER(REC_TMP_PERSON.aac002),   --´«ÈëÉí·İÖ¤
+--                                       v_aac002,   --´«³öÉí·İÖ¤
+--                                       prm_AppCode,   --´íÎó´úÂë
+--                                       prm_ErrorMsg) ;  --´íÎóÄÚÈİ
 --               IF prm_AppCode <> PKG_Constant.GN_DEF_OK THEN
 --                   v_message :=  v_message||prm_ErrorMsg;
 --                   prm_AppCode := PKG_Constant.GN_DEF_OK;
@@ -6275,23 +6275,23 @@ ELSE
 --            FROM  dual;
 --              v_aac002d := trim(REC_TMP_PERSON.aac002);
        ELSE
-             v_message := v_message||REC_TMP_PERSON.aac002||'èº«ä»½è¯ä½æ•°ä¸åˆæ³•;';
+             v_message := v_message||REC_TMP_PERSON.aac002||'Éí·İÖ¤Î»Êı²»ºÏ·¨;';
              var_flag   := 1;
        END IF;
 
-      --æ£€æŸ¥æ˜¯å¦å­˜åœ¨é‡å¤èº«ä»½å·ç 
+      --¼ì²éÊÇ·ñ´æÔÚÖØ¸´Éí·İºÅÂë
       select count(1)
         into n_count
         from IRAC01A2
        where iaz018 = prm_iaz018
          and aac002 in (v_aac002,v_aac002_l,v_aac002_u,v_aac002d);
       IF n_count > 1 THEN
-         v_message := v_message||'å¯¼å…¥æ•°æ®ä¸­èº«ä»½è¯å·ç æœ‰é‡å¤;';
+         v_message := v_message||'µ¼ÈëÊı¾İÖĞÉí·İÖ¤ºÅÂëÓĞÖØ¸´;';
          var_flag   := 1;
       END IF;
 
 
-      --18ä½èº«ä»½è¯å·æ˜¯å¦æ–°å‚ä¿æ ¡éªŒ
+      --18Î»Éí·İÖ¤ºÅÊÇ·ñĞÂ²Î±£Ğ£Ñé
       SELECT COUNT(1)
         INTO n_count
         FROM xasi2.ac01 a
@@ -6299,11 +6299,11 @@ ELSE
          AND a.aae120 = '0';
 
         IF n_count >0 THEN
-          v_message := v_message||'è¯ä»¶å·ä¸ºï¼š['||v_aac002||']çš„äººå‘˜å·²å­˜åœ¨ä¸ªäººä¿¡æ¯ï¼Œè¯·åœ¨ç»­ä¿æ¨¡å—é‡Œæ“ä½œï¼';
+          v_message := v_message||'Ö¤¼şºÅÎª£º['||v_aac002||']µÄÈËÔ±ÒÑ´æÔÚ¸öÈËĞÅÏ¢£¬ÇëÔÚĞø±£Ä£¿éÀï²Ù×÷£¡';
           var_flag  := 1;
         END IF;
 
-             --18ä½èº«ä»½è¯å·æ˜¯å¦æ–°å‚ä¿æ ¡éªŒ
+             --18Î»Éí·İÖ¤ºÅÊÇ·ñĞÂ²Î±£Ğ£Ñé
       SELECT COUNT(1)
         INTO n_count
         FROM  wsjb.irac01  a
@@ -6329,12 +6329,12 @@ ELSE
              WHERE iab001 = v_aab001
                AND rownum = 1;
         END IF;
-        v_message := v_message||'è¯¥äººå‘˜åœ¨'||v_aab004||'['||v_aab001||']æœ‰ç”³æŠ¥è®°å½•ï¼Œè¯·åœ¨ç»­ä¿æ¨¡å—é‡Œæ“ä½œï¼';
+        v_message := v_message||'¸ÃÈËÔ±ÔÚ'||v_aab004||'['||v_aab001||']ÓĞÉê±¨¼ÇÂ¼£¬ÇëÔÚĞø±£Ä£¿éÀï²Ù×÷£¡';
         var_flag  := 1;
       END IF;
 
        IF REC_TMP_PERSON.aab001 IS NULL THEN
-         v_message := v_message||'æ²¡æœ‰æ‰¾åˆ°å•ä½ç¼–å·ï¼';
+         v_message := v_message||'Ã»ÓĞÕÒµ½µ¥Î»±àºÅ£¡';
          var_flag  := 1;
        END IF;
 
@@ -6344,208 +6344,208 @@ ELSE
         FROM wsjb.irab01
        WHERE iab001 = REC_TMP_PERSON.aab001;
        IF n_count = 0 THEN
-         v_message := v_message||'æ²¡æœ‰æ‰¾åˆ°ç½‘æŠ¥å•ä½ä¿¡æ¯';
+         v_message := v_message||'Ã»ÓĞÕÒµ½Íø±¨µ¥Î»ĞÅÏ¢';
          var_flag  := 1;
        END IF;
 
 --
 --       IF REC_TMP_PERSON.aac003 IS NULL THEN
---         v_message := v_message||'å¯¼å…¥å§“åä¸èƒ½ä¸ºç©ºï¼';
+--         v_message := v_message||'µ¼ÈëĞÕÃû²»ÄÜÎª¿Õ£¡';
 --         var_flag  := 1;
 --       END IF;
 --       IF REC_TMP_PERSON.aac004 IS NOT NULL THEN
 --          IF REC_TMP_PERSON.aac004 <> '1' AND REC_TMP_PERSON.aac004 <> '2' AND REC_TMP_PERSON.aac004 <> '9' THEN
---                v_message := v_message||'æ€§åˆ«ç å€¼å‡ºé”™!';
+--                v_message := v_message||'ĞÔ±ğÂëÖµ³ö´í!';
 --                var_flag  := 1;
 --          END IF;
 --       END IF;
 --
 --       IF REC_TMP_PERSON.aac005 IS  NOT  NULL THEN
 --          IF  LENGTH(trim(REC_TMP_PERSON.aac005)) <> 2 THEN
---                v_message := v_message||'ç å€¼ç å€¼å‡ºé”™!';
+--                v_message := v_message||'ÂëÖµÂëÖµ³ö´í!';
 --                var_flag  := 1;
 --          END IF;
 --       END IF;
 --
 --       IF REC_TMP_PERSON.aac009 IS NULL THEN
---         v_message := v_message||'æˆ·å£æ€§è´¨ä¸èƒ½ä¸ºç©ºï¼';
+--         v_message := v_message||'»§¿ÚĞÔÖÊ²»ÄÜÎª¿Õ£¡';
 --         var_flag  := 1;
 --       ELSE
 --            IF REC_TMP_PERSON.aac009 <> '10' AND REC_TMP_PERSON.aac009 <> '20' AND REC_TMP_PERSON.aac009 <> '30' AND REC_TMP_PERSON.aac009 <> '40' AND REC_TMP_PERSON.aac009 <> '90' THEN
---                  v_message := v_message||'æˆ·å£æ€§è´¨ç å€¼å‡ºé”™!';
+--                  v_message := v_message||'»§¿ÚĞÔÖÊÂëÖµ³ö´í!';
 --                  var_flag  :=1;
 --            END IF;
 --       END IF;
 --
 --        IF REC_TMP_PERSON.aac010 IS NULL AND LENGTH(REC_TMP_PERSON.aac010)< 8 THEN
---         v_message := v_message||'æˆ·ç±åœ°å€ä¸èƒ½ä¸ºç©º,æˆ–å­—æ•°ä¸è¾¾8ä½ï¼';
+--         v_message := v_message||'»§¼®µØÖ·²»ÄÜÎª¿Õ,»ò×ÖÊı²»´ï8Î»£¡';
 --         var_flag  := 1;
 --       END IF;
 --
 --       IF REC_TMP_PERSON.aae006 IS NULL AND LENGTH(REC_TMP_PERSON.aae006)< 8 THEN
---         v_message := v_message||'è”ç³»åœ°å€ä¸èƒ½ä¸ºç©º,æˆ–å­—æ•°ä¸è¾¾8ä½ï¼';
+--         v_message := v_message||'ÁªÏµµØÖ·²»ÄÜÎª¿Õ,»ò×ÖÊı²»´ï8Î»£¡';
 --         var_flag  := 1;
 --       END IF;
 --
 --       IF REC_TMP_PERSON.aac011 IS NULL THEN
---         v_message := v_message||'å­¦å†ä¸èƒ½ä¸ºç©ºï¼';
+--         v_message := v_message||'Ñ§Àú²»ÄÜÎª¿Õ£¡';
 --         var_flag  := 1;
 --       ELSE
 --            IF REC_TMP_PERSON.aac011 <> '11' AND REC_TMP_PERSON.aac011 <> '12' AND REC_TMP_PERSON.aac011 <> '21'
 --               AND REC_TMP_PERSON.aac011 <> '31' AND REC_TMP_PERSON.aac011 <> '40' AND REC_TMP_PERSON.aac011 <> '50'
 --               AND REC_TMP_PERSON.aac011 <> '61' AND REC_TMP_PERSON.aac011 <> '62' AND REC_TMP_PERSON.aac011 <> '70'
 --               AND REC_TMP_PERSON.aac011 <> '80' AND REC_TMP_PERSON.aac011 <> '90' AND REC_TMP_PERSON.aac011 <> '99' THEN
---                  v_message := v_message||'å­¦å†ç å€¼å‡ºé”™!';
+--                  v_message := v_message||'Ñ§ÀúÂëÖµ³ö´í!';
 --                  var_flag  :=1;
 --            END IF;
 --       END IF;
 --
 --       IF REC_TMP_PERSON.aac021 IS NULL THEN
---         v_message := v_message||'æ¯•ä¸šæ—¶é—´ä¸èƒ½ä¸ºç©ºï¼';
+--         v_message := v_message||'±ÏÒµÊ±¼ä²»ÄÜÎª¿Õ£¡';
 --         var_flag  := 1;
 --       END IF;
 --
 --       IF REC_TMP_PERSON.aac022 IS NULL THEN
---         v_message := v_message||'æ¯•ä¸šé™¢æ ¡ä¸èƒ½ä¸ºç©ºï¼';
+--         v_message := v_message||'±ÏÒµÔºĞ£²»ÄÜÎª¿Õ£¡';
 --         var_flag  := 1;
 --       END IF;
 --
 --       IF REC_TMP_PERSON.aac025 IS NULL THEN
---         v_message := v_message||'å©šå§»çŠ¶å†µä¸èƒ½ä¸ºç©ºï¼';
+--         v_message := v_message||'»éÒö×´¿ö²»ÄÜÎª¿Õ£¡';
 --         var_flag  := 1;
 --         ELSE
 --            IF REC_TMP_PERSON.aac025 <> '1' AND REC_TMP_PERSON.aac025 <> '2' AND REC_TMP_PERSON.aac025 <> '3'
 --               AND REC_TMP_PERSON.aac025 <> '4' AND REC_TMP_PERSON.aac025 <> '9' THEN
---                  v_message := v_message||'å©šå§»çŠ¶å†µç å€¼å‡ºé”™!';
+--                  v_message := v_message||'»éÒö×´¿öÂëÖµ³ö´í!';
 --                  var_flag  :=1;
 --            END IF;
 --       END IF;
 --
 --       IF REC_TMP_PERSON.aac026 IS NULL THEN
---         v_message := v_message||'æ˜¯å¦æœå½¹ä¸èƒ½ä¸ºç©ºï¼';
+--         v_message := v_message||'ÊÇ·ñ·şÒÛ²»ÄÜÎª¿Õ£¡';
 --         var_flag  := 1;
 --         ELSE
 --            IF REC_TMP_PERSON.aac026 <> '0' AND REC_TMP_PERSON.aac026 <> '1' THEN
---                   v_message := v_message||'æ˜¯å¦æœå½¹ç å€¼å‡ºé”™!';
+--                   v_message := v_message||'ÊÇ·ñ·şÒÛÂëÖµ³ö´í!';
 --                  var_flag  :=1;
 --            END IF;
 --       END IF;
 --
 --       IF REC_TMP_PERSON.aac012 IS NULL THEN
---         v_message := v_message||'ä¸ªäººèº«ä»½ä¸èƒ½ä¸ºç©ºï¼';
+--         v_message := v_message||'¸öÈËÉí·İ²»ÄÜÎª¿Õ£¡';
 --         var_flag  := 1;
 --         ELSE
 --            IF REC_TMP_PERSON.aac012 <> '1' AND REC_TMP_PERSON.aac012 <> '4' THEN
---                   v_message := v_message||'ä¸ªäººèº«ä»½ç å€¼å‡ºé”™!';
+--                   v_message := v_message||'¸öÈËÉí·İÂëÖµ³ö´í!';
 --                  var_flag  :=1;
 --            END IF;
 --       END IF;
 --
 --       IF REC_TMP_PERSON.yac168 IS NULL THEN
---         v_message := v_message||'å¤–æ¥åŠ¡å·¥æ ‡å¿—ä¸èƒ½ä¸ºç©ºï¼';
+--         v_message := v_message||'ÍâÀ´Îñ¹¤±êÖ¾²»ÄÜÎª¿Õ£¡';
 --         var_flag  := 1;
 --       ELSE
 --            IF REC_TMP_PERSON.yac168 <> '0' AND REC_TMP_PERSON.yac168 <> '1' THEN
---                    v_message := v_message||'å†œæ°‘å·¥æ ‡å¿—ç å€¼å‡ºé”™!';
+--                    v_message := v_message||'Å©Ãñ¹¤±êÖ¾ÂëÖµ³ö´í!';
 --                    var_flag  := 1;
 --            END IF;
 --       END IF;
 --
 --       IF REC_TMP_PERSON.aac030 IS NULL THEN
---         v_message := v_message||'å‚ä¿æ—¶é—´ä¸èƒ½ä¸ºç©ºï¼';
+--         v_message := v_message||'²Î±£Ê±¼ä²»ÄÜÎª¿Õ£¡';
 --         var_flag  := 1;
 --       END IF;
 --
 --       IF REC_TMP_PERSON.yac503 IS NULL THEN
---         v_message := v_message||'å·¥èµ„ç±»åˆ«ä¸èƒ½ä¸ºç©ºï¼';
+--         v_message := v_message||'¹¤×ÊÀà±ğ²»ÄÜÎª¿Õ£¡';
 --         var_flag  := 1;
 --       END IF;
 --
 --       IF REC_TMP_PERSON.aac040 IS NULL THEN
---         v_message := v_message||'ç”³æŠ¥å·¥èµ„ä¸èƒ½ä¸ºç©ºï¼';
+--         v_message := v_message||'Éê±¨¹¤×Ê²»ÄÜÎª¿Õ£¡';
 --         var_flag  := 1;
 --       END IF;
 --
 --       IF REC_TMP_PERSON.aae110 IS NULL THEN
---         v_message := v_message||'ä¼ä¸šèŒå·¥å…»è€ä¿é™©ä¸èƒ½å¯¼å…¥ç©ºé¡¹ï¼';
+--         v_message := v_message||'ÆóÒµÖ°¹¤ÑøÀÏ±£ÏÕ²»ÄÜµ¼Èë¿ÕÏî£¡';
 --         var_flag  := 1;
 --       ELSE
 --            IF REC_TMP_PERSON.aae110 <> '0' AND REC_TMP_PERSON.aae110 <> '1' THEN
---                v_message := v_message||'ä¼ä¸šèŒå·¥å…»è€ä¿é™©ç å€¼å‡ºé”™!';
+--                v_message := v_message||'ÆóÒµÖ°¹¤ÑøÀÏ±£ÏÕÂëÖµ³ö´í!';
 --                var_flag  := 1;
 --             END IF;
 --       END IF;
 --
 --       IF REC_TMP_PERSON.aae120 IS NULL THEN
---         v_message := v_message||'æœºå…³äº‹ä¸šå…»è€ä¿é™©ä¸èƒ½å¯¼å…¥ç©ºé¡¹ï¼';
+--         v_message := v_message||'»ú¹ØÊÂÒµÑøÀÏ±£ÏÕ²»ÄÜµ¼Èë¿ÕÏî£¡';
 --         var_flag  := 1;
 --       ELSE
 --            IF REC_TMP_PERSON.aae120 <> '0' AND REC_TMP_PERSON.aae120 <> '1' THEN
---                v_message := v_message||'æœºå…³äº‹ä¸šå…»è€ä¿é™©ç å€¼å‡ºé”™!';
+--                v_message := v_message||'»ú¹ØÊÂÒµÑøÀÏ±£ÏÕÂëÖµ³ö´í!';
 --                var_flag  := 1;
 --             END IF;
 --       END IF;
 --
 --       IF REC_TMP_PERSON.aae210 IS NULL THEN
---         v_message := v_message||'å¤±ä¸šä¿é™©ä¸èƒ½å¯¼å…¥ç©ºé¡¹ï¼';
+--         v_message := v_message||'Ê§Òµ±£ÏÕ²»ÄÜµ¼Èë¿ÕÏî£¡';
 --         var_flag  := 1;
 --       ELSE
 --            IF REC_TMP_PERSON.aae210 <> '0' AND REC_TMP_PERSON.aae210 <> '1' THEN
---                v_message := v_message||'å¤±ä¸šä¿é™©ç å€¼å‡ºé”™!';
+--                v_message := v_message||'Ê§Òµ±£ÏÕÂëÖµ³ö´í!';
 --                var_flag  := 1;
 --             END IF;
 --       END IF;
 --
 --       IF REC_TMP_PERSON.aae310 IS NULL THEN
---         v_message := v_message||'åŸºæœ¬åŒ»ç–—ä¿é™©ä¸èƒ½å¯¼å…¥ç©ºé¡¹ï¼';
+--         v_message := v_message||'»ù±¾Ò½ÁÆ±£ÏÕ²»ÄÜµ¼Èë¿ÕÏî£¡';
 --         var_flag  := 1;
 --       ELSE
 --            IF REC_TMP_PERSON.aae310 <> '0' AND REC_TMP_PERSON.aae310 <> '1' THEN
---                v_message := v_message||'åŸºæœ¬åŒ»ç–—ä¿é™©ç å€¼å‡ºé”™!';
+--                v_message := v_message||'»ù±¾Ò½ÁÆ±£ÏÕÂëÖµ³ö´í!';
 --                var_flag  := 1;
 --             END IF;
 --       END IF;
 --
 --       IF REC_TMP_PERSON.aae410 IS NULL THEN
---         v_message := v_message||'å·¥ä¼¤ä¿é™©ä¸èƒ½å¯¼å…¥ç©ºé¡¹ï¼';
+--         v_message := v_message||'¹¤ÉË±£ÏÕ²»ÄÜµ¼Èë¿ÕÏî£¡';
 --         var_flag  := 1;
 --       ELSE
 --            IF REC_TMP_PERSON.aae410 <> '0' AND REC_TMP_PERSON.aae410 <> '1' THEN
---                v_message := v_message||'å·¥ä¼¤ä¿é™©ç å€¼å‡ºé”™!';
+--                v_message := v_message||'¹¤ÉË±£ÏÕÂëÖµ³ö´í!';
 --                var_flag  := 1;
 --             END IF;
 --       END IF;
 --
 --       IF REC_TMP_PERSON.aae510 IS NULL THEN
---         v_message := v_message||'ç”Ÿè‚²ä¿é™©ä¸èƒ½å¯¼å…¥ç©ºé¡¹ï¼';
+--         v_message := v_message||'ÉúÓı±£ÏÕ²»ÄÜµ¼Èë¿ÕÏî£¡';
 --         var_flag  := 1;
 --       ELSE
 --            IF REC_TMP_PERSON.aae510 <> '0' AND REC_TMP_PERSON.aae510 <> '1' THEN
---                v_message := v_message||'ç”Ÿè‚²ä¿é™©ç å€¼å‡ºé”™!';
+--                v_message := v_message||'ÉúÓı±£ÏÕÂëÖµ³ö´í!';
 --                var_flag  := 1;
 --             END IF;
 --       END IF;
 --
 --       IF REC_TMP_PERSON.aae311 IS NULL THEN
---         v_message := v_message||'å¤§ç—…è¡¥å……åŒ»ç–—ä¿é™©ä¸èƒ½å¯¼å…¥ç©ºé¡¹ï¼';
+--         v_message := v_message||'´ó²¡²¹³äÒ½ÁÆ±£ÏÕ²»ÄÜµ¼Èë¿ÕÏî£¡';
 --         var_flag  := 1;
 --       ELSE
 --            IF REC_TMP_PERSON.aae311 <> '0' AND REC_TMP_PERSON.aae311 <> '1' THEN
---                v_message := v_message||'å¤§é¢è¡¥å……åŒ»ç–—ä¿é™©ç å€¼å‡ºé”™!';
+--                v_message := v_message||'´ó¶î²¹³äÒ½ÁÆ±£ÏÕÂëÖµ³ö´í!';
 --                var_flag  := 1;
 --             END IF;
 --       END IF;
 --
 --       IF REC_TMP_PERSON.aae810 IS NULL THEN
---         v_message := v_message||'å…¬åŠ¡å‘˜è¡¥åŠ©ä¿é™©ä¸èƒ½å¯¼å…¥ç©ºé¡¹ï¼';
+--         v_message := v_message||'¹«ÎñÔ±²¹Öú±£ÏÕ²»ÄÜµ¼Èë¿ÕÏî£¡';
 --         var_flag  := 1;
 --       ELSE
 --            IF REC_TMP_PERSON.aae810 <> '0' AND REC_TMP_PERSON.aae810 <> '1' THEN
---                v_message := v_message||'å…¬åŠ¡å‘˜è¡¥åŠ©ä¿é™©ç å€¼å‡ºé”™!';
+--                v_message := v_message||'¹«ÎñÔ±²¹Öú±£ÏÕÂëÖµ³ö´í!';
 --                var_flag  := 1;
 --             END IF;
 --       END IF;
---        --ä¼ä¸šèŒå·¥å…»è€ä¿é™©æ ¡éªŒ
+--        --ÆóÒµÖ°¹¤ÑøÀÏ±£ÏÕĞ£Ñé
 --       IF REC_TMP_PERSON.aae110 IS NOT NULL THEN
 --               SELECT COUNT(1)
 --               INTO n_count
@@ -6564,12 +6564,12 @@ ELSE
 --                    v_aae110 := '0';
 --                END IF;
 --           IF  (v_aae110 = '0' AND REC_TMP_PERSON.aae110 = '1') THEN
---             v_message := v_message||'æ‰€åœ¨å•ä½æ²¡æœ‰å‚åŠ ä¼ä¸šèŒå·¥å…»è€ä¿é™©!';
+--             v_message := v_message||'ËùÔÚµ¥Î»Ã»ÓĞ²Î¼ÓÆóÒµÖ°¹¤ÑøÀÏ±£ÏÕ!';
 --             var_flag := 1;
 --           END IF;
 --       END IF;
 --
---      --æœºå…³äº‹ä¸šå…»è€ä¿é™©æ ¡éªŒ
+--      --»ú¹ØÊÂÒµÑøÀÏ±£ÏÕĞ£Ñé
 --       IF REC_TMP_PERSON.aae120 IS NOT NULL THEN
 --           SELECT COUNT(1)
 --           INTO  n_count
@@ -6588,13 +6588,13 @@ ELSE
 --            END IF;
 --
 --           IF  (v_aae120 = '0' AND REC_TMP_PERSON.aae120 = '1') THEN
---             v_message := v_message||'æ‰€åœ¨å•ä½æ²¡æœ‰å‚åŠ æœºå…³äº‹ä¸šå…»è€ä¿é™©!';
+--             v_message := v_message||'ËùÔÚµ¥Î»Ã»ÓĞ²Î¼Ó»ú¹ØÊÂÒµÑøÀÏ±£ÏÕ!';
 --             var_flag := 1;
 --           END IF;
 --
 --       END IF;
 --
---      --å¤±ä¸šä¿é™©æ ¡éªŒ
+--      --Ê§Òµ±£ÏÕĞ£Ñé
 --       IF REC_TMP_PERSON.aae210 IS NOT NULL THEN
 --           SELECT COUNT(1)
 --           INTO  n_count
@@ -6613,13 +6613,13 @@ ELSE
 --            END IF;
 --
 --           IF  (v_aae210 = '0' AND REC_TMP_PERSON.aae210 = '1') THEN
---             v_message := v_message||'æ‰€åœ¨å•ä½æ²¡æœ‰å‚å¤±ä¸šä¿é™©!';
+--             v_message := v_message||'ËùÔÚµ¥Î»Ã»ÓĞ²ÎÊ§Òµ±£ÏÕ!';
 --             var_flag := 1;
 --           END IF;
 --
 --       END IF;
 --
---      --åŸºæœ¬åŒ»ç–—ä¿é™©æ ¡éªŒ
+--      --»ù±¾Ò½ÁÆ±£ÏÕĞ£Ñé
 --       IF REC_TMP_PERSON.aae310 IS NOT NULL THEN
 --           SELECT COUNT(1)
 --           INTO  n_count
@@ -6638,13 +6638,13 @@ ELSE
 --            END IF;
 --
 --           IF  (v_aae310 = '0' AND REC_TMP_PERSON.aae310 = '1') THEN
---             v_message := v_message||'æ‰€åœ¨å•ä½æ²¡æœ‰å‚åŠ åŸºæœ¬åŒ»ç–—ä¿é™©!';
+--             v_message := v_message||'ËùÔÚµ¥Î»Ã»ÓĞ²Î¼Ó»ù±¾Ò½ÁÆ±£ÏÕ!';
 --             var_flag := 1;
 --           END IF;
 --
 --       END IF;
 --
---      --å·¥ä¼¤ä¿é™©æ ¡éªŒ
+--      --¹¤ÉË±£ÏÕĞ£Ñé
 --       IF REC_TMP_PERSON.aae410 IS NOT NULL THEN
 --           SELECT COUNT(1)
 --           INTO  n_count
@@ -6663,13 +6663,13 @@ ELSE
 --            END IF;
 --
 --           IF  (v_aae410 = '0' AND REC_TMP_PERSON.aae410 = '1') THEN
---             v_message := v_message||'æ‰€åœ¨å•ä½æ²¡æœ‰å‚åŠ æœºå·¥ä¼¤ä¿é™©!';
+--             v_message := v_message||'ËùÔÚµ¥Î»Ã»ÓĞ²Î¼Ó»ú¹¤ÉË±£ÏÕ!';
 --             var_flag := 1;
 --           END IF;
 --
 --       END IF;
 --
---       --ç”Ÿè‚²ä¿é™©æ ¡éªŒ
+--       --ÉúÓı±£ÏÕĞ£Ñé
 --       IF REC_TMP_PERSON.aae510 IS NOT NULL THEN
 --           SELECT COUNT(1)
 --           INTO  n_count
@@ -6688,13 +6688,13 @@ ELSE
 --            END IF;
 --
 --           IF  (v_aae510 = '0' AND REC_TMP_PERSON.aae510 = '1') THEN
---             v_message := v_message||'æ‰€åœ¨å•ä½æ²¡æœ‰å‚åŠ ç”Ÿè‚²ä¿é™©!';
+--             v_message := v_message||'ËùÔÚµ¥Î»Ã»ÓĞ²Î¼ÓÉúÓı±£ÏÕ!';
 --             var_flag := 1;
 --           END IF;
 --
 --       END IF;
 --
---      --å¤§é¢è¡¥å……åŒ»ç–—ä¿é™©æ ¡éªŒ
+--      --´ó¶î²¹³äÒ½ÁÆ±£ÏÕĞ£Ñé
 --       IF REC_TMP_PERSON.aae311 IS NOT NULL THEN
 --           SELECT COUNT(1)
 --           INTO  n_count
@@ -6713,13 +6713,13 @@ ELSE
 --            END IF;
 --
 --           IF  (v_aae311 = '0' AND REC_TMP_PERSON.aae311 = '1') THEN
---             v_message := v_message||'æ‰€åœ¨å•ä½æ²¡æœ‰å‚åŠ å¤§é¢è¡¥å……åŒ»ç–—ä¿é™©!';
+--             v_message := v_message||'ËùÔÚµ¥Î»Ã»ÓĞ²Î¼Ó´ó¶î²¹³äÒ½ÁÆ±£ÏÕ!';
 --             var_flag := 1;
 --           END IF;
 --
 --       END IF;
 --
---       --å…¬åŠ¡å‘˜è¡¥åŠ©ä¿é™©æ ¡éªŒ
+--       --¹«ÎñÔ±²¹Öú±£ÏÕĞ£Ñé
 --       IF REC_TMP_PERSON.aae810 IS NOT NULL THEN
 --           SELECT COUNT(1)
 --           INTO  n_count
@@ -6738,79 +6738,79 @@ ELSE
 --            END IF;
 --
 --           IF  (v_aae810 = '0' AND REC_TMP_PERSON.aae810 = '1') THEN
---             v_message := v_message||'æ‰€åœ¨å•ä½æ²¡æœ‰å‚åŠ å…¬åŠ¡å‘˜è¡¥åŠ©ä¿é™©!';
+--             v_message := v_message||'ËùÔÚµ¥Î»Ã»ÓĞ²Î¼Ó¹«ÎñÔ±²¹Öú±£ÏÕ!';
 --             var_flag := 1;
 --           END IF;
 --
 --       END IF;
 --
---       --é™©ç§äº’æ–¥æ ¡éªŒ
+--       --ÏÕÖÖ»¥³âĞ£Ñé
 --       IF REC_TMP_PERSON.aae110 = '1' AND REC_TMP_PERSON.aae120 = '1' THEN
---               v_message:= v_message||'ä¼ä¸šèŒå·¥å…»è€ä¿é™©å’Œæœºå…³å…»è€ä¿é™©ä¸èƒ½ä¸€èµ·å‚ä¿!';
+--               v_message:= v_message||'ÆóÒµÖ°¹¤ÑøÀÏ±£ÏÕºÍ»ú¹ØÑøÀÏ±£ÏÕ²»ÄÜÒ»Æğ²Î±£!';
 --              var_flag := 1;
 --       END IF;
 --       IF REC_TMP_PERSON.aae410 = '0' AND v_aae410 = '2' THEN
---               v_message:= v_message||'å·¥ä¼¤ä¿é™©ä¸ºå¿…å‚é¡¹!';
+--               v_message:= v_message||'¹¤ÉË±£ÏÕÎª±Ø²ÎÏî!';
 --              var_flag := 1;
 --       END IF;
---       /*æ ¹æ®å•ä½é™©ç§ç»‘å®šä¸ªäººå‚ä¿é™©ç§*/
---       --å•ä½å‚ä¿é™©ç§æœ‰ï¼šåŒ»ç–—ã€å¤±ä¸šã€ç”Ÿè‚²ã€å¤§é¢
+--       /*¸ù¾İµ¥Î»ÏÕÖÖ°ó¶¨¸öÈË²Î±£ÏÕÖÖ*/
+--       --µ¥Î»²Î±£ÏÕÖÖÓĞ£ºÒ½ÁÆ¡¢Ê§Òµ¡¢ÉúÓı¡¢´ó¶î
 --       IF v_aae210 = '2' AND v_aae510 = '2' AND v_aae311 = '2' AND v_aae310 = '2' THEN
 --
 --             IF REC_TMP_PERSON.aae310 = '1' THEN
 --                   IF  REC_TMP_PERSON.aae210 = '0' OR REC_TMP_PERSON.aae510 = '0' OR REC_TMP_PERSON.aae311 = '0' THEN
---                         v_message := v_message||'åŒ»ç–—ã€å¤±ä¸šã€ç”Ÿè‚²ã€å¤§é¢è¡¥å……å››é™©ç§å¿…é¡»ä¸€èµ·å‚ä¿!';
+--                         v_message := v_message||'Ò½ÁÆ¡¢Ê§Òµ¡¢ÉúÓı¡¢´ó¶î²¹³äËÄÏÕÖÖ±ØĞëÒ»Æğ²Î±£!';
 --                         var_flag  := 1;
 --                    END IF;
 --             END IF;
 --
 --             IF REC_TMP_PERSON.aae210 = '1' THEN
 --                   IF  REC_TMP_PERSON.aae310 = '0' OR REC_TMP_PERSON.aae510 = '0' OR REC_TMP_PERSON.aae311 = '0' THEN
---                         v_message := v_message||'åŒ»ç–—ã€å¤±ä¸šã€ç”Ÿè‚²ã€å¤§é¢è¡¥å……å››é™©ç§å¿…é¡»ä¸€èµ·å‚ä¿!';
+--                         v_message := v_message||'Ò½ÁÆ¡¢Ê§Òµ¡¢ÉúÓı¡¢´ó¶î²¹³äËÄÏÕÖÖ±ØĞëÒ»Æğ²Î±£!';
 --                         var_flag  := 1;
 --                    END IF;
 --             END IF;
 --
 --             IF REC_TMP_PERSON.aae510 = '1' THEN
 --                   IF  REC_TMP_PERSON.aae310 = '0' OR REC_TMP_PERSON.aae210 = '0' OR REC_TMP_PERSON.aae311 = '0' THEN
---                         v_message := v_message||'åŒ»ç–—ã€å¤±ä¸šã€ç”Ÿè‚²ã€å¤§é¢è¡¥å……å››é™©ç§å¿…é¡»ä¸€èµ·å‚ä¿!';
+--                         v_message := v_message||'Ò½ÁÆ¡¢Ê§Òµ¡¢ÉúÓı¡¢´ó¶î²¹³äËÄÏÕÖÖ±ØĞëÒ»Æğ²Î±£!';
 --                         var_flag  := 1;
 --                    END IF;
 --             END IF;
 --
 --             IF REC_TMP_PERSON.aae311 = '1' THEN
 --                   IF  REC_TMP_PERSON.aae310 = '0' OR REC_TMP_PERSON.aae210 = '0' OR REC_TMP_PERSON.aae510 = '0' THEN
---                         v_message := v_message||'åŒ»ç–—ã€å¤±ä¸šã€ç”Ÿè‚²ã€å¤§é¢è¡¥å……å››é™©ç§å¿…é¡»ä¸€èµ·å‚ä¿!';
+--                         v_message := v_message||'Ò½ÁÆ¡¢Ê§Òµ¡¢ÉúÓı¡¢´ó¶î²¹³äËÄÏÕÖÖ±ØĞëÒ»Æğ²Î±£!';
 --                         var_flag  := 1;
 --                    END IF;
 --             END IF;
 --
 --       END IF;
---       --å•ä½å‚ä¿é™©ç§æœ‰ï¼šåŒ»ç–—ã€ç”Ÿè‚²ã€å¤§é¢
+--       --µ¥Î»²Î±£ÏÕÖÖÓĞ£ºÒ½ÁÆ¡¢ÉúÓı¡¢´ó¶î
 --       IF v_aae510 = '2' AND v_aae311 = '2' AND v_aae310 = '2' THEN
 --
 --             IF REC_TMP_PERSON.aae510 = '1' THEN
 --                   IF  REC_TMP_PERSON.aae310 = '0' OR REC_TMP_PERSON.aae311 = '0' THEN
---                         v_message := v_message||'æ²¡æœ‰å‚åŠ åŸºæœ¬åŒ»ç–—å’Œå¤§é¢è¡¥å……,ä¸èƒ½å‚åŠ ç”Ÿè‚²!';
+--                         v_message := v_message||'Ã»ÓĞ²Î¼Ó»ù±¾Ò½ÁÆºÍ´ó¶î²¹³ä,²»ÄÜ²Î¼ÓÉúÓı!';
 --                         var_flag  := 1;
 --                    END IF;
 --             END IF;
 --
 --             IF REC_TMP_PERSON.aae311 = '1' THEN
 --                   IF  REC_TMP_PERSON.aae310 = '0'  THEN
---                         v_message := v_message||'æ²¡æœ‰å‚åŠ åŸºæœ¬åŒ»ç–—ä¿é™©,ä¸èƒ½å‚åŠ å¤§é¢è¡¥å……åŒ»ç–—!';
+--                         v_message := v_message||'Ã»ÓĞ²Î¼Ó»ù±¾Ò½ÁÆ±£ÏÕ,²»ÄÜ²Î¼Ó´ó¶î²¹³äÒ½ÁÆ!';
 --                         var_flag  := 1;
 --                    END IF;
 --             END IF;
 --
 --       END IF;
 --
---       --å•ä½å‚ä¿é™©ç§æœ‰ï¼šåŒ»ç–—ã€å¤§é¢
+--       --µ¥Î»²Î±£ÏÕÖÖÓĞ£ºÒ½ÁÆ¡¢´ó¶î
 --       IF  v_aae311 = '2' AND v_aae310 = '2' THEN
 --
 --             IF REC_TMP_PERSON.aae311 = '1' THEN
 --                   IF  REC_TMP_PERSON.aae310 = '0'  THEN
---                         v_message := v_message||'æ²¡æœ‰å‚åŠ åŸºæœ¬åŒ»ç–—ä¿é™©,ä¸èƒ½å‚åŠ å¤§é¢è¡¥å……åŒ»ç–—!';
+--                         v_message := v_message||'Ã»ÓĞ²Î¼Ó»ù±¾Ò½ÁÆ±£ÏÕ,²»ÄÜ²Î¼Ó´ó¶î²¹³äÒ½ÁÆ!';
 --                         var_flag  := 1;
 --                    END IF;
 --             END IF;
@@ -6818,44 +6818,44 @@ ELSE
 --       END IF;
 --
 --       IF REC_TMP_PERSON.aac009 = '20' AND REC_TMP_PERSON.yac168 = '0' THEN
---               v_message:= v_message||'æˆ·å£æ€§è´¨ä¸ºå†œä¸šæˆ·å£,å†œæ°‘å·¥æ ‡å¿—ä¸èƒ½ä¸ºâ€˜å¦â€™!';
+--               v_message:= v_message||'»§¿ÚĞÔÖÊÎªÅ©Òµ»§¿Ú,Å©Ãñ¹¤±êÖ¾²»ÄÜÎª¡®·ñ¡¯!';
 --              var_flag := 1;
 --       END IF;
 --       IF REC_TMP_PERSON.aac009 <> '20' AND REC_TMP_PERSON.yac168 = '1' THEN
---               v_message:= v_message||'å†œæ°‘å·¥æ ‡å¿—ä¸ºâ€˜å¦â€™,æˆ·å£æ€§è´¨å¿…é¡»ä¸ºå†œä¸šæˆ·å£!';
+--               v_message:= v_message||'Å©Ãñ¹¤±êÖ¾Îª¡®·ñ¡¯,»§¿ÚĞÔÖÊ±ØĞëÎªÅ©Òµ»§¿Ú!';
 --              var_flag := 1;
 --       END IF;
 --
---          --å‚ä¿æ—¶é—´ã€å‚å·¥æ—¶é—´ã€é¦–æ¬¡å‚ä¿æ—¶é—´æ ¡éªŒ
+--          --²Î±£Ê±¼ä¡¢²Î¹¤Ê±¼ä¡¢Ê×´Î²Î±£Ê±¼äĞ£Ñé
 --       IF REC_TMP_PERSON.aac030 IS NOT NULL THEN
 --            IF REC_TMP_PERSON.aac030 > sysdate THEN
---                  v_message:= v_message||'æœ¬å•ä½å‚ä¿æ—¶é—´ä¸èƒ½æ™šäºç³»ç»Ÿæ—¶é—´!';
+--                  v_message:= v_message||'±¾µ¥Î»²Î±£Ê±¼ä²»ÄÜÍíÓÚÏµÍ³Ê±¼ä!';
 --                  var_flag := 1;
 --          END IF;
 --       END IF;
 --
 --      IF REC_TMP_PERSON.yac033 IS NOT NULL THEN
 --            IF REC_TMP_PERSON.yac033 > sysdate THEN
---                  v_message:= v_message||'æœ¬å•ä½å‚ä¿æ—¶é—´ä¸èƒ½æ™šäºç³»ç»Ÿæ—¶é—´!';
+--                  v_message:= v_message||'±¾µ¥Î»²Î±£Ê±¼ä²»ÄÜÍíÓÚÏµÍ³Ê±¼ä!';
 --                  var_flag := 1;
 --          END IF;
 --       END IF;
 --
 --        IF REC_TMP_PERSON.aac007 IS NOT NULL THEN
 --            IF REC_TMP_PERSON.aac007 > sysdate THEN
---                  v_message:= v_message||'å‚å·¥æ—¶é—´ä¸èƒ½æ™šäºç³»ç»Ÿæ—¶é—´!';
+--                  v_message:= v_message||'²Î¹¤Ê±¼ä²»ÄÜÍíÓÚÏµÍ³Ê±¼ä!';
 --                  var_flag := 1;
 --          END IF;
 --      END IF;
 --
 --        IF REC_TMP_PERSON.aac007 IS NOT NULL AND REC_TMP_PERSON.aac030 IS NOT NULL THEN
 --            IF REC_TMP_PERSON.aac007 > REC_TMP_PERSON.aac030 THEN
---                  v_message:= v_message||'å‚å·¥æ—¶é—´ä¸èƒ½æ™šäºå‚ä¿æ—¶é—´!';
+--                  v_message:= v_message||'²Î¹¤Ê±¼ä²»ÄÜÍíÓÚ²Î±£Ê±¼ä!';
 --                  var_flag := 1;
 --          END IF;
 --      END IF;
 
-       --æ–°å¢é‡å¤æ ¡éªŒ
+       --ĞÂÔöÖØ¸´Ğ£Ñé
         IF REC_TMP_PERSON.aac002 IS NOT NULL THEN
           SELECT COUNT(1)
             INTO n_count
@@ -6864,7 +6864,7 @@ ELSE
             AND a.aac002 = v_aac002
             AND a.iaa001 = PKG_Constant.IAA001_ADD ;
           IF n_count>0 THEN
-          v_message := v_message||'å·²ç»å­˜åœ¨äººå‘˜æ–°å‚ä¿ç”³è¯·ä¿¡æ¯,ä¸èƒ½ç»§ç»­æ–°å¢!';
+          v_message := v_message||'ÒÑ¾­´æÔÚÈËÔ±ĞÂ²Î±£ÉêÇëĞÅÏ¢,²»ÄÜ¼ÌĞøĞÂÔö!';
           var_flag  := 1;
         END IF;
       END IF;
@@ -6877,7 +6877,7 @@ ELSE
             AND a.aac002 = v_aac002
             AND a.iaa001 = PKG_Constant.IAA001_IAD ;
           IF n_count>0 THEN
-          v_message := v_message||'å·²ç»å­˜åœ¨æ‰¹é‡æ–°å‚ä¿ç”³è¯·ä¿¡æ¯,ä¸èƒ½ç»§ç»­æ–°å¢!';
+          v_message := v_message||'ÒÑ¾­´æÔÚÅúÁ¿ĞÂ²Î±£ÉêÇëĞÅÏ¢,²»ÄÜ¼ÌĞøĞÂÔö!';
           var_flag  := 1;
         END IF;
       END IF;
@@ -6890,7 +6890,7 @@ ELSE
             AND a.aac002 = v_aac002
             AND a.iaa001 = PKG_Constant.IAA001_MIN;
           IF n_count>0 THEN
-          v_message := v_message||'å·²ç»å­˜åœ¨æš‚åœç¼´è´¹ç”³è¯·ä¿¡æ¯,ä¸èƒ½ç»§ç»­æ–°å¢!';
+          v_message := v_message||'ÒÑ¾­´æÔÚÔİÍ£½É·ÑÉêÇëĞÅÏ¢,²»ÄÜ¼ÌĞøĞÂÔö!';
           var_flag  := 1;
         END IF;
       END IF;
@@ -6903,7 +6903,7 @@ ELSE
             AND a.aac002 = v_aac002
             AND a.iaa001 = PKG_Constant.IAA001_PMI;
           IF n_count>0 THEN
-          v_message := v_message||'å·²ç»å­˜åœ¨æ‰¹é‡æš‚åœç”³è¯·ä¿¡æ¯,ä¸èƒ½ç»§ç»­æ–°å¢!';
+          v_message := v_message||'ÒÑ¾­´æÔÚÅúÁ¿ÔİÍ£ÉêÇëĞÅÏ¢,²»ÄÜ¼ÌĞøĞÂÔö!';
           var_flag  := 1;
         END IF;
       END IF;
@@ -6916,11 +6916,11 @@ ELSE
             AND a.aac002 = v_aac002
             AND a.iaa001 = PKG_Constant.IAA001_RTR;
           IF n_count>0 THEN
-          v_message := v_message||'å·²ç»å­˜åœ¨åœ¨èŒè½¬é€€ä¼‘ç”³è¯·ä¿¡æ¯,ä¸èƒ½ç»§ç»­æ–°å¢!';
+          v_message := v_message||'ÒÑ¾­´æÔÚÔÚÖ°×ªÍËĞİÉêÇëĞÅÏ¢,²»ÄÜ¼ÌĞøĞÂÔö!';
           var_flag  := 1;
         END IF;
       END IF;
-      --æ ¹æ®èº«ä»½è¯å·æˆªå–å‡ºç”Ÿæ—¥æœŸ
+      --¸ù¾İÉí·İÖ¤ºÅ½ØÈ¡³öÉúÈÕÆÚ
 --      IF LENGTH(TRIM(v_aac002)) = 18 THEN
 --             SELECT to_date( substr(TRIM(v_aac002),7,8 ),'yyyy-mm-dd')
 --              INTO  d_aac006
@@ -6969,168 +6969,168 @@ ELSE
 --     END IF;
 
      IF var_flag = 0 THEN
-        --æå–IRAC01A2çš„æ•°æ®åˆ°IRAC01
+        --ÌáÈ¡IRAC01A2µÄÊı¾İµ½IRAC01
           v_iac001 := PKG_COMMON.FUN_GETSEQUENCE(NULL,'IAC001');
          BEGIN
              INSERT INTO
                    wsjb.irac01
                    (
-                    iac001,-- ç”³æŠ¥äººå‘˜ä¿¡æ¯ç¼–å· -->
-                     iaa001,-- ç”³æŠ¥äººå‘˜ç±»åˆ« -->
-                     iaa002,-- ç”³æŠ¥äººå‘˜ä¿¡æ¯çŠ¶æ€ -->
-                     aac001,-- ä¸ªäººç¼–å·     -->
-                     aab001,-- å•ä½ç¼–å·     -->
-                     yae181,-- è¯ä»¶ç±»å‹     -->
-                     yac067,-- æ¥æºæ–¹å¼     -->
-                     aac002,-- èº«ä»½è¯å·ç (è¯ä»¶å·ç ) -->
-                     aac003,-- å§“å         -->
-                     aac004,-- æ€§åˆ«         -->
-                     aac005,-- æ°‘æ—         -->
-                     aac006,-- å‡ºç”Ÿæ—¥æœŸ     -->
-                     aac007,-- å‚åŠ å·¥ä½œæ—¥æœŸ -->
-                     aac008,-- äººå‘˜çŠ¶æ€     -->
-                     aac009,-- æˆ·å£æ€§è´¨     -->
-                     aac010,-- æˆ·å£æ‰€åœ¨åœ°   -->
-                     aac011,-- æ–‡åŒ–ç¨‹åº¦     -->
-                     aac021,--æ¯•ä¸šæ—¥æœŸ
-                     aac022,--æ¯•ä¸šé™¢æ ¡
-                     aac025,--å©šå§»æƒ…å†µ
-                     aac026,--æ˜¯å¦æœå½¹
-                     aac012,-- ä¸ªäººèº«ä»½     -->
-                     aac013,-- ç”¨å·¥å½¢å¼     -->
-                     aac014,-- ä¸“ä¸šæŠ€æœ¯èŒåŠ¡ -->
-                     aac015,-- å·¥äººæŠ€æœ¯ç­‰çº§ -->
-                     aac020,-- è¡Œæ”¿èŒåŠ¡     -->
-                     yac168,-- å†œæ°‘å·¥æ ‡å¿—   -->
-                     yac197,-- åŠ³æ¨¡çº§åˆ«     -->
-                     yac501,-- å†œç‰§å›¢åœºèŒå·¥ -->
-                     yac170,-- å†›è½¬å¹²æ ‡å¿—   -->
-                     yac502,-- æ˜¯å¦åŸå·¥å•†ä¸šè€… -->
-                     yae407,-- æ‰€å±ç¤¾åŒº     -->
-                     yae496,-- æ‰€å±è¡—é“     -->
-                     yic067,-- å»ºå›½å‰è€å·¥äºº -->
-                     aae004,-- è”ç³»äººå§“å   -->
-                     aae005,-- è”ç³»ç”µè¯     -->
-                     aae006,-- åœ°å€         -->
-                     aae007,-- é‚®æ”¿ç¼–ç      -->
+                    iac001,-- Éê±¨ÈËÔ±ĞÅÏ¢±àºÅ -->
+                     iaa001,-- Éê±¨ÈËÔ±Àà±ğ -->
+                     iaa002,-- Éê±¨ÈËÔ±ĞÅÏ¢×´Ì¬ -->
+                     aac001,-- ¸öÈË±àºÅ     -->
+                     aab001,-- µ¥Î»±àºÅ     -->
+                     yae181,-- Ö¤¼şÀàĞÍ     -->
+                     yac067,-- À´Ô´·½Ê½     -->
+                     aac002,-- Éí·İÖ¤ºÅÂë(Ö¤¼şºÅÂë) -->
+                     aac003,-- ĞÕÃû         -->
+                     aac004,-- ĞÔ±ğ         -->
+                     aac005,-- Ãñ×å         -->
+                     aac006,-- ³öÉúÈÕÆÚ     -->
+                     aac007,-- ²Î¼Ó¹¤×÷ÈÕÆÚ -->
+                     aac008,-- ÈËÔ±×´Ì¬     -->
+                     aac009,-- »§¿ÚĞÔÖÊ     -->
+                     aac010,-- »§¿ÚËùÔÚµØ   -->
+                     aac011,-- ÎÄ»¯³Ì¶È     -->
+                     aac021,--±ÏÒµÈÕÆÚ
+                     aac022,--±ÏÒµÔºĞ£
+                     aac025,--»éÒöÇé¿ö
+                     aac026,--ÊÇ·ñ·şÒÛ
+                     aac012,-- ¸öÈËÉí·İ     -->
+                     aac013,-- ÓÃ¹¤ĞÎÊ½     -->
+                     aac014,-- ×¨Òµ¼¼ÊõÖ°Îñ -->
+                     aac015,-- ¹¤ÈË¼¼ÊõµÈ¼¶ -->
+                     aac020,-- ĞĞÕşÖ°Îñ     -->
+                     yac168,-- Å©Ãñ¹¤±êÖ¾   -->
+                     yac197,-- ÀÍÄ£¼¶±ğ     -->
+                     yac501,-- Å©ÄÁÍÅ³¡Ö°¹¤ -->
+                     yac170,-- ¾ü×ª¸É±êÖ¾   -->
+                     yac502,-- ÊÇ·ñÔ­¹¤ÉÌÒµÕß -->
+                     yae407,-- ËùÊôÉçÇø     -->
+                     yae496,-- ËùÊô½ÖµÀ     -->
+                     yic067,-- ½¨¹úÇ°ÀÏ¹¤ÈË -->
+                     aae004,-- ÁªÏµÈËĞÕÃû   -->
+                     aae005,-- ÁªÏµµç»°     -->
+                     aae006,-- µØÖ·         -->
+                     aae007,-- ÓÊÕş±àÂë     -->
                      yae222,-- EMAIL        -->
-                     yac200,-- å…¬åŠ¡å‘˜è¡¥åŠ©èŒçº§ -->
-                     aae110,-- èŒå·¥å…»è€     -->
-                     aac031,-- ä¸ªäººå‚ä¿çŠ¶æ€ -->
-                     yac505,-- å‚ä¿ç¼´è´¹äººå‘˜ç±»åˆ« -->
-                     yac033,-- ä¸ªäººåˆæ¬¡å‚ä¿æ—¥æœŸ -->
-                     aac030,-- æœ¬ç³»ç»Ÿå‚ä¿æ—¥æœŸ -->
-                     yae102,-- æœ€åä¸€æ¬¡å˜æ›´æ—¶é—´ -->
-                     yae097,-- æœ€å¤§åšè´¦æœŸå· -->
-                     yac503,-- å·¥èµ„ç±»åˆ«     -->
-                     aac040,-- ç¼´è´¹å·¥èµ„     -->
-                     yac004,-- ç¼´è´¹åŸºæ•°[å…»è€] -->
-                     yaa333,-- è´¦æˆ·åŸºæ•°     -->
-                     yab013,-- åŸå•ä½ç¼–å·   -->
-                     yac002,-- ä¼ä¸šå†…åºå·ï¼ˆå·¥å·ï¼‰ -->
-                     yab139,-- å‚ä¿æ‰€å±åˆ†ä¸­å¿ƒ -->
-                     aae011,-- ç»åŠäºº       -->
-                     aae036,-- ç»åŠæ—¶é—´     -->
-                     yab003,-- ç¤¾ä¿ç»åŠæœºæ„ -->
-                     aae013,-- å¤‡æ³¨         -->
-                     aaz002,-- ä¸šåŠ¡æ—¥å¿—     -->
-                     aae120,-- æœºå…³å…»è€     -->
-                     aae210,-- å¤±ä¸š         -->
-                     aae310,-- åŒ»ç–—         -->
-                     aae410,-- å·¥ä¼¤         -->
-                     aae510,-- ç”Ÿè‚²         -->
-                     aae311,-- å¤§ç—…         -->
-                     akc021,-- åŒ»ç–—äººå‘˜ç±»åˆ« -->
-                     ykc150,-- é©»å¤–æ ‡å¿—     -->
-                     ykb109,-- æ˜¯å¦äº«å—å…¬åŠ¡å‘˜ç»Ÿç­¹å¾…é‡ -->
-                     aic162,-- ç¦»é€€ä¼‘å¹´æœˆ   -->
-                     yac005,-- ç¼´è´¹åŸºæ•°[å…¶å®ƒ] -->
+                     yac200,-- ¹«ÎñÔ±²¹ÖúÖ°¼¶ -->
+                     aae110,-- Ö°¹¤ÑøÀÏ     -->
+                     aac031,-- ¸öÈË²Î±£×´Ì¬ -->
+                     yac505,-- ²Î±£½É·ÑÈËÔ±Àà±ğ -->
+                     yac033,-- ¸öÈË³õ´Î²Î±£ÈÕÆÚ -->
+                     aac030,-- ±¾ÏµÍ³²Î±£ÈÕÆÚ -->
+                     yae102,-- ×îºóÒ»´Î±ä¸üÊ±¼ä -->
+                     yae097,-- ×î´ó×öÕËÆÚºÅ -->
+                     yac503,-- ¹¤×ÊÀà±ğ     -->
+                     aac040,-- ½É·Ñ¹¤×Ê     -->
+                     yac004,-- ½É·Ñ»ùÊı[ÑøÀÏ] -->
+                     yaa333,-- ÕË»§»ùÊı     -->
+                     yab013,-- Ô­µ¥Î»±àºÅ   -->
+                     yac002,-- ÆóÒµÄÚĞòºÅ£¨¹¤ºÅ£© -->
+                     yab139,-- ²Î±£ËùÊô·ÖÖĞĞÄ -->
+                     aae011,-- ¾­°ìÈË       -->
+                     aae036,-- ¾­°ìÊ±¼ä     -->
+                     yab003,-- Éç±£¾­°ì»ú¹¹ -->
+                     aae013,-- ±¸×¢         -->
+                     aaz002,-- ÒµÎñÈÕÖ¾     -->
+                     aae120,-- »ú¹ØÑøÀÏ     -->
+                     aae210,-- Ê§Òµ         -->
+                     aae310,-- Ò½ÁÆ         -->
+                     aae410,-- ¹¤ÉË         -->
+                     aae510,-- ÉúÓı         -->
+                     aae311,-- ´ó²¡         -->
+                     akc021,-- Ò½ÁÆÈËÔ±Àà±ğ -->
+                     ykc150,-- ×¤Íâ±êÖ¾     -->
+                     ykb109,-- ÊÇ·ñÏíÊÜ¹«ÎñÔ±Í³³ï´ıÓö -->
+                     aic162,-- ÀëÍËĞİÄêÔÂ   -->
+                     yac005,-- ½É·Ñ»ùÊı[ÆäËü] -->
                      aae810
                    ) VALUES (
                     v_iac001,
                     PKG_Constant.IAA001_PAD,
                      PKG_Constant.IAA002_WIR,
-                     v_iac001,             -- ä¸ªäººç¼–å·     -->
-                     REC_TMP_PERSON.aab001,-- å•ä½ç¼–å·     -->
+                     v_iac001,             -- ¸öÈË±àºÅ     -->
+                     REC_TMP_PERSON.aab001,-- µ¥Î»±àºÅ     -->
                      '1',
-                     PKG_Constant.YAC067_TQXCB,-- æ¥æºæ–¹å¼     -->
-                     REC_TMP_PERSON.aac002,             -- èº«ä»½è¯å·ç (è¯ä»¶å·ç ) -->
-                     REC_TMP_PERSON.aac003,-- å§“å         -->
-                     REC_TMP_PERSON.aac004,             -- æ€§åˆ«         -->
-                     REC_TMP_PERSON.aac005,-- æ°‘æ—         -->
-                     REC_TMP_PERSON.aac006             ,-- å‡ºç”Ÿæ—¥æœŸ     -->
-                     REC_TMP_PERSON.aac007,-- å‚åŠ å·¥ä½œæ—¥æœŸ -->
+                     PKG_Constant.YAC067_TQXCB,-- À´Ô´·½Ê½     -->
+                     REC_TMP_PERSON.aac002,             -- Éí·İÖ¤ºÅÂë(Ö¤¼şºÅÂë) -->
+                     REC_TMP_PERSON.aac003,-- ĞÕÃû         -->
+                     REC_TMP_PERSON.aac004,             -- ĞÔ±ğ         -->
+                     REC_TMP_PERSON.aac005,-- Ãñ×å         -->
+                     REC_TMP_PERSON.aac006             ,-- ³öÉúÈÕÆÚ     -->
+                     REC_TMP_PERSON.aac007,-- ²Î¼Ó¹¤×÷ÈÕÆÚ -->
                      PKG_Constant.AAC008_ZZ,
-                     REC_TMP_PERSON.aac009,-- æˆ·å£æ€§è´¨     -->
-                     REC_TMP_PERSON.aac010,-- æˆ·å£æ‰€åœ¨åœ°   -->
-                     REC_TMP_PERSON.aac011,-- æ–‡åŒ–ç¨‹åº¦     -->
-                     REC_TMP_PERSON.aac021,--æ¯•ä¸šæ—¶é—´
-                     REC_TMP_PERSON.aac022,--æ¯•ä¸šé™¢æ ¡
-                     REC_TMP_PERSON.aac025,--å©šå§»æƒ…å†µ
-                     REC_TMP_PERSON.aac026,--æ˜¯å¦æœå½¹
-                     REC_TMP_PERSON.aac012,--ä¸ªäººèº«ä»½
-                     PKG_Constant.AAC013_QT,-- ç”¨å·¥å½¢å¼     -->
-                     '5',                  -- ä¸“ä¸šæŠ€æœ¯èŒåŠ¡ -->
-                     '9',                  -- å·¥äººæŠ€æœ¯ç­‰çº§ -->
-                     '190',                -- è¡Œæ”¿èŒåŠ¡     -->
-                     REC_TMP_PERSON.yac168,             -- å†œæ°‘å·¥æ ‡å¿—   -->
-                     REC_TMP_PERSON.yac197,-- åŠ³æ¨¡çº§åˆ«     -->
-                     REC_TMP_PERSON.yac501,-- å†œç‰§å›¢åœºèŒå·¥ -->
-                     PKG_Constant.YAC170_FOU,-- å†›è½¬å¹²æ ‡å¿—   -->
-                     REC_TMP_PERSON.yac502,-- æ˜¯å¦åŸå·¥å•†ä¸šè€… -->
-                     REC_TMP_PERSON.yae407,-- æ‰€å±ç¤¾åŒº     -->
-                     REC_TMP_PERSON.yae496,-- æ‰€å±è¡—é“     -->
-                     REC_TMP_PERSON.yic067,-- å»ºå›½å‰è€å·¥äºº -->
-                     REC_TMP_PERSON.aae004,-- è”ç³»äººå§“å   -->
-                     REC_TMP_PERSON.aae005,-- è”ç³»ç”µè¯     -->
-                     REC_TMP_PERSON.aae006,-- åœ°å€         -->
-                     REC_TMP_PERSON.aae007,-- é‚®æ”¿ç¼–ç      -->
+                     REC_TMP_PERSON.aac009,-- »§¿ÚĞÔÖÊ     -->
+                     REC_TMP_PERSON.aac010,-- »§¿ÚËùÔÚµØ   -->
+                     REC_TMP_PERSON.aac011,-- ÎÄ»¯³Ì¶È     -->
+                     REC_TMP_PERSON.aac021,--±ÏÒµÊ±¼ä
+                     REC_TMP_PERSON.aac022,--±ÏÒµÔºĞ£
+                     REC_TMP_PERSON.aac025,--»éÒöÇé¿ö
+                     REC_TMP_PERSON.aac026,--ÊÇ·ñ·şÒÛ
+                     REC_TMP_PERSON.aac012,--¸öÈËÉí·İ
+                     PKG_Constant.AAC013_QT,-- ÓÃ¹¤ĞÎÊ½     -->
+                     '5',                  -- ×¨Òµ¼¼ÊõÖ°Îñ -->
+                     '9',                  -- ¹¤ÈË¼¼ÊõµÈ¼¶ -->
+                     '190',                -- ĞĞÕşÖ°Îñ     -->
+                     REC_TMP_PERSON.yac168,             -- Å©Ãñ¹¤±êÖ¾   -->
+                     REC_TMP_PERSON.yac197,-- ÀÍÄ£¼¶±ğ     -->
+                     REC_TMP_PERSON.yac501,-- Å©ÄÁÍÅ³¡Ö°¹¤ -->
+                     PKG_Constant.YAC170_FOU,-- ¾ü×ª¸É±êÖ¾   -->
+                     REC_TMP_PERSON.yac502,-- ÊÇ·ñÔ­¹¤ÉÌÒµÕß -->
+                     REC_TMP_PERSON.yae407,-- ËùÊôÉçÇø     -->
+                     REC_TMP_PERSON.yae496,-- ËùÊô½ÖµÀ     -->
+                     REC_TMP_PERSON.yic067,-- ½¨¹úÇ°ÀÏ¹¤ÈË -->
+                     REC_TMP_PERSON.aae004,-- ÁªÏµÈËĞÕÃû   -->
+                     REC_TMP_PERSON.aae005,-- ÁªÏµµç»°     -->
+                     REC_TMP_PERSON.aae006,-- µØÖ·         -->
+                     REC_TMP_PERSON.aae007,-- ÓÊÕş±àÂë     -->
                      REC_TMP_PERSON.yae222,-- EMAIL        -->
-                     REC_TMP_PERSON.yac200,-- å…¬åŠ¡å‘˜è¡¥åŠ©èŒçº§ -->
-                     REC_TMP_PERSON.aae110,-- èŒå·¥å…»è€     -->
-                     REC_TMP_PERSON.aac031,-- ä¸ªäººå‚ä¿çŠ¶æ€ -->
-                     REC_TMP_PERSON.yac505,-- å‚ä¿ç¼´è´¹äººå‘˜ç±»åˆ« -->
-                     REC_TMP_PERSON.yac033,-- ä¸ªäººåˆæ¬¡å‚ä¿æ—¥æœŸ -->
-                     REC_TMP_PERSON.aac030,-- æœ¬ç³»ç»Ÿå‚ä¿æ—¥æœŸ -->
-                     REC_TMP_PERSON.yae102,-- æœ€åä¸€æ¬¡å˜æ›´æ—¶é—´ -->
-                     REC_TMP_PERSON.yae097,-- æœ€å¤§åšè´¦æœŸå· -->
+                     REC_TMP_PERSON.yac200,-- ¹«ÎñÔ±²¹ÖúÖ°¼¶ -->
+                     REC_TMP_PERSON.aae110,-- Ö°¹¤ÑøÀÏ     -->
+                     REC_TMP_PERSON.aac031,-- ¸öÈË²Î±£×´Ì¬ -->
+                     REC_TMP_PERSON.yac505,-- ²Î±£½É·ÑÈËÔ±Àà±ğ -->
+                     REC_TMP_PERSON.yac033,-- ¸öÈË³õ´Î²Î±£ÈÕÆÚ -->
+                     REC_TMP_PERSON.aac030,-- ±¾ÏµÍ³²Î±£ÈÕÆÚ -->
+                     REC_TMP_PERSON.yae102,-- ×îºóÒ»´Î±ä¸üÊ±¼ä -->
+                     REC_TMP_PERSON.yae097,-- ×î´ó×öÕËÆÚºÅ -->
                      PKG_Constant.YAC503_SB,
-                     REC_TMP_PERSON.aac040,-- ç¼´è´¹å·¥èµ„     -->
-                     REC_TMP_PERSON.yac004,-- ç¼´è´¹åŸºæ•°[å…»è€] -->
-                     REC_TMP_PERSON.yaa333,-- è´¦æˆ·åŸºæ•°     -->
-                     REC_TMP_PERSON.yab013,-- åŸå•ä½ç¼–å·   -->
-                     REC_TMP_PERSON.yac002,-- ä¼ä¸šå†…åºå·ï¼ˆå·¥å·ï¼‰ -->
+                     REC_TMP_PERSON.aac040,-- ½É·Ñ¹¤×Ê     -->
+                     REC_TMP_PERSON.yac004,-- ½É·Ñ»ùÊı[ÑøÀÏ] -->
+                     REC_TMP_PERSON.yaa333,-- ÕË»§»ùÊı     -->
+                     REC_TMP_PERSON.yab013,-- Ô­µ¥Î»±àºÅ   -->
+                     REC_TMP_PERSON.yac002,-- ÆóÒµÄÚĞòºÅ£¨¹¤ºÅ£© -->
                      PKG_Constant.YAB003_JBFZX,
-                     REC_TMP_PERSON.aae011,-- ç»åŠäºº       -->
-                     REC_TMP_PERSON.aae036,-- ç»åŠæ—¶é—´     -->
-                     REC_TMP_PERSON.yab003,-- ç¤¾ä¿ç»åŠæœºæ„ -->
-                     REC_TMP_PERSON.aae013,-- å¤‡æ³¨         -->
+                     REC_TMP_PERSON.aae011,-- ¾­°ìÈË       -->
+                     REC_TMP_PERSON.aae036,-- ¾­°ìÊ±¼ä     -->
+                     REC_TMP_PERSON.yab003,-- Éç±£¾­°ì»ú¹¹ -->
+                     REC_TMP_PERSON.aae013,-- ±¸×¢         -->
                      v_aaz002,
-                     REC_TMP_PERSON.aae120,-- æœºå…³å…»è€     -->
-                     REC_TMP_PERSON.aae210,-- å¤±ä¸š         -->
-                     REC_TMP_PERSON.aae310,-- åŒ»ç–—         -->
-                     REC_TMP_PERSON.aae410,-- å·¥ä¼¤         -->
-                     REC_TMP_PERSON.aae510,-- ç”Ÿè‚²         -->
-                     REC_TMP_PERSON.aae311,-- å¤§ç—…         -->
-                     REC_TMP_PERSON.akc021,-- åŒ»ç–—äººå‘˜ç±»åˆ« -->
-                     REC_TMP_PERSON.ykc150,-- é©»å¤–æ ‡å¿—     -->
-                     REC_TMP_PERSON.ykb109,-- æ˜¯å¦äº«å—å…¬åŠ¡å‘˜ç»Ÿç­¹å¾…é‡ -->
-                     REC_TMP_PERSON.aic162,-- ç¦»é€€ä¼‘å¹´æœˆ   -->
-                     REC_TMP_PERSON.yac005,-- ç¼´è´¹åŸºæ•°[å…¶å®ƒ] -->
+                     REC_TMP_PERSON.aae120,-- »ú¹ØÑøÀÏ     -->
+                     REC_TMP_PERSON.aae210,-- Ê§Òµ         -->
+                     REC_TMP_PERSON.aae310,-- Ò½ÁÆ         -->
+                     REC_TMP_PERSON.aae410,-- ¹¤ÉË         -->
+                     REC_TMP_PERSON.aae510,-- ÉúÓı         -->
+                     REC_TMP_PERSON.aae311,-- ´ó²¡         -->
+                     REC_TMP_PERSON.akc021,-- Ò½ÁÆÈËÔ±Àà±ğ -->
+                     REC_TMP_PERSON.ykc150,-- ×¤Íâ±êÖ¾     -->
+                     REC_TMP_PERSON.ykb109,-- ÊÇ·ñÏíÊÜ¹«ÎñÔ±Í³³ï´ıÓö -->
+                     REC_TMP_PERSON.aic162,-- ÀëÍËĞİÄêÔÂ   -->
+                     REC_TMP_PERSON.yac005,-- ½É·Ñ»ùÊı[ÆäËü] -->
                      REC_TMP_PERSON.aae810
                    );
 
-              --å›å†™irac01a2 å¯¼å…¥æˆåŠŸæ ‡å¿—ä¸ºæˆåŠŸ
+              --»ØĞ´irac01a2 µ¼Èë³É¹¦±êÖ¾Îª³É¹¦
              UPDATE IRAC01A2 a
                 SET a.aae100 = '1',
-                    a.errormsg = 'æ•°æ®å·²å¯¼å…¥'
+                    a.errormsg = 'Êı¾İÒÑµ¼Èë'
               WHERE a.iaz018 = prm_iaz018
                 AND a.aac002 = REC_TMP_PERSON.aac002
                 AND a.aac003 = REC_TMP_PERSON.aac003;
 
        END;
      ELSIF var_flag = 1 THEN
-          --å›å†™irac01a2 å¯¼å…¥æˆåŠŸæ ‡å¿—ä¸ºæœªæˆåŠŸåŒæ—¶å›å†™å¤±è´¥åŸå› 
+          --»ØĞ´irac01a2 µ¼Èë³É¹¦±êÖ¾ÎªÎ´³É¹¦Í¬Ê±»ØĞ´Ê§°ÜÔ­Òò
              UPDATE IRAC01A2  a
                 SET a.aae100 = '0',
                    a.errormsg = v_message
@@ -7142,66 +7142,66 @@ ELSE
       END LOOP;
    EXCEPTION
    WHEN OTHERS THEN
-   /*å…³é—­æ‰“å¼€çš„æ¸¸æ ‡*/
+   /*¹Ø±Õ´ò¿ªµÄÓÎ±ê*/
    ROLLBACK;
    prm_AppCode  :=  gn_def_ERR;
-   prm_ErrorMsg := 'æ•°æ®åº“é”™è¯¯:'|| SQLERRM ;
+   prm_ErrorMsg := 'Êı¾İ¿â´íÎó:'|| SQLERRM ;
    RETURN;
    END prc_batchImport;
      /*--------------------------------------------------------------------------
-   || ä¸šåŠ¡ç¯èŠ‚ ï¼šæœˆåº¦ç¼´è´¹ç”³æŠ¥åŠŸèƒ½åˆå§‹åŒ–ç•Œé¢æ ¡éªŒ
-   || è¿‡ç¨‹åç§° prc_p_ValidateDeathCheck
-   || åŠŸèƒ½æè¿° ï¼šæ ¡éªŒæœˆæŠ¥
+   || ÒµÎñ»·½Ú £ºÔÂ¶È½É·ÑÉê±¨¹¦ÄÜ³õÊ¼»¯½çÃæĞ£Ñé
+   || ¹ı³ÌÃû³Æ prc_p_ValidateDeathCheck
+   || ¹¦ÄÜÃèÊö £ºĞ£ÑéÔÂ±¨
    ||
-   || å‚æ•°æè¿° ï¼šå‚æ•°æ ‡è¯†           è¯´æ˜
+   || ²ÎÊıÃèÊö £º²ÎÊı±êÊ¶           ËµÃ÷
    ||            --------------------------------------------------------------
    ||
    ||
-   || ä½œ    è€… ï¼šzhujing         å®Œæˆæ—¥æœŸ ï¼š2015-12-3
+   || ×÷    Õß £ºzhujing         Íê³ÉÈÕÆÚ £º2015-12-3
    ||------------------------------------------------------------------------*/
    PROCEDURE prc_p_ValidateMonthApply(
-       prm_aab001          IN            VARCHAR2,     --å•ä½ç¼–å·
-      prm_yab139          IN            VARCHAR2,     --ç»åŠæœºæ„
-      prm_iaa100          OUT           VARCHAR2,     --å½“å‰ä½¿æ˜¾ç¤ºç”³æŠ¥æœˆåº¦
-      prm_flag            OUT           VARCHAR2,     --è¿”å›ä¸šåŠ¡çŠ¶æ€æ ‡å¿—
-      prm_msg             OUT           VARCHAR2,     --æç¤ºä¿¡æ¯
-      prm_sign            OUT           VARCHAR2,     --é”™è¯¯æ ‡å¿—
-      prm_AppCode         OUT           VARCHAR2,     --æ‰§è¡Œä»£ç 
-      prm_ErrorMsg        OUT           VARCHAR2)    --å‡ºé”™ä¿¡æ¯
+       prm_aab001          IN            VARCHAR2,     --µ¥Î»±àºÅ
+      prm_yab139          IN            VARCHAR2,     --¾­°ì»ú¹¹
+      prm_iaa100          OUT           VARCHAR2,     --µ±Ç°Ê¹ÏÔÊ¾Éê±¨ÔÂ¶È
+      prm_flag            OUT           VARCHAR2,     --·µ»ØÒµÎñ×´Ì¬±êÖ¾
+      prm_msg             OUT           VARCHAR2,     --ÌáÊ¾ĞÅÏ¢
+      prm_sign            OUT           VARCHAR2,     --´íÎó±êÖ¾
+      prm_AppCode         OUT           VARCHAR2,     --Ö´ĞĞ´úÂë
+      prm_ErrorMsg        OUT           VARCHAR2)    --³ö´íĞÅÏ¢
     IS
       num_count           NUMBER(6);
-      var_iaa100          VARCHAR2(15);--å•ä½æœ€è¿‘çš„ç”³æŠ¥æœˆåº¦
-      var_iaa100nex       VARCHAR2(15);--å•ä½ç”³æŠ¥æœˆåº¦çš„ä¸‹ä¸ªæœˆåº¦
-      var_sysmonth        VARCHAR2(23);--å½“å‰æ—¶é—´æœˆåº¦
-      var_sysnexmonth     VARCHAR2(23);--å½“å‰æ—¶é—´çš„ä¸‹ä¸ªæœˆåº¦
-      var_yae097          VARCHAR2(23);--æœ€å¤§åšè´¦æœŸ
-      var_yae097nex       VARCHAR2(23);--æœ€å¤§åšè´¦æœŸçš„ä¸‹ä¸ªæœˆåº¦
-      num_ab02count        NUMBER;--é’ˆå¯¹å•å…»è€æ–°å¼€æˆ·å•ä½åˆ¤æ–­
+      var_iaa100          VARCHAR2(15);--µ¥Î»×î½üµÄÉê±¨ÔÂ¶È
+      var_iaa100nex       VARCHAR2(15);--µ¥Î»Éê±¨ÔÂ¶ÈµÄÏÂ¸öÔÂ¶È
+      var_sysmonth        VARCHAR2(23);--µ±Ç°Ê±¼äÔÂ¶È
+      var_sysnexmonth     VARCHAR2(23);--µ±Ç°Ê±¼äµÄÏÂ¸öÔÂ¶È
+      var_yae097          VARCHAR2(23);--×î´ó×öÕËÆÚ
+      var_yae097nex       VARCHAR2(23);--×î´ó×öÕËÆÚµÄÏÂ¸öÔÂ¶È
+      num_ab02count        NUMBER;--Õë¶Ôµ¥ÑøÀÏĞÂ¿ª»§µ¥Î»ÅĞ¶Ï
     BEGIN
-      /*åˆå§‹åŒ–å˜é‡*/
+      /*³õÊ¼»¯±äÁ¿*/
        prm_AppCode  := GN_DEF_OK;
        prm_ErrorMsg := '';
        prm_msg :='';
        prm_sign :='0';
-       prm_flag :='';--0é¦–æ¬¡è¿›å…¥ç”³æŠ¥ï¼Œ1è¿›å…¥ç”³æŠ¥ï¼Œ2æ­£åœ¨å®¡æ ¸ä¸­  3å®¡æ ¸æ‰“å›  4å®¡æ ¸é€šè¿‡ 5è¿˜æœªåˆ°è¾¾ç”³æŠ¥æ—¶é—´
-      --åˆ¤æ–­æ˜¯å¦ä¸ºå•å…»è€å•ä½
+       prm_flag :='';--0Ê×´Î½øÈëÉê±¨£¬1½øÈëÉê±¨£¬2ÕıÔÚÉóºËÖĞ  3ÉóºË´ò»Ø  4ÉóºËÍ¨¹ı 5»¹Î´µ½´ïÉê±¨Ê±¼ä
+      --ÅĞ¶ÏÊÇ·ñÎªµ¥ÑøÀÏµ¥Î»
       SELECT count(1)
         INTO num_ab02count
         FROM xasi2.ab02 a
         WHERE a.aab001 = prm_aab001
         AND a.aab051='1';
-       --å•ä½å¾é›†æ–¹å¼ç¡®å®š
+       --µ¥Î»Õ÷¼¯·½Ê½È·¶¨
        SELECT count(1)
          INTO num_count
         FROM wsjb.irab03  a
        WHERE a.aab001 = prm_aab001;
       IF num_count = 0 THEN
-         prm_msg :=  'æ²¡æœ‰å¯ç”¨çš„å•ä½å¾é›†æ–¹å¼ï¼Œè¯·è”ç³»å’¨è¯¢ç¤¾ä¿ä¸­å¿ƒï¼';
+         prm_msg :=  'Ã»ÓĞ¿ÉÓÃµÄµ¥Î»Õ÷¼¯·½Ê½£¬ÇëÁªÏµ×ÉÑ¯Éç±£ÖĞĞÄ£¡';
         prm_sign := '1';
         GOTO label_OUT;
       END IF;
       IF num_ab02count>0 THEN
-       --è·å–å•ä½å½“å‰æœ€å¤§åšè´¦æœŸ
+       --»ñÈ¡µ¥Î»µ±Ç°×î´ó×öÕËÆÚ
        SELECT TO_CHAR(SYSDATE, 'yyyymm') SYS100,
              TO_CHAR(ADD_MONTHS(SYSDATE, 1), 'yyyymm') SYSNEX,
              TO_CHAR(NVL(MAX(YAE097), '999999')) IAA100,
@@ -7221,7 +7221,7 @@ ELSE
                  AND YAE517 = 'H01'
                  AND AAE140 = '01');
        IF var_yae097 = '999999' THEN
-         prm_msg :=  prm_msg||'è·å–æœ€å¤§åšè´¦æœŸå·å‡ºé”™ï¼';
+         prm_msg :=  prm_msg||'»ñÈ¡×î´ó×öÕËÆÚºÅ³ö´í£¡';
         prm_sign := '1';
         GOTO label_OUT;
        END IF;
@@ -7233,7 +7233,7 @@ ELSE
          AND YAE517 = 'H01'
          AND AAE140 = '01';
        IF num_count>0 THEN
-       --è·å–å•ä½å½“å‰æœ€å¤§åšè´¦æœŸ
+       --»ñÈ¡µ¥Î»µ±Ç°×î´ó×öÕËÆÚ
        SELECT TO_CHAR(SYSDATE, 'yyyymm') SYS100,
              TO_CHAR(ADD_MONTHS(SYSDATE, 1), 'yyyymm') SYSNEX,
              TO_CHAR(NVL(MAX(YAE097), '999999')) IAA100,
@@ -7260,10 +7260,10 @@ ELSE
        FROM dual;
        END IF;
        END IF;
-       --é»˜è®¤æœ€å¤§åšè´¦æœŸçš„ä¸‹ä¸€æœŸ
+       --Ä¬ÈÏ×î´ó×öÕËÆÚµÄÏÂÒ»ÆÚ
        prm_iaa100 := var_yae097nex;
 
-       --è·å–å•ä½æœ€å¤§ç”³æŠ¥æœˆåº¦
+       --»ñÈ¡µ¥Î»×î´óÉê±¨ÔÂ¶È
         SELECT NVL(MAX(A.IAA100), '999999') IAA100,
               TO_CHAR(ADD_MONTHS(TO_DATE(TO_CHAR(NVL(MAX(A.IAA100),TO_CHAR(SYSDATE,'yyyymm'))),'yyyymm'),1),'yyyymm') NEX100
          INTO var_iaa100,
@@ -7271,27 +7271,27 @@ ELSE
          FROM wsjb.irad01  A
         WHERE A.IAA011 = 'A04'
           AND A.AAB001 = prm_aab001;
-      IF var_iaa100 = '999999' THEN --è¿˜æ²¡æœ‰ç”³æŠ¥è¿‡ï¼ˆç¬¬ä¸€æ¬¡è¿›ç³»ç»Ÿï¼‰
+      IF var_iaa100 = '999999' THEN --»¹Ã»ÓĞÉê±¨¹ı£¨µÚÒ»´Î½øÏµÍ³£©
         IF var_yae097  <= var_sysmonth THEN
           prm_iaa100 := var_yae097nex;
-           prm_msg :=  'å½“å‰å¯ç”³æŠ¥çš„æœˆåº¦ä¸º'||prm_iaa100||'ï¼';
+           prm_msg :=  'µ±Ç°¿ÉÉê±¨µÄÔÂ¶ÈÎª'||prm_iaa100||'£¡';
           prm_flag := '0';
           GOTO label_OUT;
         ELSE
           prm_iaa100 := var_yae097nex;
-           prm_msg :=  'è¿˜æœªåˆ°è¾¾ç”³æŠ¥æ—¶é—´ï¼';
+           prm_msg :=  '»¹Î´µ½´ïÉê±¨Ê±¼ä£¡';
           prm_flag := '5';
           GOTO label_OUT;
         END IF;
        END IF;
 
-       --æœ€å¤§åšè´¦æœŸ å’Œ å½“å‰æ—¶é—´æœˆåº¦ æ¯”è¾ƒ
-       --æœ€å¤§åšè´¦æœŸ < å½“å‰æ—¶é—´æœˆåº¦
+       --×î´ó×öÕËÆÚ ºÍ µ±Ç°Ê±¼äÔÂ¶È ±È½Ï
+       --×î´ó×öÕËÆÚ < µ±Ç°Ê±¼äÔÂ¶È
        IF var_yae097 < var_sysmonth THEN
-         --æœ€å¤§åšè´¦æœŸ < æœ€å¤§ç”³æŠ¥æœˆåº¦ï¼ˆå·²ç»ç”³æŠ¥ï¼‰
+         --×î´ó×öÕËÆÚ < ×î´óÉê±¨ÔÂ¶È£¨ÒÑ¾­Éê±¨£©
          IF var_yae097 < var_iaa100 THEN
 
-           --æ˜¯å¦å­˜åœ¨æ‰“å›ä¿¡æ¯
+           --ÊÇ·ñ´æÔÚ´ò»ØĞÅÏ¢
            SELECT count(1)
              INTO num_count
              FROM wsjb.irac01
@@ -7300,12 +7300,12 @@ ELSE
               AND iaa002 = '4';
            IF num_count > 0 THEN
              prm_iaa100 := var_iaa100;
-             prm_msg :=  'å·²ç»ç”³æŠ¥æœˆåº¦ä¸ºï¼š'||var_iaa100||'çš„äººå‘˜ä¿¡æ¯,å­˜åœ¨æ‰“å›ä¿¡æ¯ï¼Œéœ€è¦ä¿®æ”¹å†…å®¹ç»§ç»­ç”³æŠ¥!';
+             prm_msg :=  'ÒÑ¾­Éê±¨ÔÂ¶ÈÎª£º'||var_iaa100||'µÄÈËÔ±ĞÅÏ¢,´æÔÚ´ò»ØĞÅÏ¢£¬ĞèÒªĞŞ¸ÄÄÚÈİ¼ÌĞøÉê±¨!';
             prm_flag := '3';
             GOTO label_OUT;
            END IF;
 
-           --æ˜¯å¦è¿˜åœ¨å®¡æ ¸ä¸­
+           --ÊÇ·ñ»¹ÔÚÉóºËÖĞ
            SELECT count(1)
              INTO num_count
              FROM wsjb.irac01
@@ -7314,13 +7314,13 @@ ELSE
               AND iaa002 = '1';
            IF num_count > 0 THEN
              prm_iaa100 := var_iaa100;
-             prm_msg :=  'å·²ç»ç”³æŠ¥æœˆåº¦ä¸ºï¼š'||var_iaa100||'çš„äººå‘˜ä¿¡æ¯ï¼Œè¿˜åœ¨å®¡æ ¸ä¸­ï¼Œä¸èƒ½å†åšäººå‘˜å¢å‡æ“ä½œï¼';
+             prm_msg :=  'ÒÑ¾­Éê±¨ÔÂ¶ÈÎª£º'||var_iaa100||'µÄÈËÔ±ĞÅÏ¢£¬»¹ÔÚÉóºËÖĞ£¬²»ÄÜÔÙ×öÈËÔ±Ôö¼õ²Ù×÷£¡';
             prm_flag := '2';
             GOTO label_OUT;
            END IF;
 
-          --æ˜¯å¦æ ¸å®š
-          -- åœ°ç¨å¹³å°  20181224
+          --ÊÇ·ñºË¶¨
+          -- µØË°Æ½Ì¨  20181224
        --   IF  to_number(var_iaa100) > 201812  THEN
 
           SELECT SUM(n)
@@ -7344,7 +7344,7 @@ ELSE
                       AND A.AAE003 = var_iaa100 );
            IF num_count = 0 THEN
              prm_iaa100 := var_iaa100;
-             prm_msg :=  'å·²ç»ç”³æŠ¥æœˆåº¦ä¸ºï¼š'||var_iaa100||'çš„äººå‘˜ä¿¡æ¯ï¼Œè¿˜åœ¨å®¡æ ¸ä¸­ï¼Œä¸èƒ½å†åšäººå‘˜å¢å‡æ“ä½œï¼';
+             prm_msg :=  'ÒÑ¾­Éê±¨ÔÂ¶ÈÎª£º'||var_iaa100||'µÄÈËÔ±ĞÅÏ¢£¬»¹ÔÚÉóºËÖĞ£¬²»ÄÜÔÙ×öÈËÔ±Ôö¼õ²Ù×÷£¡';
             prm_flag := '2';
             GOTO label_OUT;
            END IF;
@@ -7354,32 +7354,32 @@ ELSE
 
          END IF;
 
-         --æœ€å¤§åšè´¦æœŸ = æœ€å¤§ç”³æŠ¥æœˆåº¦ï¼ˆå¯ä»¥ç”³æŠ¥ï¼‰
+         --×î´ó×öÕËÆÚ = ×î´óÉê±¨ÔÂ¶È£¨¿ÉÒÔÉê±¨£©
          IF var_yae097 = var_iaa100 THEN
            prm_iaa100 := var_yae097nex;
-           prm_msg :=  'å½“å‰å¯ç”³æŠ¥çš„æœˆåº¦ä¸º'||prm_iaa100||'ï¼';
+           prm_msg :=  'µ±Ç°¿ÉÉê±¨µÄÔÂ¶ÈÎª'||prm_iaa100||'£¡';
           prm_flag := '1';
           GOTO label_OUT;
          END IF;
 
-        /*  201904ä»¥å‰çš„
-       ELSIF var_yae097 = var_sysmonth THEN --æœ€å¤§åšè´¦æœŸ = å½“å‰æ—¶é—´æœˆåº¦ ï¼ˆå½“æœˆå·²ç»æ ¸å®šå®Œæˆï¼‰
+        /*  201904ÒÔÇ°µÄ
+       ELSIF var_yae097 = var_sysmonth THEN --×î´ó×öÕËÆÚ = µ±Ç°Ê±¼äÔÂ¶È £¨µ±ÔÂÒÑ¾­ºË¶¨Íê³É£©
          prm_iaa100 := var_yae097;
-         prm_msg :=  prm_iaa100||'æœˆåº¦ï¼Œæœˆåº¦ç¼´è´¹ç”³æŠ¥å®¡æ ¸å®Œæˆï¼';
+         prm_msg :=  prm_iaa100||'ÔÂ¶È£¬ÔÂ¶È½É·ÑÉê±¨ÉóºËÍê³É£¡';
         prm_flag := '4';
         */
-          /*201904ä»¥åçš„*/
-        ELSIF var_yae097 = var_sysmonth THEN --æœ€å¤§åšè´¦æœŸ = å½“å‰æ—¶é—´æœˆåº¦ ï¼ˆå¯ä»¥åšä¸‹ä¸€æœŸå¢å‡ï¼‰
-        prm_msg :=  'å¯ä»¥è¿›è¡Œ'||prm_iaa100||'æœˆåº¦çš„äººå‘˜å¢å‡ç”³æŠ¥ï¼';
+          /*201904ÒÔºóµÄ*/
+        ELSIF var_yae097 = var_sysmonth THEN --×î´ó×öÕËÆÚ = µ±Ç°Ê±¼äÔÂ¶È £¨¿ÉÒÔ×öÏÂÒ»ÆÚÔö¼õ£©
+        prm_msg :=  '¿ÉÒÔ½øĞĞ'||prm_iaa100||'ÔÂ¶ÈµÄÈËÔ±Ôö¼õÉê±¨£¡';
         prm_flag := '6';
         GOTO label_OUT;
       ELSE
        -- prm_iaa100 := var_yae097;
-        prm_msg :=  prm_iaa100||'æœˆåº¦äººå‘˜å¢å‡å°šæœªåˆ°ç”³æŠ¥æœŸï¼';
+        prm_msg :=  prm_iaa100||'ÔÂ¶ÈÈËÔ±Ôö¼õÉĞÎ´µ½Éê±¨ÆÚ£¡';
         prm_sign := '1';
         GOTO label_OUT;
        END IF;
-       /*201904ä»¥åçš„*/
+       /*201904ÒÔºóµÄ*/
 
 
     <<label_OUT>>
@@ -7387,45 +7387,45 @@ ELSE
 
    EXCEPTION
      WHEN OTHERS THEN
-     /*å…³é—­æ‰“å¼€çš„æ¸¸æ ‡*/
+     /*¹Ø±Õ´ò¿ªµÄÓÎ±ê*/
      ROLLBACK;
      prm_AppCode  :=  gn_def_ERR;
-     prm_ErrorMsg := 'æ•°æ®åº“é”™è¯¯:'|| SQLERRM ;
+     prm_ErrorMsg := 'Êı¾İ¿â´íÎó:'|| SQLERRM ;
      RETURN;
     END prc_p_ValidateMonthApply;
     /*--------------------------------------------------------------------------
-   || ä¸šåŠ¡ç¯èŠ‚ ï¼šå•ä½å‚ä¿è¯æ˜ç”³è¯·æƒé™éªŒè¯
-   || è¿‡ç¨‹åç§° ï¼šprc_p_ValidateProveApply
-   || åŠŸèƒ½æè¿° ï¼š
+   || ÒµÎñ»·½Ú £ºµ¥Î»²Î±£Ö¤Ã÷ÉêÇëÈ¨ÏŞÑéÖ¤
+   || ¹ı³ÌÃû³Æ £ºprc_p_ValidateProveApply
+   || ¹¦ÄÜÃèÊö £º
    ||
-   || å‚æ•°æè¿° ï¼šå‚æ•°æ ‡è¯†           è¯´æ˜
+   || ²ÎÊıÃèÊö £º²ÎÊı±êÊ¶           ËµÃ÷
    ||            --------------------------------------------------------------
    ||
    ||
-   || ä½œ    è€… ï¼šzhujing          å®Œæˆæ—¥æœŸ ï¼š2015-12-18
+   || ×÷    Õß £ºzhujing          Íê³ÉÈÕÆÚ £º2015-12-18
    ||------------------------------------------------------------------------*/
    PROCEDURE prc_p_ValidateProveApply(
-      prm_aab001          IN            VARCHAR2,     --å•ä½ç¼–å·
-      prm_msg             OUT           VARCHAR2,     -- é”™è¯¯ä¿¡æ¯
-      prm_sign            OUT           VARCHAR2,     -- é”™è¯¯æ ‡å¿—
-      prm_AppCode         OUT           VARCHAR2,     --æ‰§è¡Œä»£ç 
-      prm_ErrorMsg        OUT           VARCHAR2)    --å‡ºé”™ä¿¡æ¯
+      prm_aab001          IN            VARCHAR2,     --µ¥Î»±àºÅ
+      prm_msg             OUT           VARCHAR2,     -- ´íÎóĞÅÏ¢
+      prm_sign            OUT           VARCHAR2,     -- ´íÎó±êÖ¾
+      prm_AppCode         OUT           VARCHAR2,     --Ö´ĞĞ´úÂë
+      prm_ErrorMsg        OUT           VARCHAR2)    --³ö´íĞÅÏ¢
 
    IS
        num_count           NUMBER(6);
-      var_aae003          VARCHAR2(23);--è´¹æ¬¾æ‰€å±æœŸ
-      var_aae003pre       VARCHAR2(23);--å½“å‰æ—¶é—´çš„ä¸Šä¸€ä¸ªæœˆåº¦
-      var_aae003pre2       VARCHAR2(23);--å½“å‰æ—¶é—´çš„ä¸Šä¸€ä¸ªæœˆåº¦
+      var_aae003          VARCHAR2(23);--·Ñ¿îËùÊôÆÚ
+      var_aae003pre       VARCHAR2(23);--µ±Ç°Ê±¼äµÄÉÏÒ»¸öÔÂ¶È
+      var_aae003pre2       VARCHAR2(23);--µ±Ç°Ê±¼äµÄÉÏÒ»¸öÔÂ¶È
 
 
    BEGIN
-      /*åˆå§‹åŒ–å˜é‡*/
+      /*³õÊ¼»¯±äÁ¿*/
        prm_AppCode  := GN_DEF_OK;
        prm_ErrorMsg := '';
        prm_msg :='';
        prm_sign :='0';
 
-    --å¦‚æœå½“å‰æ—¶é—´å¤§äº15å·ï¼Œåˆ™åˆ¤æ–­å½“æœˆæ˜¯å¦æœˆæŠ¥
+    --Èç¹ûµ±Ç°Ê±¼ä´óÓÚ15ºÅ£¬ÔòÅĞ¶Ïµ±ÔÂÊÇ·ñÔÂ±¨
     IF to_char(SYSDATE,'dd')>15 THEN
       var_aae003 := to_char(SYSDATE,'yyyymm');
       SELECT SUM(I)
@@ -7448,12 +7448,12 @@ ELSE
                  AND AAB001 = prm_aab001
                  AND AAE003 = var_aae003);
       IF num_count = 0 THEN
-         prm_msg :=  'å•ä½'||var_aae003||'æœˆåº¦ç¼´è´¹ç”³æŠ¥å°šæœªå®Œæˆï¼Œè¯·å®Œæˆåå†è¿›è¡Œç¤¾ä¿è¯æ˜ç”³è¯·ï¼';
+         prm_msg :=  'µ¥Î»'||var_aae003||'ÔÂ¶È½É·ÑÉê±¨ÉĞÎ´Íê³É£¬ÇëÍê³ÉºóÔÙ½øĞĞÉç±£Ö¤Ã÷ÉêÇë£¡';
         prm_sign := '1';
         GOTO label_OUT;
       END IF;
     END IF;
-    --ä¸Šæœˆæ˜¯å¦æœˆæŠ¥
+    --ÉÏÔÂÊÇ·ñÔÂ±¨
     var_aae003pre := to_char(add_months(SYSDATE,-1),'yyyyMM');
     SELECT SUM(I)
       INTO num_count
@@ -7475,11 +7475,11 @@ ELSE
                AND AAB001 = prm_aab001
                AND AAE003 = var_aae003pre);
     IF num_count = 0 THEN
-       prm_msg :=  'å•ä½'||var_aae003pre||'æœˆåº¦ç¼´è´¹ç”³æŠ¥å°šæœªå®Œæˆï¼Œè¯·å®Œæˆåå†è¿›è¡Œç¤¾ä¿è¯æ˜ç”³è¯·ï¼';
+       prm_msg :=  'µ¥Î»'||var_aae003pre||'ÔÂ¶È½É·ÑÉê±¨ÉĞÎ´Íê³É£¬ÇëÍê³ÉºóÔÙ½øĞĞÉç±£Ö¤Ã÷ÉêÇë£¡';
       prm_sign := '1';
       GOTO label_OUT;
     END IF;
-    --åˆ¤æ–­å•ä½æ˜¯å¦å‚åŒ»ç–—ä¿é™©ï¼Œå¦‚æœä¸å‚ï¼Œä¸åšå®æ”¶ï¼ˆå½“å‰æ—¶é—´çš„ä¸Šä¸¤ä¸ªæœˆï¼‰åˆ¤æ–­
+    --ÅĞ¶Ïµ¥Î»ÊÇ·ñ²ÎÒ½ÁÆ±£ÏÕ£¬Èç¹û²»²Î£¬²»×öÊµÊÕ£¨µ±Ç°Ê±¼äµÄÉÏÁ½¸öÔÂ£©ÅĞ¶Ï
     SELECT COUNT(1)
       INTO num_count
       FROM xasi2.AB02
@@ -7487,9 +7487,9 @@ ELSE
        AND AAE140 = '03'
        AND AAB051 = '1';
     IF num_count > 0 THEN
-      --å½“å‰æœˆçš„ä¸Šä¸¤ä¸ªæœˆ
+      --µ±Ç°ÔÂµÄÉÏÁ½¸öÔÂ
       var_aae003pre2 := to_char(add_months(SYSDATE,-2),'yyyyMM');
-      --ä¸Šä¸¤ä¸ªæœˆåŒ»ç–—æ˜¯å¦å®æ”¶
+      --ÉÏÁ½¸öÔÂÒ½ÁÆÊÇ·ñÊµÊÕ
       SELECT COUNT(1) AS I
         INTO num_count
         FROM xasi2.AB08A8
@@ -7498,13 +7498,13 @@ ELSE
          AND AAB001 = prm_aab001
          AND AAE003 = var_aae003pre2;
       IF num_count = 0 THEN
-        prm_msg :=  'å•ä½'||var_aae003pre2||'åŒ»ç–—ä¿é™©è´¦åŠ¡å°šæœªåˆ°è´¦ï¼Œè¯·å…ˆåˆ°ç¤¾ä¿ä¸­å¿ƒç»è¡Œè´¦åŠ¡æ ¸å¯¹åï¼Œå†è¿›è¡Œå‡ºå…·ï¼';
+        prm_msg :=  'µ¥Î»'||var_aae003pre2||'Ò½ÁÆ±£ÏÕÕËÎñÉĞÎ´µ½ÕË£¬ÇëÏÈµ½Éç±£ÖĞĞÄ¾­ĞĞÕËÎñºË¶Ôºó£¬ÔÙ½øĞĞ³ö¾ß£¡';
         prm_sign := '1';
         GOTO label_OUT;
       END IF;
     END IF;
 
-    --åˆ¤æ–­å•ä½æ˜¯å¦å­˜åœ¨å¾…å®¡æ ¸çš„æœˆæŠ¥è®°å½•
+    --ÅĞ¶Ïµ¥Î»ÊÇ·ñ´æÔÚ´ıÉóºËµÄÔÂ±¨¼ÇÂ¼
     SELECT SUM(C) AS C
       INTO num_count
       FROM (SELECT COUNT(1) AS C
@@ -7549,7 +7549,7 @@ ELSE
                          AND IAZ007 = C.IAC001
                          AND C.IAA002 IN ('1', '4')));
      IF num_count > 0 THEN
-         prm_msg :=  'å•ä½æœˆåº¦ç¼´è´¹ç”³æŠ¥æœªå®¡æ ¸å®Œæˆï¼Œå¾…å®¡æ ¸å®Œæˆåï¼Œå†è¿›è¡Œè¯æ˜å‡ºå…·ã€‚';
+         prm_msg :=  'µ¥Î»ÔÂ¶È½É·ÑÉê±¨Î´ÉóºËÍê³É£¬´ıÉóºËÍê³Éºó£¬ÔÙ½øĞĞÖ¤Ã÷³ö¾ß¡£';
         prm_sign := '1';
         GOTO label_OUT;
      END IF;
@@ -7559,32 +7559,32 @@ ELSE
 
    EXCEPTION
      WHEN OTHERS THEN
-     /*å…³é—­æ‰“å¼€çš„æ¸¸æ ‡*/
+     /*¹Ø±Õ´ò¿ªµÄÓÎ±ê*/
      ROLLBACK;
      prm_AppCode  :=  gn_def_ERR;
-     prm_ErrorMsg := 'æ•°æ®åº“é”™è¯¯:'|| SQLERRM ;
+     prm_ErrorMsg := 'Êı¾İ¿â´íÎó:'|| SQLERRM ;
      RETURN;
    END prc_p_ValidateProveApply;
 
     /*--------------------------------------------------------------------------
-   || ä¸šåŠ¡ç¯èŠ‚ ï¼šæ ¡éªŒå‚ä¿äººå‘˜æ˜¯å¦å¯ä»¥æ–°å¢æŸä¸€ä¸ªé™©ç§
-   || è¿‡ç¨‹åç§° prc_p_ValidateAddKindYesOrNo
-   || åŠŸèƒ½æè¿° ï¼šæ ¡éªŒé™©ç§æ–°å¢
+   || ÒµÎñ»·½Ú £ºĞ£Ñé²Î±£ÈËÔ±ÊÇ·ñ¿ÉÒÔĞÂÔöÄ³Ò»¸öÏÕÖÖ
+   || ¹ı³ÌÃû³Æ prc_p_ValidateAddKindYesOrNo
+   || ¹¦ÄÜÃèÊö £ºĞ£ÑéÏÕÖÖĞÂÔö
    ||
-   || å‚æ•°æè¿° ï¼šå‚æ•°æ ‡è¯†           è¯´æ˜
+   || ²ÎÊıÃèÊö £º²ÎÊı±êÊ¶           ËµÃ÷
    ||            --------------------------------------------------------------
    ||
    ||
-   || ä½œ    è€… ï¼šycliu         å®Œæˆæ—¥æœŸ ï¼š2017-02-15
+   || ×÷    Õß £ºycliu         Íê³ÉÈÕÆÚ £º2017-02-15
    ||------------------------------------------------------------------------*/
-  PROCEDURE prc_p_ValidateAddKindYesOrNo(prm_aab001   IN VARCHAR2, --å•ä½ç¼–å·
-                                         prm_aac001   IN VARCHAR2, --ä¸ªäººç¼–å·
-                                         prm_aae140   IN VARCHAR2, --é™©ç§
-                                         prm_yab139   IN VARCHAR2, --ç»åŠæœºæ„
-                                         prm_flag     OUT VARCHAR2, --è¿”å›çŠ¶æ€æ ‡å¿—
-                                         prm_msg      OUT VARCHAR2, --æç¤ºä¿¡æ¯
-                                         prm_AppCode  OUT VARCHAR2, --æ‰§è¡Œä»£ç 
-                                         prm_ErrorMsg OUT VARCHAR2) --å‡ºé”™ä¿¡æ¯
+  PROCEDURE prc_p_ValidateAddKindYesOrNo(prm_aab001   IN VARCHAR2, --µ¥Î»±àºÅ
+                                         prm_aac001   IN VARCHAR2, --¸öÈË±àºÅ
+                                         prm_aae140   IN VARCHAR2, --ÏÕÖÖ
+                                         prm_yab139   IN VARCHAR2, --¾­°ì»ú¹¹
+                                         prm_flag     OUT VARCHAR2, --·µ»Ø×´Ì¬±êÖ¾
+                                         prm_msg      OUT VARCHAR2, --ÌáÊ¾ĞÅÏ¢
+                                         prm_AppCode  OUT VARCHAR2, --Ö´ĞĞ´úÂë
+                                         prm_ErrorMsg OUT VARCHAR2) --³ö´íĞÅÏ¢
    IS
     v_flag   varchar2(1);
     v_msg    varchar2(4500);
@@ -7592,16 +7592,16 @@ ELSE
     v_aab001 irac01.aab001%TYPE;
     v_aac031 irac01.aac031%TYPE;
   BEGIN
-    --åˆå§‹åŒ–å˜é‡
+    --³õÊ¼»¯±äÁ¿
     prm_AppCode  := GN_DEF_OK;
     prm_ErrorMsg := '';
-    v_flag   := '0'; --æ­£å¸¸(0--æ­£å¸¸ï¼Œ1--é”™è¯¯ï¼Œ2--è­¦å‘Š)
+    v_flag   := '0'; --Õı³£(0--Õı³££¬1--´íÎó£¬2--¾¯¸æ)
     v_msg    := '';
     v_yon    := '';
     v_aab001 := '';
-    v_aac031 := '0'; --é»˜è®¤æœªå‚ä¿
+    v_aac031 := '0'; --Ä¬ÈÏÎ´²Î±£
 
-    --åˆ¤æ–­è¯¥å•ä½æ˜¯å¦å‚åŠ æ­¤é™©ç§
+    --ÅĞ¶Ï¸Ãµ¥Î»ÊÇ·ñ²Î¼Ó´ËÏÕÖÖ
 
     BEGIN
       select 1
@@ -7622,27 +7622,27 @@ ELSE
     EXCEPTION
       WHEN NO_DATA_FOUND THEN
         v_flag := '1';
-        v_msg  := 'å•ä½æ²¡æœ‰å‚åŠ ' ||
+        v_msg  := 'µ¥Î»Ã»ÓĞ²Î¼Ó' ||
                   xasi2.pkg_comm.fun_getAaa103('AAE140', prm_aae140) ||
-                  ',ä¸èƒ½æ–°å¢è¯¥é™©ç§ï¼';
+                  ',²»ÄÜĞÂÔö¸ÃÏÕÖÖ£¡';
         goto label_out;
       WHEN TOO_MANY_ROWS THEN
         v_flag := '1';
-        v_msg  := 'å•ä½æ‰¾åˆ°å¤šæ¡' ||
+        v_msg  := 'µ¥Î»ÕÒµ½¶àÌõ' ||
                   xasi2.pkg_comm.fun_getAaa103('AAE140', prm_aae140) ||
-                  'å‚ä¿è®°å½•,è¯·è”ç³»ç¤¾ä¿ä¸­å¿ƒï¼';
+                  '²Î±£¼ÇÂ¼,ÇëÁªÏµÉç±£ÖĞĞÄ£¡';
         goto label_out;
       WHEN OTHERS THEN
         v_flag := '1';
-        v_msg  := 'æœªçŸ¥é”™è¯¯ï¼Œè¯·è”ç³»ç³»ç»Ÿç»´æŠ¤äººå‘˜ï¼';
+        v_msg  := 'Î´Öª´íÎó£¬ÇëÁªÏµÏµÍ³Î¬»¤ÈËÔ±£¡';
         goto label_out;
     END;
 
     if v_yon <> '1' then
       v_flag := '1';
-      v_msg  := 'å•ä½æ²¡æœ‰å‚åŠ ' ||
+      v_msg  := 'µ¥Î»Ã»ÓĞ²Î¼Ó' ||
                 xasi2.pkg_comm.fun_getAaa103('AAE140', prm_aae140) ||
-                ',ä¸èƒ½æ–°å¢è¯¥é™©ç§ï¼';
+                ',²»ÄÜĞÂÔö¸ÃÏÕÖÖ£¡';
       goto label_out;
     end if;
 
@@ -7670,9 +7670,9 @@ ELSE
 
       if v_aab001 is not null or v_aac031 = '1' then
         v_flag := '1';
-        v_msg  := 'æ­¤äººå·²ç»åœ¨æœ¬å•ä½çš„' ||
+        v_msg  := '´ËÈËÒÑ¾­ÔÚ±¾µ¥Î»µÄ' ||
                   xasi2.pkg_comm.fun_getAaa103('AAE140', prm_aae140) ||
-                  'ä¸º'||xasi2.pkg_comm.fun_getAaa103('AAC031', v_aac031)||'çŠ¶æ€ï¼';
+                  'Îª'||xasi2.pkg_comm.fun_getAaa103('AAC031', v_aac031)||'×´Ì¬£¡';
         goto label_out;
       end if;
 
@@ -7699,14 +7699,14 @@ ELSE
 
       if v_aab001 is not null or v_aac031 = '1' then
         v_flag := '1';
-        v_msg  := 'æ­¤äººå·²ç»åœ¨' || v_aab001 || 'å•ä½å‚åŠ äº†' ||
+        v_msg  := '´ËÈËÒÑ¾­ÔÚ' || v_aab001 || 'µ¥Î»²Î¼ÓÁË' ||
                   xasi2.pkg_comm.fun_getAaa103('AAE140', prm_aae140) ||
-                  ',ä¸èƒ½æ–°å¢è¯¥é™©ç§ï¼';
+                  ',²»ÄÜĞÂÔö¸ÃÏÕÖÖ£¡';
         goto label_out;
       end if;*/
     else
 
-      --åˆ¤æ–­äººå‘˜è¯¥é™©ç§æ˜¯å¦æ­£å¸¸å‚ä¿
+      --ÅĞ¶ÏÈËÔ±¸ÃÏÕÖÖÊÇ·ñÕı³£²Î±£
       BEGIN
         select r.aab001, r.aac031
           into v_aab001, v_aac031
@@ -7727,21 +7727,21 @@ ELSE
           goto label_out;
         WHEN TOO_MANY_ROWS THEN
           v_flag := '1';
-          v_msg  := 'æ­¤äººæ‰¾åˆ°å¤šæ¡' ||
+          v_msg  := '´ËÈËÕÒµ½¶àÌõ' ||
                     xasi2.pkg_comm.fun_getAaa103('AAE140', prm_aae140) ||
-                    'å‚ä¿è®°å½•,è¯·è”ç³»ç¤¾ä¿ä¸­å¿ƒï¼';
+                    '²Î±£¼ÇÂ¼,ÇëÁªÏµÉç±£ÖĞĞÄ£¡';
           goto label_out;
         WHEN OTHERS THEN
           v_flag := '1';
-          v_msg  := 'æœªçŸ¥é”™è¯¯ï¼Œè¯·è”ç³»ç³»ç»Ÿç»´æŠ¤äººå‘˜ï¼';
+          v_msg  := 'Î´Öª´íÎó£¬ÇëÁªÏµÏµÍ³Î¬»¤ÈËÔ±£¡';
           goto label_out;
       END;
 
       if v_aab001 is not null or v_aac031 is not null then
         v_flag := '1';
-        v_msg  := 'æ­¤äººå·²ç»åœ¨' || v_aab001 || 'å•ä½çš„' ||
+        v_msg  := '´ËÈËÒÑ¾­ÔÚ' || v_aab001 || 'µ¥Î»µÄ' ||
                   xasi2.pkg_comm.fun_getAaa103('AAE140', prm_aae140) ||
-                  'ä¸º'||xasi2.pkg_comm.fun_getAaa103('AAC031', v_aac031)||'çŠ¶æ€ï¼';
+                  'Îª'||xasi2.pkg_comm.fun_getAaa103('AAC031', v_aac031)||'×´Ì¬£¡';
         goto label_out;
       end if;
     end if;
@@ -7752,14 +7752,14 @@ ELSE
 
   EXCEPTION
     WHEN OTHERS THEN
-      /*å…³é—­æ‰“å¼€çš„æ¸¸æ ‡*/
+      /*¹Ø±Õ´ò¿ªµÄÓÎ±ê*/
       ROLLBACK;
       prm_AppCode  := gn_def_ERR;
-      prm_ErrorMsg := 'æ•°æ®åº“é”™è¯¯:' || SQLERRM;
+      prm_ErrorMsg := 'Êı¾İ¿â´íÎó:' || SQLERRM;
       RETURN;
   END prc_p_ValidateAddKindYesOrNo;
 
---æ ¡éªŒæ‰¹é‡äººå‘˜æ–°å¢é™©ç§
+--Ğ£ÑéÅúÁ¿ÈËÔ±ĞÂÔöÏÕÖÖ
 PROCEDURE prc_p_ValidKindsBatchAddCheck(PRM_IAZ018 IN VARCHAR2,
                                        PRM_AAB001   IN VARCHAR2,
                                        PRM_IAA100   IN VARCHAR2,
@@ -7876,17 +7876,17 @@ BEGIN
 
   IF prm_aab001 IS NULL THEN
     prm_AppCode  := PRE_ERRCODE || GN_DEF_ERR;
-    prm_ErrorMsg := 'prm_aab001å•ä½ç¼–å·ä¸èƒ½ä¸ºç©ºï¼';
+    prm_ErrorMsg := 'prm_aab001µ¥Î»±àºÅ²»ÄÜÎª¿Õ£¡';
     RETURN;
   END IF;
 
   IF PRM_IAA100 IS NULL THEN
     prm_AppCode  := PRE_ERRCODE || GN_DEF_ERR;
-    prm_ErrorMsg := 'prm_iaa100ç”³æŠ¥æœˆåº¦ä¸èƒ½ä¸ºç©ºï¼';
+    prm_ErrorMsg := 'prm_iaa100Éê±¨ÔÂ¶È²»ÄÜÎª¿Õ£¡';
     RETURN;
   END IF;
 
-  --è·å–å¹´åº¦çœçº§æœ€ä½å·¥èµ„
+  --»ñÈ¡Äê¶ÈÊ¡¼¶×îµÍ¹¤×Ê
   SELECT aaa010
     into v_aaa010
     FROM xasi2.AA02A1
@@ -7902,12 +7902,12 @@ BEGIN
     v_aae311  :='0';
     v_aae120  :='0';
 
-    v_flag       := '0'; --æ ¡éªŒæ ‡å¿—ï¼ˆ0-æ­£å¸¸ï¼›1-é”™è¯¯ï¼›2 -è­¦å‘Šï¼‰
+    v_flag       := '0'; --Ğ£Ñé±êÖ¾£¨0-Õı³££»1-´íÎó£»2 -¾¯¸æ£©
     v_msg        := '';
     num_count    := 0;
     v_aac040_old := 0;
 
-    --è·å–å„ç§å½¢å¼çš„è¯ä»¶å·ç 
+    --»ñÈ¡¸÷ÖÖĞÎÊ½µÄÖ¤¼şºÅÂë
     var_15aac002  := SUBSTR(rec_temp.aac002, 1, 6) ||
                      SUBSTR(rec_temp.aac002, 9, 9);
     var_aac002Low := LOWER(rec_temp.aac002);
@@ -7918,15 +7918,15 @@ BEGIN
      WHERE AAE120 = '0'
        AND A.AAC002 IN (var_15aac002, var_aac002Low, rec_temp.aac002)
        and replace(a.aac003, ' ', '') = rec_temp.aac003
-       AND AAC003 NOT LIKE '%é‡å¤%';
+       AND AAC003 NOT LIKE '%ÖØ¸´%';
 
     IF num_count = 0 THEN
-      v_msg  := 'è¯ä»¶å·ä¸ºï¼š[' || rec_temp.aac002 ||
-                ']çš„äººå‘˜ä¸å­˜åœ¨ä¸ªäººä¿¡æ¯æˆ–è€…å§“åæœ‰è¯¯ï¼Œè¯·åœ¨æ–°å‚ä¿æ¨¡å—é‡Œæ“ä½œï¼';
+      v_msg  := 'Ö¤¼şºÅÎª£º[' || rec_temp.aac002 ||
+                ']µÄÈËÔ±²»´æÔÚ¸öÈËĞÅÏ¢»òÕßĞÕÃûÓĞÎó£¬ÇëÔÚĞÂ²Î±£Ä£¿éÀï²Ù×÷£¡';
       v_flag := '1';
     END IF;
     IF num_count > 1 THEN
-      v_msg  := 'è¯ä»¶å·ä¸ºï¼š[' || rec_temp.aac002 || ']çš„äººå‘˜å­˜åœ¨å¤šæ¡ä¸ªäººä¿¡æ¯ï¼Œè¯·åœ¨è”ç³»ç¤¾ä¿ä¸­å¿ƒï¼';
+      v_msg  := 'Ö¤¼şºÅÎª£º[' || rec_temp.aac002 || ']µÄÈËÔ±´æÔÚ¶àÌõ¸öÈËĞÅÏ¢£¬ÇëÔÚÁªÏµÉç±£ÖĞĞÄ£¡';
       v_flag := '1';
     END IF;
 
@@ -7937,12 +7937,12 @@ BEGIN
        WHERE AAE120 = '0'
          AND A.AAC002 IN (var_15aac002, var_aac002Low, rec_temp.aac002)
          and replace(a.aac003, ' ', '') = rec_temp.aac003
-         AND AAC003 NOT LIKE '%é‡å¤%';
+         AND AAC003 NOT LIKE '%ÖØ¸´%';
     exception
       when no_data_found then
         v_flag := '1';
-        v_msg  := 'è¯ä»¶å·ä¸ºï¼š[' || rec_temp.aac002 ||
-                  ']çš„äººå‘˜ä¸å­˜åœ¨ä¸ªäººä¿¡æ¯æˆ–è€…å§“åæœ‰è¯¯ï¼Œè¯·åœ¨æ–°å‚ä¿æ¨¡å—é‡Œæ“ä½œï¼';
+        v_msg  := 'Ö¤¼şºÅÎª£º[' || rec_temp.aac002 ||
+                  ']µÄÈËÔ±²»´æÔÚ¸öÈËĞÅÏ¢»òÕßĞÕÃûÓĞÎó£¬ÇëÔÚĞÂ²Î±£Ä£¿éÀï²Ù×÷£¡';
     end;
 
     if v_flag = '0' then
@@ -7959,7 +7959,7 @@ BEGIN
 
    /* if v_flag = '0' and rec_temp.aac040 < v_aaa010 then
       v_flag := '1';
-      v_msg  := 'ç”³æŠ¥å·¥èµ„ä½äºé™•è¥¿çœæœ€ä½å·¥èµ„æ ‡å‡†' || v_aaa010 || '!';
+      v_msg  := 'Éê±¨¹¤×ÊµÍÓÚÉÂÎ÷Ê¡×îµÍ¹¤×Ê±ê×¼' || v_aaa010 || '!';
     end if;*/
 
     if v_flag = '0' then
@@ -7979,8 +7979,8 @@ BEGIN
                  AND AAE110 = '2');
       if v_aac040_old != rec_temp.aac040 then
         v_flag := '1';
-        v_msg  := 'ç”³æŠ¥å·¥èµ„' || rec_temp.aac040 || 'ä¸ä¹‹å‰å‚ä¿å·¥èµ„' || v_aac040_old ||
-                  'ä¸ä¸€è‡´!';
+        v_msg  := 'Éê±¨¹¤×Ê' || rec_temp.aac040 || 'ÓëÖ®Ç°²Î±£¹¤×Ê' || v_aac040_old ||
+                  '²»Ò»ÖÂ!';
       end if;
     end if;
 
@@ -8092,7 +8092,7 @@ BEGIN
 
     if v_flag = '0' and rec_temp.aae110 = '1' and rec_temp.aae120 = '1' then
       v_flag := '1';
-      v_msg  := 'ä¼ä¸šå…»è€å’Œæœºå…³å…»è€é™©ç§ä¸èƒ½åŒæ—¶å‚ä¿ï¼';
+      v_msg  := 'ÆóÒµÑøÀÏºÍ»ú¹ØÑøÀÏÏÕÖÖ²»ÄÜÍ¬Ê±²Î±££¡';
     end if;
 
     if v_flag is null then
@@ -8179,13 +8179,13 @@ BEGIN
 
       if sql%rowcount = 0 then
         prm_appcode  := PRE_ERRCODE || GN_DEF_ERR;
-        prm_errormsg := 'prc_p_ValidKindBatchAddCheckå‡ºé”™,å‡ºé”™åŸå› :æ²¡æœ‰æ›´æ–°åˆ°æ ¡éªŒç»“æœä¿¡æ¯ï¼';
+        prm_errormsg := 'prc_p_ValidKindBatchAddCheck³ö´í,³ö´íÔ­Òò:Ã»ÓĞ¸üĞÂµ½Ğ£Ñé½á¹ûĞÅÏ¢£¡';
         return;
       end if;
 
       if sql%rowcount > 1 then
         prm_appcode  := PRE_ERRCODE || GN_DEF_ERR;
-        prm_errormsg := 'prc_p_ValidKindBatchAddCheckå‡ºé”™,å‡ºé”™åŸå› :æ›´æ–°åˆ°å¤šæ¡æ ¡éªŒç»“æœä¿¡æ¯ï¼';
+        prm_errormsg := 'prc_p_ValidKindBatchAddCheck³ö´í,³ö´íÔ­Òò:¸üĞÂµ½¶àÌõĞ£Ñé½á¹ûĞÅÏ¢£¡';
         return;
       end if;
     else
@@ -8207,13 +8207,13 @@ BEGIN
 
       if sql%rowcount = 0 then
         prm_appcode  := PRE_ERRCODE || GN_DEF_ERR;
-        prm_errormsg := 'prc_p_ValidKindBatchAddCheckå‡ºé”™,å‡ºé”™åŸå› :æ²¡æœ‰æ›´æ–°åˆ°æ ¡éªŒç»“æœä¿¡æ¯ï¼';
+        prm_errormsg := 'prc_p_ValidKindBatchAddCheck³ö´í,³ö´íÔ­Òò:Ã»ÓĞ¸üĞÂµ½Ğ£Ñé½á¹ûĞÅÏ¢£¡';
         return;
       end if;
 
       if sql%rowcount > 1 then
         prm_appcode  := PRE_ERRCODE || GN_DEF_ERR;
-        prm_errormsg := 'prc_p_ValidKindBatchAddCheckå‡ºé”™,å‡ºé”™åŸå› :æ›´æ–°åˆ°å¤šæ¡æ ¡éªŒç»“æœä¿¡æ¯ï¼';
+        prm_errormsg := 'prc_p_ValidKindBatchAddCheck³ö´í,³ö´íÔ­Òò:¸üĞÂµ½¶àÌõĞ£Ñé½á¹ûĞÅÏ¢£¡';
         return;
       end if;
     end if;
@@ -8224,12 +8224,12 @@ EXCEPTION
   WHEN OTHERS THEN
     ROLLBACK;
     PRM_APPCODE  := PRE_ERRCODE || GN_DEF_ERR;
-    PRM_ERRORMSG := 'prc_p_ValidKindBatchAddCheckå‡ºé”™,å‡ºé”™åŸå› :' || SQLERRM ||
+    PRM_ERRORMSG := 'prc_p_ValidKindBatchAddCheck³ö´í,³ö´íÔ­Òò:' || SQLERRM ||
                     DBMS_UTILITY.FORMAT_ERROR_BACKTRACE();
     RETURN;
 END prc_p_ValidKindsBatchAddCheck;
 
- --æ ¡éªŒæ‰¹é‡äººå‘˜ç»­ä¿
+ --Ğ£ÑéÅúÁ¿ÈËÔ±Ğø±£
 PROCEDURE prc_p_ValidBatchContinueCheck(PRM_IAZ018 IN VARCHAR2,
                                        PRM_AAB001   IN VARCHAR2,
                                        PRM_IAA100   IN VARCHAR2,
@@ -8264,7 +8264,7 @@ PROCEDURE prc_p_ValidBatchContinueCheck(PRM_IAZ018 IN VARCHAR2,
   v_aae410      irac01.aae410%TYPE;
   v_aae510      irac01.aae510%TYPE;
   v_aae311      irac01.aae311%TYPE;
-  v_aac012      irac01.aac012%TYPE; 
+  v_aac012      irac01.aac012%TYPE;
   n_ac02count    NUMBER;
   n_ab02count    NUMBER;
   COUNT_JM       NUMBER;
@@ -8285,7 +8285,7 @@ PROCEDURE prc_p_ValidBatchContinueCheck(PRM_IAZ018 IN VARCHAR2,
   X            VARCHAR2(6);
   var_aac006   irac01.aac006%TYPE;
   woman_worker_months  NUMBER;
-  var_aae110     VARCHAR2(9); 
+  var_aae110     VARCHAR2(9);
   cursor cur_temp is
     SELECT a.iaz018,
        a.iaa001,
@@ -8371,7 +8371,7 @@ PROCEDURE prc_p_ValidBatchContinueCheck(PRM_IAZ018 IN VARCHAR2,
       WHERE AAE120 = '0'
        AND A.AAC002 IN (var_15aac002, var_aac002Low, var_18aac002)
        and replace(a.aac003, ' ', '') = var_aac003
-       AND AAC003 NOT LIKE '%é‡å¤%';
+       AND AAC003 NOT LIKE '%ÖØ¸´%';
 
 BEGIN
   prm_AppCode  := GN_DEF_OK;
@@ -8384,22 +8384,22 @@ BEGIN
   SELECT count(1) INTO n_ab02count FROM xasi2.ab02 WHERE aab001=prm_aab001 AND aab051='1';
   IF prm_iaz018 IS NULL THEN
     prm_AppCode  := PRE_ERRCODE || GN_DEF_ERR;
-    prm_ErrorMsg := 'æµæ°´å·ä¸èƒ½ä¸ºç©ºï¼';
+    prm_ErrorMsg := 'Á÷Ë®ºÅ²»ÄÜÎª¿Õ£¡';
     RETURN;
   END IF;
   IF prm_aab001 IS NULL THEN
     prm_AppCode  := PRE_ERRCODE || GN_DEF_ERR;
-    prm_ErrorMsg := 'prm_aab001å•ä½ç¼–å·ä¸èƒ½ä¸ºç©ºï¼';
+    prm_ErrorMsg := 'prm_aab001µ¥Î»±àºÅ²»ÄÜÎª¿Õ£¡';
     RETURN;
   END IF;
 
   IF PRM_IAA100 IS NULL THEN
     prm_AppCode  := PRE_ERRCODE || GN_DEF_ERR;
-    prm_ErrorMsg := 'prm_iaa100ç”³æŠ¥æœˆåº¦ä¸èƒ½ä¸ºç©ºï¼';
+    prm_ErrorMsg := 'prm_iaa100Éê±¨ÔÂ¶È²»ÄÜÎª¿Õ£¡';
     RETURN;
   END IF;
 
-  --è·å–å¹´åº¦çœçº§æœ€ä½å·¥èµ„
+  --»ñÈ¡Äê¶ÈÊ¡¼¶×îµÍ¹¤×Ê
   SELECT aaa010
     into v_aaa010
     FROM xasi2.AA02A1
@@ -8408,7 +8408,7 @@ BEGIN
      AND YAA001 = '13';
 
   FOR REC_TEMP IN CUR_TEMP LOOP
-    v_flag       := '0'; --æ ¡éªŒæ ‡å¿—ï¼ˆ0-æ­£å¸¸ï¼›1-é”™è¯¯ï¼›2 -è­¦å‘Šï¼‰
+    v_flag       := '0'; --Ğ£Ñé±êÖ¾£¨0-Õı³££»1-´íÎó£»2 -¾¯¸æ£©
     v_msg        := '';
     num_count    := 0;
     v_aac040_old := 0;
@@ -8419,17 +8419,17 @@ BEGIN
     var_aae110   := rec_temp.aae110;
     xb_aac004    := rec_temp.aac004;
     v_aac012     := rec_temp.aac012;
-     
+
 
       SELECT count(1)
      INTO num_count
     FROM  wsjb.tmp_irac01a2
     WHERE aac002 = rec_temp.aac002;
     IF num_count >1 THEN
-    v_msg  := v_errmsg||'èº«ä»½è¯å·ä¸º'||rec_temp.aac002||'å§“åä¸º'||rec_temp.aac003||'å­˜åœ¨é‡å¤ç»­ä¿ä¿¡æ¯è¯·å‹¿é‡å¤å¢åŠ ï¼'||v_msg;
+    v_msg  := v_errmsg||'Éí·İÖ¤ºÅÎª'||rec_temp.aac002||'ĞÕÃûÎª'||rec_temp.aac003||'´æÔÚÖØ¸´Ğø±£ĞÅÏ¢ÇëÎğÖØ¸´Ôö¼Ó£¡'||v_msg;
     v_flag := '1';
     END IF;
-    --è·å–å„ç§å½¢å¼çš„è¯ä»¶å·ç 
+    --»ñÈ¡¸÷ÖÖĞÎÊ½µÄÖ¤¼şºÅÂë
     var_15aac002  := SUBSTR(rec_temp.aac002, 1, 6) ||
                      SUBSTR(rec_temp.aac002, 9, 9);
     var_aac002Low := LOWER(rec_temp.aac002);
@@ -8444,7 +8444,7 @@ BEGIN
      WHERE AAE120 = '0'
        AND A.AAC002 IN (var_15aac002, var_aac002Low, rec_temp.aac002)
        and replace(a.aac003, ' ', '') = rec_temp.aac003
-       AND AAC003 NOT LIKE '%é‡å¤%';
+       AND AAC003 NOT LIKE '%ÖØ¸´%';
 
     /*IF num_count = 0 THEN
      SELECT count(1)
@@ -8453,13 +8453,13 @@ BEGIN
      WHERE AAE120 = '0'
        AND A.AAC002 IN (var_15aac002, var_aac002Low, rec_temp.aac002)
        and replace(a.aac003, ' ', '') = rec_temp.aac003
-       AND AAC003 NOT LIKE '%é‡å¤%';
+       AND AAC003 NOT LIKE '%ÖØ¸´%';
        IF num_count = 0 THEN
-      v_msg  := v_errmsg||v_msg|| 'è¯ä»¶å·ä¸ºï¼š[' || rec_temp.aac002 ||
-                ']çš„äººå‘˜ä¸å­˜åœ¨ä¸ªäººä¿¡æ¯æˆ–è€…å§“åæœ‰è¯¯ï¼Œè¯·åœ¨æ–°å‚ä¿æ¨¡å—é‡Œæ“ä½œï¼';
+      v_msg  := v_errmsg||v_msg|| 'Ö¤¼şºÅÎª£º[' || rec_temp.aac002 ||
+                ']µÄÈËÔ±²»´æÔÚ¸öÈËĞÅÏ¢»òÕßĞÕÃûÓĞÎó£¬ÇëÔÚĞÂ²Î±£Ä£¿éÀï²Ù×÷£¡';
       v_flag := '1';
       ELSIF num_count > 1 THEN
-      v_msg  :=  v_errmsg||v_msg||'è¯ä»¶å·ä¸ºï¼š[' || rec_temp.aac002 || ']çš„äººå‘˜å­˜åœ¨å¤šæ¡ä¸ªäººä¿¡æ¯ï¼Œè¯·åœ¨è”ç³»ç¤¾ä¿ä¸­å¿ƒï¼';
+      v_msg  :=  v_errmsg||v_msg||'Ö¤¼şºÅÎª£º[' || rec_temp.aac002 || ']µÄÈËÔ±´æÔÚ¶àÌõ¸öÈËĞÅÏ¢£¬ÇëÔÚÁªÏµÉç±£ÖĞĞÄ£¡';
       v_flag := '1';
     END IF;*/
 
@@ -8475,13 +8475,13 @@ BEGIN
        WHERE AAE120 = '0'
          AND A.AAC002 IN (var_15aac002, var_aac002Low, rec_temp.aac002)
          and replace(a.aac003, ' ', '') = rec_temp.aac003
-         AND AAC003 NOT LIKE '%é‡å¤%';
+         AND AAC003 NOT LIKE '%ÖØ¸´%';
 
      END  IF ;
 
      IF   num_count > 1 THEN
 
-           v_msg := 'è¯¥èº«ä»½è¯å·å·²ç»å­˜åœ¨å¤šä¸ªåŒ»ä¿ç¼–å·,è¯·åœ¨å•ä¸ªç»­ä¿æ¨¡å—æ“ä½œï¼';
+           v_msg := '¸ÃÉí·İÖ¤ºÅÒÑ¾­´æÔÚ¶à¸öÒ½±£±àºÅ,ÇëÔÚµ¥¸öĞø±£Ä£¿é²Ù×÷£¡';
            v_flag :='1';
 
      END  IF;
@@ -8491,36 +8491,36 @@ BEGIN
            select to_number(to_char(min(aac006),'yyyymm')),aac004,aac008   INTO nl_aac006 ,xb_aac004,zy_aac008
             from xasi2.ac01
            where aac002 IN (var_15aac002, var_aac002Low,var_18aac002)
-             AND AAC003 NOT LIKE '%é‡å¤%'
+             AND AAC003 NOT LIKE '%ÖØ¸´%'
              AND rownum = 1
              group by aac004 , aac008;
 
            select trunc(months_between(sysdate,to_date(nl_aac006,'yyyymm'))) INTO sj_months from dual;
 
-           --  æ£€éªŒé€æœˆäººå‘˜  ac01   aac008  2   kc01  akc021 11
-             
+           --  ¼ìÑéÖğÔÂÈËÔ±  ac01   aac008  2   kc01  akc021 11
+
            select count(1)
              into yl_count from wsjb.irac01a7_yl
             where aae123 = '2'
               and aac002  IN (var_15aac002, var_aac002Low,var_18aac002);
-                   
+
       IF  yl_count = 0 THEN
-     
+
 
         IF xb_aac004 = '1' and xb_aac004 IS NOT NULL  and  sj_months >=  man_months  THEN
 
 
            select akc021  INTO  zy_akc021 from xasi2.kc01    where aac001 = v_aac001;
-         
-           
+
+
                IF   zy_aac008 = 2 and  zy_akc021 =11 THEN
-                  --  ä¸åšä¸šåŠ¡å¤„ç†
+                  --  ²»×öÒµÎñ´¦Àí
                  select akc021  INTO  zy_akc021 from xasi2.kc01   where aac001 = v_aac001;
 
                 ELSIF  (xb_aac004 = '1' and xb_aac004 IS NOT NULL  and  sj_months >=  man_months)   THEN
 
                    v_flag := '1';
-                   v_msg  := 'æ­¤äººå‘˜å¹´çºªè¶…è¿‡éœ€è¦ç»­ä¿çš„å¹´çºªï¼';
+                   v_msg  := '´ËÈËÔ±Äê¼Í³¬¹ıĞèÒªĞø±£µÄÄê¼Í£¡';
 
                END IF;
           END IF;
@@ -8529,52 +8529,52 @@ BEGIN
 
           IF xb_aac004 = '2' and xb_aac004 IS NOT NULL  and  sj_months >=  woman_months  THEN
             IF   zy_aac008 = 2 and  zy_akc021 =11 THEN
-               --  ä¸åšä¸šåŠ¡å¤„ç†
+               --  ²»×öÒµÎñ´¦Àí
              select akc021  INTO  zy_akc021 from xasi2.kc01   where aac001 = v_aac001;
               ELSIF    (xb_aac004 = '2' and xb_aac004 IS NOT NULL  and  sj_months >=  woman_months)  THEN
-                
+
               v_flag := '1';
-              v_msg  := 'æ­¤äººå‘˜å¹´çºªè¶…è¿‡éœ€è¦ç»­ä¿çš„å¹´çºªï¼';
+              v_msg  := '´ËÈËÔ±Äê¼Í³¬¹ıĞèÒªĞø±£µÄÄê¼Í£¡';
             END IF;
          END IF;
-         
-        END IF ; --  å…»è€ç»§ç»­ç¼´è´¹æ ‡å¿—
-          
-          
-        -- begin 20190703  
-       select to_number(to_char(min(aac006),'yyyymm'))    INTO nl_aac006  
+
+        END IF ; --  ÑøÀÏ¼ÌĞø½É·Ñ±êÖ¾
+
+
+        -- begin 20190703
+       select to_number(to_char(min(aac006),'yyyymm'))    INTO nl_aac006
             from xasi2.ac01
            where aac002 IN (var_15aac002, var_aac002Low,var_18aac002)
-             AND AAC003 NOT LIKE '%é‡å¤%'
+             AND AAC003 NOT LIKE '%ÖØ¸´%'
              AND rownum = 1
             ;
 
            select trunc(months_between(sysdate,to_date(nl_aac006,'yyyymm'))) INTO sj_months from dual;
-           
-         IF   var_aae110 = '1' and  xb_aac004 = '2' and xb_aac004 IS NOT NULL  THEN --  å…»è€é¦–æ¬¡å‚ä¿
+
+         IF   var_aae110 = '1' and  xb_aac004 = '2' and xb_aac004 IS NOT NULL  THEN --  ÑøÀÏÊ×´Î²Î±£
                 select X INTO X from dual;
-         
-             --  å¤„ç†å¹²éƒ¨  55 4  å·¥äºº 50  1  é’ˆå¯¹å¥³æ€§   
+
+             --  ´¦Àí¸É²¿  55 4  ¹¤ÈË 50  1  Õë¶ÔÅ®ĞÔ
                  IF   sj_months > woman_worker_months  and v_aac012 = '1' THEN
                       v_flag := '1';
-                      v_msg  := 'è¯¥äººå‘˜ä¸ªäººèº«ä»½ä¸ºå·¥äººï¼Œè¶…è¿‡éœ€è¦ç»­ä¿çš„å¹´çºªï¼';
-                     
+                      v_msg  := '¸ÃÈËÔ±¸öÈËÉí·İÎª¹¤ÈË£¬³¬¹ıĞèÒªĞø±£µÄÄê¼Í£¡';
+
                  ELSIF   sj_months >=  woman_months and  v_aac012 = '4'  THEN
                       v_flag := '1';
-                      v_msg  := 'è¯¥äººå‘˜ä¸ªäººèº«ä»½ä¸ºå¹²éƒ¨ï¼Œè¶…è¿‡éœ€è¦ç»­ä¿çš„å¹´çºªï¼';
-                      
+                      v_msg  := '¸ÃÈËÔ±¸öÈËÉí·İÎª¸É²¿£¬³¬¹ıĞèÒªĞø±£µÄÄê¼Í£¡';
+
                  END IF;
-             
+
              END IF;
-   
+
           -- end  20190708
-         
+
       END IF;
 
 
      IF  num_count >= 1 THEN
 
-       --å¾ªç¯æ ¡éªŒac01
+       --Ñ­»·Ğ£Ñéac01
         FOR rec_cur_ac01 IN cur_ac01 LOOP
     --  BEGIN
          SELECT aac001 INTO var_aac001_more   FROM xasi2.ac01 A
@@ -8582,11 +8582,11 @@ BEGIN
          AND A.aac001 = rec_cur_ac01.aac001
          AND A.AAC002 IN (var_15aac002, var_aac002Low, rec_cur_ac01.aac002)
          and replace(a.aac003, ' ', '') = rec_cur_ac01.aac003
-         AND AAC003 NOT LIKE '%é‡å¤%';
+         AND AAC003 NOT LIKE '%ÖØ¸´%';
       --  EXCEPTION
          --    WHEN others THEN
            IF var_aac001_more IS NULL  OR var_aac001_more = '' THEN
-             v_msg := v_errmsg||v_msg||'è·å–ä¸åˆ°ä¸ªäººç¼–å·!';
+             v_msg := v_errmsg||v_msg||'»ñÈ¡²»µ½¸öÈË±àºÅ!';
              v_flag  := '1';
             END IF;
          --  RETURN;
@@ -8605,7 +8605,7 @@ BEGIN
                           FROM XASI2.AC02K1
                          WHERE AAC001 = var_aac001_more
                            AND AAC031 = '1');
-        v_msg  := 'æ­¤èº«ä»½è¯å·ç äººå‘˜åŒ»ç–—ä¿é™©å…³ç³»ç›®å‰åœ¨ç¤¾åŒºï¼š' || VAR_AAB004 || 'å‚åŠ å±…æ°‘åŒ»ä¿ï¼Œå§“å:'  ||'ä¸ªäººç¼–å·ï¼š'||var_aac001_more|| ',å‚ä¿çŠ¶æ€:å‚ä¿ç¼´è´¹ã€‚';
+        v_msg  := '´ËÉí·İÖ¤ºÅÂëÈËÔ±Ò½ÁÆ±£ÏÕ¹ØÏµÄ¿Ç°ÔÚÉçÇø£º' || VAR_AAB004 || '²Î¼Ó¾ÓÃñÒ½±££¬ĞÕÃû:'  ||'¸öÈË±àºÅ£º'||var_aac001_more|| ',²Î±£×´Ì¬:²Î±£½É·Ñ¡£';
         v_flag := '3';
        END IF;
         END LOOP;
@@ -8617,9 +8617,9 @@ BEGIN
        where aac001 <> rec_temp.aac001
          and aac002 IN (var_15aac002, var_aac002Low, rec_temp.aac002)
          and replace(aac003, ' ', '') = rec_temp.aac003
-         AND AAC003 NOT LIKE '%é‡å¤%';
+         AND AAC003 NOT LIKE '%ÖØ¸´%';
          IF v_aac001 IS NULL  OR  v_aac001 = '' THEN
-            v_msg := v_errmsg||v_msg||'è·å–ä¸åˆ°ä¸ªäººç¼–å·!';
+            v_msg := v_errmsg||v_msg||'»ñÈ¡²»µ½¸öÈË±àºÅ!';
             v_flag  := '1';
       END IF;
 
@@ -8636,66 +8636,66 @@ BEGIN
                           FROM XASI2.AC02K1
                          WHERE AAC001 = v_aac001
                            AND AAC031 = '1');
-        v_msg  := 'æ­¤èº«ä»½è¯å·ç äººå‘˜åŒ»ç–—ä¿é™©å…³ç³»ç›®å‰åœ¨ç¤¾åŒºï¼š' || VAR_AAB004 || 'å‚åŠ å±…æ°‘åŒ»ä¿ï¼Œå§“å:'  ||'ä¸ªäººç¼–å·ï¼š'||v_aac001|| ',å‚ä¿çŠ¶æ€:å‚ä¿ç¼´è´¹ã€‚';
+        v_msg  := '´ËÉí·İÖ¤ºÅÂëÈËÔ±Ò½ÁÆ±£ÏÕ¹ØÏµÄ¿Ç°ÔÚÉçÇø£º' || VAR_AAB004 || '²Î¼Ó¾ÓÃñÒ½±££¬ĞÕÃû:'  ||'¸öÈË±àºÅ£º'||v_aac001|| ',²Î±£×´Ì¬:²Î±£½É·Ñ¡£';
         v_flag := '3';
 
       END IF;
      END IF;
      */
 
-  -- åˆ¤æ–­æ˜¯å¦åœ¨å…¶ä»–å•ä½å‚ä¿
+  -- ÅĞ¶ÏÊÇ·ñÔÚÆäËûµ¥Î»²Î±£
 
    /* SElECT  count(*) INTO  Count_ZG  FROM  xasi2.ac02 where aac001 =   v_aac001
     and aab001 <> prm_aab001  and aac031 ='1' and  aae140 <> 04;
     IF   Count_ZG > 0 THEN
-       v_msg  := 'æ­¤èº«ä»½è¯å·ç äººå‘˜åœ¨å…¶ä»–å•ä½å‚åŠ èŒå·¥åŒ»ä¿ï¼Œå§“å:'  ||'ä¸ªäººç¼–å·ï¼š'||v_aac001|| ',å‚ä¿çŠ¶æ€:å‚ä¿ç¼´è´¹ã€‚';
+       v_msg  := '´ËÉí·İÖ¤ºÅÂëÈËÔ±ÔÚÆäËûµ¥Î»²Î¼ÓÖ°¹¤Ò½±££¬ĞÕÃû:'  ||'¸öÈË±àºÅ£º'||v_aac001|| ',²Î±£×´Ì¬:²Î±£½É·Ñ¡£';
         v_flag := '5';
     END IF;
   */
 
-    --åˆ¤æ–­å¤±ä¸šæ˜¯å¦ä¸ºç»­
+    --ÅĞ¶ÏÊ§ÒµÊÇ·ñÎªĞø
     IF  rec_temp.aae210 = '1' THEN
     SELECT count(1) INTO num_count FROM xasi2.ac02 WHERE aac001 = v_aac001 AND aae140='02';
     IF num_count > 0 THEN
     UPDATE wsjb.tmp_irac01a2  SET aae210 ='10' WHERE aac002 = REC_TEMP.aac002 AND iaz018 = prm_iaz018 ;
     END IF;
     END IF;
-   --åˆ¤æ–­åŒ»ç–—æ˜¯å¦ä¸ºç»­
+   --ÅĞ¶ÏÒ½ÁÆÊÇ·ñÎªĞø
     IF rec_temp.aae310 = '1' THEN
     SELECT count(1) INTO num_count FROM xasi2.ac02 WHERE aac001 = v_aac001 AND aae140='03';
     IF num_count > 0 THEN
     UPDATE wsjb.tmp_irac01a2  SET aae310 ='10' WHERE aac002 = REC_TEMP.aac002 AND iaz018 = prm_iaz018 ;
     END IF;
     END IF;
-     --åˆ¤æ–­å·¥ä¼¤æ˜¯å¦ä¸ºç»­
+     --ÅĞ¶Ï¹¤ÉËÊÇ·ñÎªĞø
     IF  rec_temp.aae410 = '1' THEN
     SELECT count(1) INTO num_count FROM xasi2.ac02 WHERE aac001 = v_aac001 AND aae140='04';
     IF num_count > 0 THEN
     UPDATE wsjb.tmp_irac01a2  SET aae410 ='10' WHERE aac002 = REC_TEMP.aac002 AND iaz018 = prm_iaz018 ;
     END IF;
     END IF;
-     --åˆ¤æ–­ç”Ÿè‚²æ˜¯å¦ä¸ºç»­
+     --ÅĞ¶ÏÉúÓıÊÇ·ñÎªĞø
     IF  rec_temp.aae210 = '1' THEN
     SELECT count(1) INTO num_count FROM xasi2.ac02 WHERE aac001 = v_aac001 AND aae140='05';
     IF num_count > 0 THEN
     UPDATE wsjb.tmp_irac01a2  SET aae510 ='10' WHERE aac002 = REC_TEMP.aac002 AND iaz018 = prm_iaz018 ;
     END IF;
     END IF;
-     --åˆ¤æ–­å¤§é¢æ˜¯å¦ä¸ºç»­
+     --ÅĞ¶Ï´ó¶îÊÇ·ñÎªĞø
     IF  rec_temp.aae311 = '1' THEN
     SELECT count(1) INTO num_count FROM xasi2.ac02 WHERE aac001 = v_aac001 AND aae140='07';
     IF num_count > 0 THEN
     UPDATE wsjb.tmp_irac01a2  SET aae311 ='10' WHERE aac002 = REC_TEMP.aac002 AND iaz018 = prm_iaz018 ;
     END IF;
     END IF;
-     --åˆ¤æ–­æœºå…³æ˜¯å¦ä¸ºç»­
+     --ÅĞ¶Ï»ú¹ØÊÇ·ñÎªĞø
     IF rec_temp.aae120 = '1' THEN
     SELECT count(1) INTO num_count FROM xasi2.ac02 WHERE aac001 = v_aac001 AND aae140='06';
     IF num_count > 0 THEN
     UPDATE wsjb.tmp_irac01a2  SET aae120 ='10' WHERE aac002 = REC_TEMP.aac002 AND iaz018 = prm_iaz018 ;
     END IF;
     END IF;
-     --åˆ¤æ–­å…¬åŠ¡å‘˜è¡¥åŠ©æ˜¯å¦ä¸ºç»­
+     --ÅĞ¶Ï¹«ÎñÔ±²¹ÖúÊÇ·ñÎªĞø
     IF rec_temp.aae810 = '1' THEN
     SELECT count(1) INTO num_count FROM xasi2.ac02 WHERE aac001 = v_aac001 AND aae140='08';
     IF num_count > 0 THEN
@@ -8703,29 +8703,29 @@ BEGIN
     END IF;
     END IF;
     ELSIF num_count > 1 THEN
-      v_msg  :=  v_errmsg||v_msg||'è¯ä»¶å·ä¸ºï¼š[' || rec_temp.aac002 || ']çš„äººå‘˜å­˜åœ¨å¤šæ¡ä¸ªäººä¿¡æ¯ï¼Œè¯·åœ¨è”ç³»ç¤¾ä¿ä¸­å¿ƒï¼';
+      v_msg  :=  v_errmsg||v_msg||'Ö¤¼şºÅÎª£º[' || rec_temp.aac002 || ']µÄÈËÔ±´æÔÚ¶àÌõ¸öÈËĞÅÏ¢£¬ÇëÔÚÁªÏµÉç±£ÖĞĞÄ£¡';
       v_flag := '1';
     END IF;
 
 
-        --åˆ¤æ–­åŒ»ç–—é™©ç§æ†ç»‘
+        --ÅĞ¶ÏÒ½ÁÆÏÕÖÖÀ¦°ó
     IF v_aae310 = '1' THEN
 
                    IF  (v_aae510 = '0') OR (v_aae311 = '0') THEN
 
-                         v_msg :=v_errmsg||v_msg|| 'åŒ»ç–—ã€ç”Ÿè‚²ã€å¤§é¢è¡¥å……ä¸‰é™©ç§å¿…é¡»ä¸€èµ·å‚ä¿!';
+                         v_msg :=v_errmsg||v_msg|| 'Ò½ÁÆ¡¢ÉúÓı¡¢´ó¶î²¹³äÈıÏÕÖÖ±ØĞëÒ»Æğ²Î±£!';
                          v_flag  := '1';
                     END IF;
              END IF;
       IF v_aae510 = '1' THEN
                    IF  v_aae310 = '0' OR v_aae311 = '0' THEN
-                         v_msg := v_errmsg||v_msg||'åŒ»ç–—ã€ç”Ÿè‚²ã€å¤§é¢è¡¥å……ä¸‰é™©ç§å¿…é¡»ä¸€èµ·å‚ä¿!';
+                         v_msg := v_errmsg||v_msg||'Ò½ÁÆ¡¢ÉúÓı¡¢´ó¶î²¹³äÈıÏÕÖÖ±ØĞëÒ»Æğ²Î±£!';
                          v_flag  := '1';
                     END IF;
              END IF;
       IF v_aae311 = '1' THEN
                    IF  v_aae310 = '0' OR v_aae510 = '0' THEN
-                         v_msg := v_errmsg||v_msg||'åŒ»ç–—ã€ç”Ÿè‚²ã€å¤§é¢è¡¥å……ä¸‰é™©ç§å¿…é¡»ä¸€èµ·å‚ä¿!';
+                         v_msg := v_errmsg||v_msg||'Ò½ÁÆ¡¢ÉúÓı¡¢´ó¶î²¹³äÈıÏÕÖÖ±ØĞëÒ»Æğ²Î±£!';
                          v_flag  := '1';
                     END IF;
              END IF;
@@ -8736,13 +8736,13 @@ BEGIN
     IF v_flag = '0' THEN
     prc_p_checkInfoByaac001(v_aac001 ,
                            rec_temp.aac003 ,
-                           prm_flag    , --1æ ¡éªŒå¤±è´¥ï¼Œæ— æ³•ç»­ä¿ 2æ ¡éªŒæˆåŠŸï¼Œé«˜æ–° 3æ ¡éªŒæˆåŠŸï¼Œå¸‚å±€ 4æ ¡éªŒæˆåŠŸï¼Œåˆå¹¶æ•°æ® 5æ ¡éªŒæˆåŠŸï¼Œå•å¢å·¥ä¼¤é™©ç§  6.æœªæŸ¥åˆ° åŒ»ç–—ä¿¡æ¯
+                           prm_flag    , --1Ğ£ÑéÊ§°Ü£¬ÎŞ·¨Ğø±£ 2Ğ£Ñé³É¹¦£¬¸ßĞÂ 3Ğ£Ñé³É¹¦£¬ÊĞ¾Ö 4Ğ£Ñé³É¹¦£¬ºÏ²¢Êı¾İ 5Ğ£Ñé³É¹¦£¬µ¥Ôö¹¤ÉËÏÕÖÖ  6.Î´²éµ½ Ò½ÁÆĞÅÏ¢
                            v_msg     ,
-                           prm_AppCode ,             --é”™è¯¯ä»£ç 
+                           prm_AppCode ,             --´íÎó´úÂë
                            prm_ErrorMsg   );
     IF prm_flag = '1' THEN
     v_flag :='1';
-    v_msg :=v_errmsg||v_msg||'è¯¥äººå‘˜å‚ä¿é™©ç§æœªåšæš‚åœæˆ–æœ‰å¤šä¸ªè´¦æˆ·ï¼Œä¸ç¬¦åˆç»­ä¿æ¡ä»¶ï¼';
+    v_msg :=v_errmsg||v_msg||'¸ÃÈËÔ±²Î±£ÏÕÖÖÎ´×öÔİÍ£»òÓĞ¶à¸öÕË»§£¬²»·ûºÏĞø±£Ìõ¼ş£¡';
     END IF;
     IF prm_flag = '2' THEN
     v_flag :=v_flag;
@@ -8828,13 +8828,13 @@ BEGIN
     END LOOP;
     ELSE
     v_flag :='1';
-    v_msg :=v_errmsg||v_msg||'è¯¥äººå‘˜åœ¨å¸‚äººç¤¾å±€æœ‰æ­£å¸¸å‚ä¿çš„ä¿¡æ¯ï¼';
+    v_msg :=v_errmsg||v_msg||'¸ÃÈËÔ±ÔÚÊĞÈËÉç¾ÖÓĞÕı³£²Î±£µÄĞÅÏ¢£¡';
     END IF;
     END IF;*/
       IF prm_flag ='6' THEN
     IF REC_TEMP.aae110 = '0' THEN
     v_flag :='1';
-    v_msg :=v_errmsg||v_msg||'æœªæŸ¥åˆ°è¯¥äººå‘˜çš„ä¿¡æ¯ï¼Œè¯·åœ¨æ–°å‚ä¿æ¨¡å—æ“ä½œï¼';
+    v_msg :=v_errmsg||v_msg||'Î´²éµ½¸ÃÈËÔ±µÄĞÅÏ¢£¬ÇëÔÚĞÂ²Î±£Ä£¿é²Ù×÷£¡';
     END IF;
     END IF;
     END IF;
@@ -8853,7 +8853,7 @@ BEGIN
 
   /*  if v_flag = '0' and rec_temp.aac040 < v_aaa010 then
       v_flag := '1';
-      v_msg  := v_errmsg||v_msg||'ç”³æŠ¥å·¥èµ„ä½äºé™•è¥¿çœæœ€ä½å·¥èµ„æ ‡å‡†' || v_aaa010 || '!';
+      v_msg  := v_errmsg||v_msg||'Éê±¨¹¤×ÊµÍÓÚÉÂÎ÷Ê¡×îµÍ¹¤×Ê±ê×¼' || v_aaa010 || '!';
     end if;
     */
 
@@ -8874,8 +8874,8 @@ BEGIN
                  AND AAE110 = '2');
       if v_aac040_old != rec_temp.sbgz then
         v_flag := '1';
-        v_msg  := 'ç”³æŠ¥å·¥èµ„' || rec_temp.sbgz || 'ä¸ä¹‹å‰å‚ä¿å·¥èµ„' || v_aac040_old ||
-                  'ä¸ä¸€è‡´!';
+        v_msg  := 'Éê±¨¹¤×Ê' || rec_temp.sbgz || 'ÓëÖ®Ç°²Î±£¹¤×Ê' || v_aac040_old ||
+                  '²»Ò»ÖÂ!';
       end if;
     end if;
 
@@ -8969,7 +8969,7 @@ BEGIN
 
     if v_flag = '0' and rec_temp.aae110 = '1' and rec_temp.aae120 = '1' then
       v_flag := '1';
-      v_msg  := v_errmsg||v_msg||'ä¼ä¸šå…»è€å’Œæœºå…³å…»è€é™©ç§ä¸èƒ½åŒæ—¶å‚ä¿ï¼';
+      v_msg  := v_errmsg||v_msg||'ÆóÒµÑøÀÏºÍ»ú¹ØÑøÀÏÏÕÖÖ²»ÄÜÍ¬Ê±²Î±££¡';
     end if;
 
     if v_flag is null then
@@ -9028,13 +9028,13 @@ BEGIN
 
       if sql%rowcount = 0 then
         prm_appcode  := PRE_ERRCODE || GN_DEF_ERR;
-        prm_errormsg := 'prc_p_ValidBatchContinueCheckå‡ºé”™,å‡ºé”™åŸå› :æ²¡æœ‰æ›´æ–°åˆ°æ ¡éªŒç»“æœä¿¡æ¯ï¼';
+        prm_errormsg := 'prc_p_ValidBatchContinueCheck³ö´í,³ö´íÔ­Òò:Ã»ÓĞ¸üĞÂµ½Ğ£Ñé½á¹ûĞÅÏ¢£¡';
         return;
       end if;
 
       if sql%rowcount > 1 then
         prm_appcode  := PRE_ERRCODE || GN_DEF_ERR;
-        prm_errormsg := 'prc_p_ValidBatchContinueCheckå‡ºé”™,å‡ºé”™åŸå› :æ›´æ–°åˆ°å¤šæ¡æ ¡éªŒç»“æœä¿¡æ¯ï¼';
+        prm_errormsg := 'prc_p_ValidBatchContinueCheck³ö´í,³ö´íÔ­Òò:¸üĞÂµ½¶àÌõĞ£Ñé½á¹ûĞÅÏ¢£¡';
         return;
       end if;
     ELSE
@@ -9049,13 +9049,13 @@ BEGIN
 
       if sql%rowcount = 0 then
         prm_appcode  := PRE_ERRCODE || GN_DEF_ERR;
-        prm_errormsg := 'prc_p_ValidBatchContinueCheckå‡ºé”™,å‡ºé”™åŸå› :æ²¡æœ‰æ›´æ–°åˆ°æ ¡éªŒç»“æœä¿¡æ¯ï¼';
+        prm_errormsg := 'prc_p_ValidBatchContinueCheck³ö´í,³ö´íÔ­Òò:Ã»ÓĞ¸üĞÂµ½Ğ£Ñé½á¹ûĞÅÏ¢£¡';
         return;
       end if;
 
       if sql%rowcount > 1 then
         prm_appcode  := PRE_ERRCODE || GN_DEF_ERR;
-        prm_errormsg := 'prc_p_ValidBatchContinueCheckå‡ºé”™,å‡ºé”™åŸå› :æ›´æ–°åˆ°å¤šæ¡æ ¡éªŒç»“æœä¿¡æ¯ï¼';
+        prm_errormsg := 'prc_p_ValidBatchContinueCheck³ö´í,³ö´íÔ­Òò:¸üĞÂµ½¶àÌõĞ£Ñé½á¹ûĞÅÏ¢£¡';
         return;
       end if;
     end if;
@@ -9067,29 +9067,29 @@ EXCEPTION
   WHEN OTHERS THEN
     ROLLBACK;
     PRM_APPCODE  := PRE_ERRCODE || GN_DEF_ERR;
-    PRM_ERRORMSG := 'prc_p_ValidBatchContinueCheckå‡ºé”™,å‡ºé”™åŸå› :' || SQLERRM ||
+    PRM_ERRORMSG := 'prc_p_ValidBatchContinueCheck³ö´í,³ö´íÔ­Òò:' || SQLERRM ||
                     DBMS_UTILITY.FORMAT_ERROR_BACKTRACE();
     RETURN;
 END prc_p_ValidBatchContinueCheck;
 /*--------------------------------------------------------------------------
-   || ä¸šåŠ¡ç¯èŠ‚ ï¼šæ ¡éªŒå‚ä¿äººå‘˜æ˜¯å¦å¯ä»¥ç»­ä¿æŸä¸€ä¸ªé™©ç§
-   || è¿‡ç¨‹åç§° prc_p_ValidateAddKindYesOrNo
-   || åŠŸèƒ½æè¿° ï¼šæ ¡éªŒé™©ç§ç»­ä¿
+   || ÒµÎñ»·½Ú £ºĞ£Ñé²Î±£ÈËÔ±ÊÇ·ñ¿ÉÒÔĞø±£Ä³Ò»¸öÏÕÖÖ
+   || ¹ı³ÌÃû³Æ prc_p_ValidateAddKindYesOrNo
+   || ¹¦ÄÜÃèÊö £ºĞ£ÑéÏÕÖÖĞø±£
    ||
-   || å‚æ•°æè¿° ï¼šå‚æ•°æ ‡è¯†           è¯´æ˜
+   || ²ÎÊıÃèÊö £º²ÎÊı±êÊ¶           ËµÃ÷
    ||            --------------------------------------------------------------
    ||
    ||
-   || ä½œ    è€… ï¼šycliu         å®Œæˆæ—¥æœŸ ï¼š2017-02-15
+   || ×÷    Õß £ºycliu         Íê³ÉÈÕÆÚ £º2017-02-15
    ||------------------------------------------------------------------------*/
-  PROCEDURE prc_p_ValidateContinueYesOrNo(prm_aab001   IN VARCHAR2, --å•ä½ç¼–å·
-                                         prm_aac001   IN VARCHAR2, --ä¸ªäººç¼–å·
-                                         prm_aae140   IN VARCHAR2, --é™©ç§
-                                         prm_yab139   IN VARCHAR2, --ç»åŠæœºæ„
-                                         prm_flag     OUT VARCHAR2, --è¿”å›çŠ¶æ€æ ‡å¿—
-                                         prm_msg      OUT VARCHAR2, --æç¤ºä¿¡æ¯
-                                         prm_AppCode  OUT VARCHAR2, --æ‰§è¡Œä»£ç 
-                                         prm_ErrorMsg OUT VARCHAR2) --å‡ºé”™ä¿¡æ¯
+  PROCEDURE prc_p_ValidateContinueYesOrNo(prm_aab001   IN VARCHAR2, --µ¥Î»±àºÅ
+                                         prm_aac001   IN VARCHAR2, --¸öÈË±àºÅ
+                                         prm_aae140   IN VARCHAR2, --ÏÕÖÖ
+                                         prm_yab139   IN VARCHAR2, --¾­°ì»ú¹¹
+                                         prm_flag     OUT VARCHAR2, --·µ»Ø×´Ì¬±êÖ¾
+                                         prm_msg      OUT VARCHAR2, --ÌáÊ¾ĞÅÏ¢
+                                         prm_AppCode  OUT VARCHAR2, --Ö´ĞĞ´úÂë
+                                         prm_ErrorMsg OUT VARCHAR2) --³ö´íĞÅÏ¢
    IS
     v_flag   varchar2(2);
     v_msg    varchar2(4500);
@@ -9097,16 +9097,16 @@ END prc_p_ValidBatchContinueCheck;
     v_aab001 irab01.aab001%TYPE;
     v_aac031 irac01.aac031%TYPE;
   BEGIN
-    --åˆå§‹åŒ–å˜é‡
+    --³õÊ¼»¯±äÁ¿
     prm_AppCode  := GN_DEF_OK;
     prm_ErrorMsg := '';
-    v_flag   := '0'; --æ­£å¸¸(0--æ­£å¸¸ï¼Œ1--é”™è¯¯ï¼Œ2--è­¦å‘Š)
+    v_flag   := '0'; --Õı³£(0--Õı³££¬1--´íÎó£¬2--¾¯¸æ)
     v_msg    := '';
     v_yon    := '';
     v_aab001 := '';
-    v_aac031 := '0'; --é»˜è®¤æœªå‚ä¿
+    v_aac031 := '0'; --Ä¬ÈÏÎ´²Î±£
 
-    --åˆ¤æ–­è¯¥å•ä½æ˜¯å¦å‚åŠ æ­¤é™©ç§
+    --ÅĞ¶Ï¸Ãµ¥Î»ÊÇ·ñ²Î¼Ó´ËÏÕÖÖ
 
     BEGIN
       select 1
@@ -9127,27 +9127,27 @@ END prc_p_ValidBatchContinueCheck;
     EXCEPTION
       WHEN NO_DATA_FOUND THEN
         v_flag := '1';
-        v_msg  := 'å•ä½æ²¡æœ‰å‚åŠ ' ||
+        v_msg  := 'µ¥Î»Ã»ÓĞ²Î¼Ó' ||
                   xasi2.pkg_comm.fun_getAaa103('AAE140', prm_aae140) ||
-                  ',ä¸èƒ½ç»­ä¿è¯¥é™©ç§ï¼';
+                  ',²»ÄÜĞø±£¸ÃÏÕÖÖ£¡';
         goto label_out;
       WHEN TOO_MANY_ROWS THEN
         v_flag := '1';
-        v_msg  := 'å•ä½æ‰¾åˆ°å¤šæ¡' ||
+        v_msg  := 'µ¥Î»ÕÒµ½¶àÌõ' ||
                   xasi2.pkg_comm.fun_getAaa103('AAE140', prm_aae140) ||
-                  'å‚ä¿è®°å½•,è¯·è”ç³»ç¤¾ä¿ä¸­å¿ƒï¼';
+                  '²Î±£¼ÇÂ¼,ÇëÁªÏµÉç±£ÖĞĞÄ£¡';
         goto label_out;
       WHEN OTHERS THEN
         v_flag := '1';
-        v_msg  := 'æœªçŸ¥é”™è¯¯ï¼Œè¯·è”ç³»ç³»ç»Ÿç»´æŠ¤äººå‘˜ï¼';
+        v_msg  := 'Î´Öª´íÎó£¬ÇëÁªÏµÏµÍ³Î¬»¤ÈËÔ±£¡';
         goto label_out;
     END;
 
     if v_yon <> '1' then
       v_flag := '1';
-      v_msg  := 'å•ä½æ²¡æœ‰å‚åŠ ' ||
+      v_msg  := 'µ¥Î»Ã»ÓĞ²Î¼Ó' ||
                 xasi2.pkg_comm.fun_getAaa103('AAE140', prm_aae140) ||
-                ',ä¸èƒ½ç»­ä¿è¯¥é™©ç§ï¼';
+                ',²»ÄÜĞø±£¸ÃÏÕÖÖ£¡';
       goto label_out;
     end if;
 
@@ -9175,9 +9175,9 @@ END prc_p_ValidBatchContinueCheck;
 
       if v_aab001 is not null AND v_aac031 = '1' then
         v_flag := '1';
-        v_msg  := 'æ­¤äººå·²ç»åœ¨æœ¬å•ä½çš„' ||
+        v_msg  := '´ËÈËÒÑ¾­ÔÚ±¾µ¥Î»µÄ' ||
                   xasi2.pkg_comm.fun_getAaa103('AAE140', prm_aae140) ||
-                  'ä¸º'||xasi2.pkg_comm.fun_getAaa103('AAC031', v_aac031)||'çŠ¶æ€ï¼';
+                  'Îª'||xasi2.pkg_comm.fun_getAaa103('AAC031', v_aac031)||'×´Ì¬£¡';
         goto label_out;
       end if;
 
@@ -9204,14 +9204,14 @@ END prc_p_ValidBatchContinueCheck;
 
       if v_aab001 is not null or v_aac031 = '1' then
         v_flag := '1';
-        v_msg  := 'æ­¤äººå·²ç»åœ¨' || v_aab001 || 'å•ä½å‚åŠ äº†' ||
+        v_msg  := '´ËÈËÒÑ¾­ÔÚ' || v_aab001 || 'µ¥Î»²Î¼ÓÁË' ||
                   xasi2.pkg_comm.fun_getAaa103('AAE140', prm_aae140) ||
-                  ',ä¸èƒ½æ–°å¢è¯¥é™©ç§ï¼';
+                  ',²»ÄÜĞÂÔö¸ÃÏÕÖÖ£¡';
         goto label_out;
       end if;*/
     else
 
-      --åˆ¤æ–­äººå‘˜è¯¥é™©ç§æ˜¯å¦æ­£å¸¸å‚ä¿
+      --ÅĞ¶ÏÈËÔ±¸ÃÏÕÖÖÊÇ·ñÕı³£²Î±£
       BEGIN
         select r.aab001, r.aac031
           into v_aab001, v_aac031
@@ -9232,21 +9232,21 @@ END prc_p_ValidBatchContinueCheck;
           goto label_out;
         WHEN TOO_MANY_ROWS THEN
           v_flag := '1';
-          v_msg  := 'æ­¤äººæ‰¾åˆ°å¤šæ¡' ||
+          v_msg  := '´ËÈËÕÒµ½¶àÌõ' ||
                     xasi2.pkg_comm.fun_getAaa103('AAE140', prm_aae140) ||
-                    'å‚ä¿è®°å½•,è¯·è”ç³»ç¤¾ä¿ä¸­å¿ƒï¼';
+                    '²Î±£¼ÇÂ¼,ÇëÁªÏµÉç±£ÖĞĞÄ£¡';
           goto label_out;
         WHEN OTHERS THEN
           v_flag := '1';
-          v_msg  := 'æœªçŸ¥é”™è¯¯ï¼Œè¯·è”ç³»ç³»ç»Ÿç»´æŠ¤äººå‘˜ï¼';
+          v_msg  := 'Î´Öª´íÎó£¬ÇëÁªÏµÏµÍ³Î¬»¤ÈËÔ±£¡';
           goto label_out;
       END;
 
       if v_aab001 is not null AND v_aac031 = '1' then
         v_flag := '1';
-        v_msg  := 'æ­¤äººå·²ç»åœ¨' || v_aab001 || 'å•ä½çš„' ||
+        v_msg  := '´ËÈËÒÑ¾­ÔÚ' || v_aab001 || 'µ¥Î»µÄ' ||
                   xasi2.pkg_comm.fun_getAaa103('AAE140', prm_aae140) ||
-                  'ä¸º'||xasi2.pkg_comm.fun_getAaa103('AAC031', v_aac031)||'çŠ¶æ€ï¼';
+                  'Îª'||xasi2.pkg_comm.fun_getAaa103('AAC031', v_aac031)||'×´Ì¬£¡';
         goto label_out;
       end if;
     end if;
@@ -9257,33 +9257,33 @@ END prc_p_ValidBatchContinueCheck;
 
   EXCEPTION
     WHEN OTHERS THEN
-      /*å…³é—­æ‰“å¼€çš„æ¸¸æ ‡*/
+      /*¹Ø±Õ´ò¿ªµÄÓÎ±ê*/
       ROLLBACK;
       prm_AppCode  := gn_def_ERR;
-      prm_ErrorMsg := 'æ•°æ®åº“é”™è¯¯:' || SQLERRM;
+      prm_ErrorMsg := 'Êı¾İ¿â´íÎó:' || SQLERRM;
       RETURN;
   END prc_p_ValidateContinueYesOrNo;
 
   /*--------------------------------------------------------------------------
-   || ä¸šåŠ¡ç¯èŠ‚ ï¼šç‰¹æ®Šæ–°å‚ä¿æ ¡éªŒ
-   || è¿‡ç¨‹åç§° prc_p_ValidateAddKindYesOrNo
-   || åŠŸèƒ½æè¿° ï¼šç‰¹æ®Šæ–°å‚ä¿æ ¡éªŒ
+   || ÒµÎñ»·½Ú £ºÌØÊâĞÂ²Î±£Ğ£Ñé
+   || ¹ı³ÌÃû³Æ prc_p_ValidateAddKindYesOrNo
+   || ¹¦ÄÜÃèÊö £ºÌØÊâĞÂ²Î±£Ğ£Ñé
    ||
-   || å‚æ•°æè¿° ï¼šå‚æ•°æ ‡è¯†           è¯´æ˜
+   || ²ÎÊıÃèÊö £º²ÎÊı±êÊ¶           ËµÃ÷
    ||            --------------------------------------------------------------
    ||
    ||
-   || ä½œ    è€… ï¼š        å®Œæˆæ—¥æœŸ ï¼š2017-02-19
+   || ×÷    Õß £º        Íê³ÉÈÕÆÚ £º2017-02-19
    ||------------------------------------------------------------------------*/
 
   PROCEDURE prc_p_ValidateAac002Special(
-       prm_yae181          IN            VARCHAR2,     --è¯ä»¶ç±»å‹
-      prm_aac002          IN            VARCHAR2,     --è¯ä»¶å·ç 
-      prm_aab001          IN            VARCHAR2,     --å•ä½ç¼–å·
-      prm_msg             OUT           VARCHAR2,     -- é”™è¯¯ä¿¡æ¯
-      prm_sign            OUT           VARCHAR2,     -- é”™è¯¯æ ‡å¿—
-      prm_AppCode         OUT           VARCHAR2,     --æ‰§è¡Œä»£ç 
-      prm_ErrorMsg        OUT           VARCHAR2)    --å‡ºé”™ä¿¡æ¯
+       prm_yae181          IN            VARCHAR2,     --Ö¤¼şÀàĞÍ
+      prm_aac002          IN            VARCHAR2,     --Ö¤¼şºÅÂë
+      prm_aab001          IN            VARCHAR2,     --µ¥Î»±àºÅ
+      prm_msg             OUT           VARCHAR2,     -- ´íÎóĞÅÏ¢
+      prm_sign            OUT           VARCHAR2,     -- ´íÎó±êÖ¾
+      prm_AppCode         OUT           VARCHAR2,     --Ö´ĞĞ´úÂë
+      prm_ErrorMsg        OUT           VARCHAR2)    --³ö´íĞÅÏ¢
    IS
      num_count        NUMBER(6);
      var_aac001       irac01.aac001%TYPE;
@@ -9292,30 +9292,30 @@ END prc_p_ValidBatchContinueCheck;
    var_15aac002     irac01.aac002%TYPE;
    var_aab001       irac01.aab001%TYPE;
    BEGIN
-    /*åˆå§‹åŒ–å˜é‡*/
+    /*³õÊ¼»¯±äÁ¿*/
       prm_AppCode  := GN_DEF_OK;
       prm_ErrorMsg := '';
       prm_msg :='';
       prm_sign :='0';
-   --æ ¡éªŒå‚æ•°
+   --Ğ£Ñé²ÎÊı
       IF prm_yae181 IS NULL  THEN
-         prm_msg :=  prm_msg||'ä¼ å…¥è¯ä»¶ç±»å‹ä¸ºç©ºï¼Œè¯·æ ¸å®ã€‚ã€‚ã€‚';
+         prm_msg :=  prm_msg||'´«ÈëÖ¤¼şÀàĞÍÎª¿Õ£¬ÇëºËÊµ¡£¡£¡£';
          prm_sign := '1';
          GOTO label_ERROR;
       END IF;
       IF prm_aab001 IS NULL  THEN
-         prm_msg :=  prm_msg||'ä¼ å…¥å•ä½ç¼–å·ä¸ºç©ºï¼Œè¯·æ ¸å®ã€‚ã€‚ã€‚';
+         prm_msg :=  prm_msg||'´«Èëµ¥Î»±àºÅÎª¿Õ£¬ÇëºËÊµ¡£¡£¡£';
          prm_sign := '1';
          GOTO label_ERROR;
       END IF;
       IF prm_aac002 IS NULL  THEN
-         prm_msg :=  prm_msg||'ä¼ å…¥è¯ä»¶å·ç ä¸ºç©ºï¼Œè¯·æ ¸å®ã€‚ã€‚ã€‚';
+         prm_msg :=  prm_msg||'´«ÈëÖ¤¼şºÅÂëÎª¿Õ£¬ÇëºËÊµ¡£¡£¡£';
          prm_sign := '1';
          GOTO label_ERROR;
       END IF;
-       --èº«ä»½è¯ç±»å‹
+       --Éí·İÖ¤ÀàĞÍ
      IF prm_yae181 = 1 THEN
-        --è·å–å„ç§å½¢å¼çš„è¯ä»¶å·ç 
+        --»ñÈ¡¸÷ÖÖĞÎÊ½µÄÖ¤¼şºÅÂë
          var_15aac002 := SUBSTR(prm_aac002,1,6)||SUBSTR(prm_aac002,9, 9);
          var_aac002Low := LOWER(prm_aac002);
 
@@ -9323,10 +9323,10 @@ END prc_p_ValidBatchContinueCheck;
           INTO num_count
           FROM xasi2.ac01 A
          WHERE A.AAC002 IN (var_15aac002, var_aac002Low, prm_aac002)
-           AND AAC003 NOT LIKE '%é‡å¤%';
+           AND AAC003 NOT LIKE '%ÖØ¸´%';
 
          IF num_count = 0 THEN
-           prm_msg := 'è¯ä»¶å·ä¸ºï¼š['||prm_aac002||']çš„äººå‘˜ä¸å­˜åœ¨ä¸ªäººä¿¡æ¯ï¼Œè¯·åœ¨æ–°å‚ä¿æ¨¡å—é‡Œæ“ä½œ';
+           prm_msg := 'Ö¤¼şºÅÎª£º['||prm_aac002||']µÄÈËÔ±²»´æÔÚ¸öÈËĞÅÏ¢£¬ÇëÔÚĞÂ²Î±£Ä£¿éÀï²Ù×÷';
            prm_sign :='1';
            GOTO label_ERROR ;
          END IF ;
@@ -9347,7 +9347,7 @@ END prc_p_ValidBatchContinueCheck;
              AND a.iaa001 <> '4'
              AND A.IAA002 ='0'
              AND rownum =1;
-           prm_msg := 'è¯ä»¶å·ä¸ºï¼š['||prm_aac002||']çš„äººå‘˜åœ¨å•ä½'||var_aab001||'æœ‰ç”³æŠ¥è®°å½•,ä¸èƒ½æ–°å¢!';
+           prm_msg := 'Ö¤¼şºÅÎª£º['||prm_aac002||']µÄÈËÔ±ÔÚµ¥Î»'||var_aab001||'ÓĞÉê±¨¼ÇÂ¼,²»ÄÜĞÂÔö!';
            prm_sign :='1';
            GOTO label_ERROR ;
          END IF;
@@ -9356,7 +9356,7 @@ END prc_p_ValidBatchContinueCheck;
                INTO var_aac001
                FROM xasi2.ac01 a
                WHERE a.aac002 IN (var_15aac002, var_aac002Low, prm_aac002)
-           AND AAC003 NOT LIKE '%é‡å¤%';
+           AND AAC003 NOT LIKE '%ÖØ¸´%';
 
        SELECT COUNT(*)
          INTO num_count
@@ -9379,17 +9379,17 @@ END prc_p_ValidBatchContinueCheck;
 
        EXCEPTION
     WHEN OTHERS THEN
-      /*å…³é—­æ‰“å¼€çš„æ¸¸æ ‡*/
+      /*¹Ø±Õ´ò¿ªµÄÓÎ±ê*/
       ROLLBACK;
       prm_AppCode  := gn_def_ERR;
-      prm_ErrorMsg := 'æ•°æ®åº“é”™è¯¯:' || SQLERRM;
+      prm_ErrorMsg := 'Êı¾İ¿â´íÎó:' || SQLERRM;
       RETURN;
  END prc_p_ValidateAac002Special;
 
-  /*--è´¦æˆ·è½¬å…¥
+  /*--ÕË»§×ªÈë
   procedure prc_p_accountInto(prm_str    IN CLOB,
                               prm_aaz174 IN VARCHAR2,
-                              prm_AppCode OUT   VARCHAR2  ,             --é”™è¯¯ä»£ç 
+                              prm_AppCode OUT   VARCHAR2  ,             --´íÎó´úÂë
                                prm_ErrorMsg  OUT   VARCHAR2
                               )
   is
@@ -9424,7 +9424,7 @@ END prc_p_ValidBatchContinueCheck;
      xmlPar := xmlparser.newParser;
      xmlparser.parseClob(xmlPar,prm_str);
      doc := xmlparser.getDocument(xmlPar);
-     --é‡Šæ”¾
+     --ÊÍ·Å
     xmlparser.freeParser(xmlPar);
     ac02List := xmldom.getElementsByTagName(doc,'row');
     len := xmldom.getLength(ac02List);
@@ -9435,17 +9435,17 @@ END prc_p_ValidBatchContinueCheck;
       var_nac001 := '';
       var_aac002 := '';
       var_aac003 := '';
-      var_flag := '';--ä¸‹è´¦æˆåŠŸæ ‡å¿—
+      var_flag := '';--ÏÂÕË³É¹¦±êÖ¾
       var_aae013 := '';
       num_nkc087 := 0;
       num_akc087 := 0;
-      var_yae235 := '1';--ä¸Šè´¦æˆåŠŸä¸º1ï¼Œä¸Šè´¦å¤±è´¥ä¸º2
+      var_yae235 := '1';--ÉÏÕË³É¹¦Îª1£¬ÉÏÕËÊ§°ÜÎª2
       var_yae238 := '';
-      --è·å–ç¬¬iä¸ªac08
+      --»ñÈ¡µÚi¸öac08
       ac02Node := xmldom.item(ac02List,i);
-      --è·å–å±æ€§
+      --»ñÈ¡ÊôĞÔ
      -- ac08ArrMap := xmldom.getAttributes(ac02Node);
-      --è·å–å­èŠ‚ç‚¹
+      --»ñÈ¡×Ó½Úµã
       chilNodes := xmldom.getChildNodes(ac02Node);
       var_nac001 := xmldom.getNodeValue(xmldom.getFirstChild(xmldom.item(chilNodes,0)));
       var_aac002 := xmldom.getNodeValue(xmldom.getFirstChild(xmldom.item(chilNodes,1)));
@@ -9453,14 +9453,14 @@ END prc_p_ValidBatchContinueCheck;
        num_nkc087 := xmldom.getNodeValue(xmldom.getFirstChild(xmldom.item(chilNodes,3)));
       var_flag := xmldom.getNodeValue(xmldom.getFirstChild(xmldom.item(chilNodes,4)));
       var_aae013 := xmldom.getNodeValue(xmldom.getFirstChild(xmldom.item(chilNodes,5)));
-      --å¯¹æ–¹çš„aaz175å¯¹åº”è¿™è¾¹çš„aaz176
+      --¶Ô·½µÄaaz175¶ÔÓ¦Õâ±ßµÄaaz176
       var_aaz176 := xmldom.getNodeValue(xmldom.getFirstChild(xmldom.item(chilNodes,6)));
       if var_flag = '2' then
          var_yae235 := '2';
-         var_yae238 := 'å› ä¸‹è´¦å‡ºé”™ï¼Œä¸èƒ½è¿›è¡Œä¸Šè´¦!';
+         var_yae238 := 'ÒòÏÂÕË³ö´í£¬²»ÄÜ½øĞĞÉÏÕË!';
          GOTO label_next;
       end if;
-      --æŸ¥è¯¢ä¸ªäººç¼–å·
+      --²éÑ¯¸öÈË±àºÅ
       begin
         select aac001
           into var_aac001
@@ -9469,17 +9469,17 @@ END prc_p_ValidBatchContinueCheck;
            and replace(aac003,' ','') = replace(var_aac003,' ','');
         exception
           WHEN NO_DATA_FOUND THEN
-            --æœªè·å–åˆ°ä¸ªäººåŸºæœ¬ä¿¡æ¯
+            --Î´»ñÈ¡µ½¸öÈË»ù±¾ĞÅÏ¢
             var_yae235 := '2';
-            var_yae238 := 'æœªè·å–åˆ°èº«ä»½è¯ä¸º'||var_aac002||'äººå‘˜çš„åŸºæœ¬ä¿¡æ¯ï¼';
+            var_yae238 := 'Î´»ñÈ¡µ½Éí·İÖ¤Îª'||var_aac002||'ÈËÔ±µÄ»ù±¾ĞÅÏ¢£¡';
             GOTO label_next;
           WHEN TOO_MANY_ROWS THEN
-            --èº«ä»½è¯å’Œå§“åå­˜åœ¨å¤šä¸ªä¸ªäººç¼–å·
+            --Éí·İÖ¤ºÍĞÕÃû´æÔÚ¶à¸ö¸öÈË±àºÅ
             var_yae235 := '2';
-            var_yae238 := 'è¯¥èº«ä»½è¯å·ç å­˜åœ¨å¤šä¸ªä¸ªäººç¼–å·,èº«ä»½è¯å·ä¸º:'||var_aac002;
+            var_yae238 := '¸ÃÉí·İÖ¤ºÅÂë´æÔÚ¶à¸ö¸öÈË±àºÅ,Éí·İÖ¤ºÅÎª:'||var_aac002;
             GOTO label_next;
       end;
-      --æŸ¥è¯¢è¯¥äººå‘˜æ˜¯å¦æ­£åœ¨å‚ä¿
+      --²éÑ¯¸ÃÈËÔ±ÊÇ·ñÕıÔÚ²Î±£
       select count(*)
         INTO num_count
         from xasi2.ac02
@@ -9487,28 +9487,28 @@ END prc_p_ValidBatchContinueCheck;
          and aae140 = '03'
          and aac031 = '1';
       IF num_count = 0 THEN
-         --è¯¥äººå‘˜æœªæœ‰åŸºæœ¬åŒ»ç–—å‚ä¿ä¿¡æ¯,ä¸èƒ½è½¬å…¥è´¦æˆ·
+         --¸ÃÈËÔ±Î´ÓĞ»ù±¾Ò½ÁÆ²Î±£ĞÅÏ¢,²»ÄÜ×ªÈëÕË»§
          var_yae235 := '2';
-         var_yae238 := 'äººå‘˜æœªå­˜åœ¨åŸºæœ¬åŒ»ç–—å‚ä¿ä¿¡æ¯ï¼Œä¸èƒ½è½¬å…¥è´¦æˆ·!';
+         var_yae238 := 'ÈËÔ±Î´´æÔÚ»ù±¾Ò½ÁÆ²Î±£ĞÅÏ¢£¬²»ÄÜ×ªÈëÕË»§!';
          GOTO label_next;
       END IF;
 
       --var_akc087 := to_number(prm_akc087);
       select xasi2.seq_yae099.nextval into var_yae099 from dual;
-      --è®°å½•ä»å¦ä¸€ä¸ªç³»ç»Ÿå¾—åˆ°çš„é‡‘é¢å’Œä¸ªäººç¼–å·
+      --¼ÇÂ¼´ÓÁíÒ»¸öÏµÍ³µÃµ½µÄ½ğ¶îºÍ¸öÈË±àºÅ
       --insert into kc04k9(yae099,
                         --aac001,
                          --iac001,
                         -- akc087,
                         -- aae120)
-                  --VALUES(var_yae099,--ä¸šåŠ¡æµæ°´å·
-                        -- var_aac001,--æœ¬ç³»ç»Ÿä¸ªäººç¼–å·
-                        -- prm_aac001,--å¦ä¸€ä¸ªç³»ç»Ÿä¸­çš„ä¸ªäººç¼–å·
-                        -- var_akc087,--å¦ä¸€ä¸ªç³»ç»Ÿè½¬å…¥çš„é‡‘é¢
-                        -- '0'--æœ‰æ•ˆæ ‡å¿—
+                  --VALUES(var_yae099,--ÒµÎñÁ÷Ë®ºÅ
+                        -- var_aac001,--±¾ÏµÍ³¸öÈË±àºÅ
+                        -- prm_aac001,--ÁíÒ»¸öÏµÍ³ÖĞµÄ¸öÈË±àºÅ
+                        -- var_akc087,--ÁíÒ»¸öÏµÍ³×ªÈëµÄ½ğ¶î
+                        -- '0'--ÓĞĞ§±êÖ¾
                       --  );
 
-      --æŸ¥è¯¢äººå‘˜åœ¨æœ¬ç³»ç»Ÿä¸­çš„è´¦æˆ·ä½™é¢
+      --²éÑ¯ÈËÔ±ÔÚ±¾ÏµÍ³ÖĞµÄÕË»§Óà¶î
       begin
         select akc087
           into num_akc087
@@ -9518,96 +9518,96 @@ END prc_p_ValidBatchContinueCheck;
           WHEN NO_DATA_FOUND THEN
             num_akc087 := 0 ;
       end;
-      --æ›´æ–°å¸‚å±€æ­¤äººè´¦æˆ·ä½™é¢,è¿™é‡Œéœ€è¦æŸ¥è¯¢ä¸€ä¸‹è½¬å…¥çš„é‡‘é¢ ,
+      --¸üĞÂÊĞ¾Ö´ËÈËÕË»§Óà¶î,ÕâÀïĞèÒª²éÑ¯Ò»ÏÂ×ªÈëµÄ½ğ¶î ,
       update xasi2.kc04
-         set akc082 = akc082 + num_nkc087,--(è½¬å…¥çš„ä½™é¢)
+         set akc082 = akc082 + num_nkc087,--(×ªÈëµÄÓà¶î)
               akc087 = akc087 + num_nkc087
        where aac001 = var_aac001
          and aae001 = n_aae001;
-      IF SQL%ROWCOUNT < 1 THEN --å¦‚æœæ²¡æœ‰è´¦æˆ·åˆ™ç›´æ¥æ’å…¥ä¸€æ¡
+      IF SQL%ROWCOUNT < 1 THEN --Èç¹ûÃ»ÓĞÕË»§ÔòÖ±½Ó²åÈëÒ»Ìõ
          INSERT INTO xasi2.KC04
-                 (aac001,   --ä¸ªäººç¼–å·
-                  aae001,   --å¹´åº¦
-                  ykc203,   --å¸æˆ·çŠ¶æ€
-                  akc081,   --åŸºæœ¬åŒ»ç–—è´¦æˆ·ä¸ªäººç¼´è´¹éƒ¨åˆ†æœ¬å¹´æ”¶å…¥æ€»é¢
-                  akc082,   --åŸºæœ¬åŒ»ç–—è´¦æˆ·å•ä½ç¼´è´¹åˆ’å…¥éƒ¨åˆ†æœ¬å¹´æ”¶å…¥æ€»é¢
-                  ykc061,   --åŸºæœ¬åŒ»ç–—è´¦æˆ·ä¸Šå¹´ç»“è½¬é‡‘é¢
-                  ykc025,   --å…¬åŠ¡å‘˜è´¦æˆ·æœ¬å¹´æ”¶å…¥æ€»é¢
-                  ykc062,   --å…¬åŠ¡å‘˜è´¦æˆ·ä¸Šå¹´ç»“è½¬é‡‘é¢
-                  ykc252,   --å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘æœ¬å¹´æ”¶å…¥é‡‘é¢
-                  ykc255,   --å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘ä¸Šå¹´ç»“è½¬é‡‘é¢
-                  ykc026,   --æœ¬å¹´ç»§æ‰¿ä¸ªäººç¼´è´¹é‡‘é¢
-                  ykc027,   --æœ¬å¹´ç»§æ‰¿å•ä½åˆ’å…¥é‡‘é¢
-                  ykc028,   --æœ¬å¹´ç»§æ‰¿å…¬åŠ¡å‘˜é‡‘é¢
-                  ykc244,   --æœ¬å¹´ç»§æ‰¿å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘é‡‘é¢
-                  akc087,   --å½“å‰ç»“ä½™é‡‘é¢
-                  yka147,   --åŸºæœ¬åŒ»ç–—ä¸Šå¹´è´¦æˆ·åˆ©æ¯
-                  yka148,   --åŸºæœ¬åŒ»ç–—æœ¬å¹´è´¦æˆ·åˆ©æ¯
-                  yka149,   --å…¬åŠ¡å‘˜ä¸Šå¹´è´¦æˆ·åˆ©æ¯
-                  yka150,   --å…¬åŠ¡å‘˜æœ¬å¹´è´¦æˆ·åˆ©æ¯
-                  ykc256,   --å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘ä¸Šå¹´è´¦æˆ·åˆ©æ¯
-                  ykc253,   --å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘æœ¬å¹´è´¦æˆ·åˆ©æ¯
-                  ykc074,   --åŸºæœ¬åŒ»ç–—ä¸Šå¹´è´¦æˆ·æ”¯å‡ºæ€»é¢
-                  ykc075,   --åŸºæœ¬åŒ»ç–—æœ¬å¹´è´¦æˆ·æ”¯å‡ºæ€»é¢
-                  ykc076,   --å…¬åŠ¡å‘˜ä¸Šå¹´è´¦æˆ·æ”¯å‡ºæ€»é¢
-                  ykc077,   --å…¬åŠ¡å‘˜æœ¬å¹´è´¦æˆ·æ”¯å‡ºæ€»é¢
-                  ykc257,   --å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘ä¸Šå¹´æ”¯å‡ºæ€»é¢
-                  ykc254,   --å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘æœ¬å¹´æ”¯å‡ºæ€»é¢
-                  ykc250,   --å…¬åŠ¡å‘˜é—¨è¯Šè¡¥åŠ©å†å¹´ç»“è½¬é‡‘é¢
-                  ykc036,   --æˆªæ­¢ä¸Šå¹´æœ«ç´¯è®¡åº”ç¼´è´¹æœˆæ•°
-                  akc096,   --æˆªæ­¢ä¸Šå¹´æœ«ç´¯è®¡å®ç¼´è´¹æœˆæ•°
-                  ykc204,   --è½¬ç§»ç´¯è®¡ç¼´è´¹å¹´é™
-                  ykc035,   --åŸºæœ¬åŒ»ç–—æœ¬å¹´åº”ç¼´æœˆæ•°
-                  akc085,   --åŒ»ç–—æœ¬å¹´ç¼´è´¹æœˆæ•°
-                  akc095,   --è´¦æˆ·ä¿®æ”¹æ—¥æœŸ
-                  ykc031,   --ä¸Šå¹´åŸºæœ¬åŒ»ç–—è´¦æˆ·è®¡æ¯ç§¯æ•°
-                  akc094,   --æœ¬å¹´åŸºæœ¬åŒ»ç–—è´¦æˆ·è®¡æ¯ç§¯æ•°
-                  ykc032,   --ä¸Šå¹´å…¬åŠ¡å‘˜è´¦æˆ·è®¡ç®—ç§¯æ•°
-                  ykc033,   --æœ¬å¹´å…¬åŠ¡å‘˜è´¦æˆ·è®¡ç®—ç§¯æ•°
-                  ykc260,   --ä¸Šå¹´å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘è®°æ¯ç§¯æ•°
-                  ykc242,   --æœ¬å¹´å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘è®°æ¯ç§¯æ•°
-                  yke104)   --è¡Œæ•°æ®ç‰ˆæœ¬å·
-           VALUES(var_aac001,   --ä¸ªäººç¼–å·
-                  TO_NUMBER(TO_CHAR(SYSDATE,'YYYY')),   --å¹´åº¦
-                  '1',   --å¸æˆ·çŠ¶æ€æ­£å¸¸
-                  0,   --åŸºæœ¬åŒ»ç–—è´¦æˆ·ä¸ªäººç¼´è´¹éƒ¨åˆ†æœ¬å¹´æ”¶å…¥æ€»é¢
-                  num_nkc087,   --åŸºæœ¬åŒ»ç–—è´¦æˆ·å•ä½ç¼´è´¹åˆ’å…¥éƒ¨åˆ†æœ¬å¹´æ”¶å…¥æ€»é¢
-                  0,   --åŸºæœ¬åŒ»ç–—è´¦æˆ·ä¸Šå¹´ç»“è½¬é‡‘é¢
-                  0,   --å…¬åŠ¡å‘˜è´¦æˆ·æœ¬å¹´æ”¶å…¥æ€»é¢
-                  0,   --å…¬åŠ¡å‘˜è´¦æˆ·ä¸Šå¹´ç»“è½¬é‡‘é¢
-                  0,   --å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘æœ¬å¹´æ”¶å…¥é‡‘é¢
-                  0,   --å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘ä¸Šå¹´ç»“è½¬é‡‘é¢
-                  0,   --æœ¬å¹´ç»§æ‰¿ä¸ªäººç¼´è´¹é‡‘é¢
-                  0,   --æœ¬å¹´ç»§æ‰¿å•ä½åˆ’å…¥é‡‘é¢
-                  0,   --æœ¬å¹´ç»§æ‰¿å…¬åŠ¡å‘˜é‡‘é¢
-                  0,   --æœ¬å¹´ç»§æ‰¿å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘é‡‘é¢
-                  num_nkc087,   --å½“å‰ç»“ä½™é‡‘é¢
-                  0,   --åŸºæœ¬åŒ»ç–—ä¸Šå¹´è´¦æˆ·åˆ©æ¯
-                  0,   --åŸºæœ¬åŒ»ç–—æœ¬å¹´è´¦æˆ·åˆ©æ¯
-                  0,   --å…¬åŠ¡å‘˜ä¸Šå¹´è´¦æˆ·åˆ©æ¯
-                  0,   --å…¬åŠ¡å‘˜æœ¬å¹´è´¦æˆ·åˆ©æ¯
-                  0,   --å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘ä¸Šå¹´è´¦æˆ·åˆ©æ¯
-                  0,   --å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘æœ¬å¹´è´¦æˆ·åˆ©æ¯
-                  0,   --åŸºæœ¬åŒ»ç–—ä¸Šå¹´è´¦æˆ·æ”¯å‡ºæ€»é¢
-                  0,   --åŸºæœ¬åŒ»ç–—æœ¬å¹´è´¦æˆ·æ”¯å‡ºæ€»é¢
-                  0,   --å…¬åŠ¡å‘˜ä¸Šå¹´è´¦æˆ·æ”¯å‡ºæ€»é¢
-                  0,   --å…¬åŠ¡å‘˜æœ¬å¹´è´¦æˆ·æ”¯å‡ºæ€»é¢
-                  0,   --å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘ä¸Šå¹´æ”¯å‡ºæ€»é¢
-                  0,   --å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘æœ¬å¹´æ”¯å‡ºæ€»é¢
-                  0,   --å…¬åŠ¡å‘˜é—¨è¯Šè¡¥åŠ©å†å¹´ç»“è½¬é‡‘é¢
-                  0,   --æˆªæ­¢ä¸Šå¹´æœ«ç´¯è®¡åº”ç¼´è´¹æœˆæ•°
-                  0,   --æˆªæ­¢ä¸Šå¹´æœ«ç´¯è®¡å®ç¼´è´¹æœˆæ•°
-                  0,   --è½¬ç§»ç´¯è®¡ç¼´è´¹å¹´é™
-                  0,   --åŸºæœ¬åŒ»ç–—æœ¬å¹´åº”ç¼´æœˆæ•°
-                  0,   --åŒ»ç–—æœ¬å¹´ç¼´è´¹æœˆæ•°
-                  SYSDATE,   --è´¦æˆ·ä¿®æ”¹æ—¥æœŸ
-                  0,   --ä¸Šå¹´åŸºæœ¬åŒ»ç–—è´¦æˆ·è®¡æ¯ç§¯æ•°
-                  0,   --æœ¬å¹´åŸºæœ¬åŒ»ç–—è´¦æˆ·è®¡æ¯ç§¯æ•°
-                  0,   --ä¸Šå¹´å…¬åŠ¡å‘˜è´¦æˆ·è®¡ç®—ç§¯æ•°
-                  0,   --æœ¬å¹´å…¬åŠ¡å‘˜è´¦æˆ·è®¡ç®—ç§¯æ•°
-                  0,   --ä¸Šå¹´å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘è®°æ¯ç§¯æ•°
-                  0,   --æœ¬å¹´å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘è®°æ¯ç§¯æ•°
-                  TO_NUMBER(TO_CHAR(SYSDATE,'yyyymmdd')));     --è¡Œæ•°æ®ç‰ˆæœ¬å·
+                 (aac001,   --¸öÈË±àºÅ
+                  aae001,   --Äê¶È
+                  ykc203,   --ÕÊ»§×´Ì¬
+                  akc081,   --»ù±¾Ò½ÁÆÕË»§¸öÈË½É·Ñ²¿·Ö±¾ÄêÊÕÈë×Ü¶î
+                  akc082,   --»ù±¾Ò½ÁÆÕË»§µ¥Î»½É·Ñ»®Èë²¿·Ö±¾ÄêÊÕÈë×Ü¶î
+                  ykc061,   --»ù±¾Ò½ÁÆÕË»§ÉÏÄê½á×ª½ğ¶î
+                  ykc025,   --¹«ÎñÔ±ÕË»§±¾ÄêÊÕÈë×Ü¶î
+                  ykc062,   --¹«ÎñÔ±ÕË»§ÉÏÄê½á×ª½ğ¶î
+                  ykc252,   --¹«ÎñÔ±×¢Èë×Ê½ğ±¾ÄêÊÕÈë½ğ¶î
+                  ykc255,   --¹«ÎñÔ±×¢Èë×Ê½ğÉÏÄê½á×ª½ğ¶î
+                  ykc026,   --±¾Äê¼Ì³Ğ¸öÈË½É·Ñ½ğ¶î
+                  ykc027,   --±¾Äê¼Ì³Ğµ¥Î»»®Èë½ğ¶î
+                  ykc028,   --±¾Äê¼Ì³Ğ¹«ÎñÔ±½ğ¶î
+                  ykc244,   --±¾Äê¼Ì³Ğ¹«ÎñÔ±×¢Èë×Ê½ğ½ğ¶î
+                  akc087,   --µ±Ç°½áÓà½ğ¶î
+                  yka147,   --»ù±¾Ò½ÁÆÉÏÄêÕË»§ÀûÏ¢
+                  yka148,   --»ù±¾Ò½ÁÆ±¾ÄêÕË»§ÀûÏ¢
+                  yka149,   --¹«ÎñÔ±ÉÏÄêÕË»§ÀûÏ¢
+                  yka150,   --¹«ÎñÔ±±¾ÄêÕË»§ÀûÏ¢
+                  ykc256,   --¹«ÎñÔ±×¢Èë×Ê½ğÉÏÄêÕË»§ÀûÏ¢
+                  ykc253,   --¹«ÎñÔ±×¢Èë×Ê½ğ±¾ÄêÕË»§ÀûÏ¢
+                  ykc074,   --»ù±¾Ò½ÁÆÉÏÄêÕË»§Ö§³ö×Ü¶î
+                  ykc075,   --»ù±¾Ò½ÁÆ±¾ÄêÕË»§Ö§³ö×Ü¶î
+                  ykc076,   --¹«ÎñÔ±ÉÏÄêÕË»§Ö§³ö×Ü¶î
+                  ykc077,   --¹«ÎñÔ±±¾ÄêÕË»§Ö§³ö×Ü¶î
+                  ykc257,   --¹«ÎñÔ±×¢Èë×Ê½ğÉÏÄêÖ§³ö×Ü¶î
+                  ykc254,   --¹«ÎñÔ±×¢Èë×Ê½ğ±¾ÄêÖ§³ö×Ü¶î
+                  ykc250,   --¹«ÎñÔ±ÃÅÕï²¹ÖúÀúÄê½á×ª½ğ¶î
+                  ykc036,   --½ØÖ¹ÉÏÄêÄ©ÀÛ¼ÆÓ¦½É·ÑÔÂÊı
+                  akc096,   --½ØÖ¹ÉÏÄêÄ©ÀÛ¼ÆÊµ½É·ÑÔÂÊı
+                  ykc204,   --×ªÒÆÀÛ¼Æ½É·ÑÄêÏŞ
+                  ykc035,   --»ù±¾Ò½ÁÆ±¾ÄêÓ¦½ÉÔÂÊı
+                  akc085,   --Ò½ÁÆ±¾Äê½É·ÑÔÂÊı
+                  akc095,   --ÕË»§ĞŞ¸ÄÈÕÆÚ
+                  ykc031,   --ÉÏÄê»ù±¾Ò½ÁÆÕË»§¼ÆÏ¢»ıÊı
+                  akc094,   --±¾Äê»ù±¾Ò½ÁÆÕË»§¼ÆÏ¢»ıÊı
+                  ykc032,   --ÉÏÄê¹«ÎñÔ±ÕË»§¼ÆËã»ıÊı
+                  ykc033,   --±¾Äê¹«ÎñÔ±ÕË»§¼ÆËã»ıÊı
+                  ykc260,   --ÉÏÄê¹«ÎñÔ±×¢Èë×Ê½ğ¼ÇÏ¢»ıÊı
+                  ykc242,   --±¾Äê¹«ÎñÔ±×¢Èë×Ê½ğ¼ÇÏ¢»ıÊı
+                  yke104)   --ĞĞÊı¾İ°æ±¾ºÅ
+           VALUES(var_aac001,   --¸öÈË±àºÅ
+                  TO_NUMBER(TO_CHAR(SYSDATE,'YYYY')),   --Äê¶È
+                  '1',   --ÕÊ»§×´Ì¬Õı³£
+                  0,   --»ù±¾Ò½ÁÆÕË»§¸öÈË½É·Ñ²¿·Ö±¾ÄêÊÕÈë×Ü¶î
+                  num_nkc087,   --»ù±¾Ò½ÁÆÕË»§µ¥Î»½É·Ñ»®Èë²¿·Ö±¾ÄêÊÕÈë×Ü¶î
+                  0,   --»ù±¾Ò½ÁÆÕË»§ÉÏÄê½á×ª½ğ¶î
+                  0,   --¹«ÎñÔ±ÕË»§±¾ÄêÊÕÈë×Ü¶î
+                  0,   --¹«ÎñÔ±ÕË»§ÉÏÄê½á×ª½ğ¶î
+                  0,   --¹«ÎñÔ±×¢Èë×Ê½ğ±¾ÄêÊÕÈë½ğ¶î
+                  0,   --¹«ÎñÔ±×¢Èë×Ê½ğÉÏÄê½á×ª½ğ¶î
+                  0,   --±¾Äê¼Ì³Ğ¸öÈË½É·Ñ½ğ¶î
+                  0,   --±¾Äê¼Ì³Ğµ¥Î»»®Èë½ğ¶î
+                  0,   --±¾Äê¼Ì³Ğ¹«ÎñÔ±½ğ¶î
+                  0,   --±¾Äê¼Ì³Ğ¹«ÎñÔ±×¢Èë×Ê½ğ½ğ¶î
+                  num_nkc087,   --µ±Ç°½áÓà½ğ¶î
+                  0,   --»ù±¾Ò½ÁÆÉÏÄêÕË»§ÀûÏ¢
+                  0,   --»ù±¾Ò½ÁÆ±¾ÄêÕË»§ÀûÏ¢
+                  0,   --¹«ÎñÔ±ÉÏÄêÕË»§ÀûÏ¢
+                  0,   --¹«ÎñÔ±±¾ÄêÕË»§ÀûÏ¢
+                  0,   --¹«ÎñÔ±×¢Èë×Ê½ğÉÏÄêÕË»§ÀûÏ¢
+                  0,   --¹«ÎñÔ±×¢Èë×Ê½ğ±¾ÄêÕË»§ÀûÏ¢
+                  0,   --»ù±¾Ò½ÁÆÉÏÄêÕË»§Ö§³ö×Ü¶î
+                  0,   --»ù±¾Ò½ÁÆ±¾ÄêÕË»§Ö§³ö×Ü¶î
+                  0,   --¹«ÎñÔ±ÉÏÄêÕË»§Ö§³ö×Ü¶î
+                  0,   --¹«ÎñÔ±±¾ÄêÕË»§Ö§³ö×Ü¶î
+                  0,   --¹«ÎñÔ±×¢Èë×Ê½ğÉÏÄêÖ§³ö×Ü¶î
+                  0,   --¹«ÎñÔ±×¢Èë×Ê½ğ±¾ÄêÖ§³ö×Ü¶î
+                  0,   --¹«ÎñÔ±ÃÅÕï²¹ÖúÀúÄê½á×ª½ğ¶î
+                  0,   --½ØÖ¹ÉÏÄêÄ©ÀÛ¼ÆÓ¦½É·ÑÔÂÊı
+                  0,   --½ØÖ¹ÉÏÄêÄ©ÀÛ¼ÆÊµ½É·ÑÔÂÊı
+                  0,   --×ªÒÆÀÛ¼Æ½É·ÑÄêÏŞ
+                  0,   --»ù±¾Ò½ÁÆ±¾ÄêÓ¦½ÉÔÂÊı
+                  0,   --Ò½ÁÆ±¾Äê½É·ÑÔÂÊı
+                  SYSDATE,   --ÕË»§ĞŞ¸ÄÈÕÆÚ
+                  0,   --ÉÏÄê»ù±¾Ò½ÁÆÕË»§¼ÆÏ¢»ıÊı
+                  0,   --±¾Äê»ù±¾Ò½ÁÆÕË»§¼ÆÏ¢»ıÊı
+                  0,   --ÉÏÄê¹«ÎñÔ±ÕË»§¼ÆËã»ıÊı
+                  0,   --±¾Äê¹«ÎñÔ±ÕË»§¼ÆËã»ıÊı
+                  0,   --ÉÏÄê¹«ÎñÔ±×¢Èë×Ê½ğ¼ÇÏ¢»ıÊı
+                  0,   --±¾Äê¹«ÎñÔ±×¢Èë×Ê½ğ¼ÇÏ¢»ıÊı
+                  TO_NUMBER(TO_CHAR(SYSDATE,'yyyymmdd')));     --ĞĞÊı¾İ°æ±¾ºÅ
          END IF;
          <<label_next>>
          select xasi2.seq_aaz175.nextval into var_aaz175 from dual;
@@ -9629,7 +9629,7 @@ END prc_p_ValidBatchContinueCheck;
                      values(
                             prm_aaz174,
                             var_aaz175,
-                            var_aaz176,--è®°å½•å¯¹é¢çš„aaz175ï¼Œä¸ºå›å†™æ ‡å¿—
+                            var_aaz176,--¼ÇÂ¼¶ÔÃæµÄaaz175£¬Îª»ØĞ´±êÖ¾
                             var_aac001,
                             var_nac001,
                             var_aac002,
@@ -9646,15 +9646,15 @@ END prc_p_ValidBatchContinueCheck;
 
    EXCEPTION
        WHEN OTHERS THEN
-       --è°ƒç”¨å­˜å‚¨è¿‡ç¨‹å‡ºé”™
+       --µ÷ÓÃ´æ´¢¹ı³Ì³ö´í
        prm_AppCode := '-1';
-      prm_ErrorMsg := 'è°ƒç”¨ä¸Šè´¦å­˜å‚¨è¿‡ç¨‹å‡ºé”™ï¼';
+      prm_ErrorMsg := 'µ÷ÓÃÉÏÕË´æ´¢¹ı³Ì³ö´í£¡';
       RETURN;
   END prc_p_accountInto;
-  --è´¦æˆ·è½¬å‡ºä¸‹è´¦
+  --ÕË»§×ª³öÏÂÕË
   procedure prc_p_accountOut(prm_rows IN VARCHAR2,
                              prm_log OUT sys_refcursor,
-                             prm_AppCode OUT   VARCHAR2,             --é”™è¯¯ä»£ç 
+                             prm_AppCode OUT   VARCHAR2,             --´íÎó´úÂë
                               prm_ErrorMsg  OUT   VARCHAR2
                             )
   is
@@ -9678,13 +9678,13 @@ END prc_p_ValidBatchContinueCheck;
   var_flag VARCHAR2(6);
   var_aae013 VARCHAR2(120);
   begin
-    --æŸ¥è¯¢ä¸ªäººç¼–å·
+    --²éÑ¯¸öÈË±àºÅ
     prm_AppCode := '1';
     prm_ErrorMsg  := '';
     xmlPar := xmlparser.newParser;
     xmlparser.parseClob(xmlPar,prm_rows);
     doc := xmlparser.getDocument(xmlPar);
-    --é‡Šæ”¾
+    --ÊÍ·Å
     xmlparser.freeParser(xmlPar);
     ac02List := xmldom.getElementsByTagName(doc,'row');
     len := xmldom.getLength(ac02List);
@@ -9693,25 +9693,25 @@ END prc_p_ValidBatchContinueCheck;
       into var_aaz174
       from dual;
 
-    --æŸ¥è¯¢ä¿¡æ¯è¿›è¡Œé‡Šæ”¾
+    --²éÑ¯ĞÅÏ¢½øĞĞÊÍ·Å
     for i in 0..len-1 loop
       var_aac001 := '';
       var_aac002 := '';
       var_aac003 := '';
-      var_flag := '1';--ä¸‹è´¦æˆåŠŸæ ‡å¿—
+      var_flag := '1';--ÏÂÕË³É¹¦±êÖ¾
       var_aae013 := '';
       num_akc087 := 0;
-      --è·å–ç¬¬iä¸ªac08
+      --»ñÈ¡µÚi¸öac08
       ac02Node := xmldom.item(ac02List,i);
-      --è·å–å±æ€§
+      --»ñÈ¡ÊôĞÔ
      -- ac08ArrMap := xmldom.getAttributes(ac02Node);
-      --è·å–å­èŠ‚ç‚¹
+      --»ñÈ¡×Ó½Úµã
       chilNodes := xmldom.getChildNodes(ac02Node);
       var_aac002 := xmldom.getNodeValue(xmldom.getFirstChild(xmldom.item(chilNodes,0)));
       var_aac003 := xmldom.getNodeValue(xmldom.getFirstChild(xmldom.item(chilNodes,1)));
 
       n_aae001:=TO_NUMBER(substr(to_char(sysdate,'yyyy-MM-dd'),0,4));
-      --æŸ¥è¯¢ä¸ªäººç¼–å·
+      --²éÑ¯¸öÈË±àºÅ
       begin
         select aac001
           into var_aac001
@@ -9720,17 +9720,17 @@ END prc_p_ValidBatchContinueCheck;
            and replace(aac003,' ','') = replace(var_aac003,' ','');
         exception
           WHEN NO_DATA_FOUND THEN
-            --æœªè·å–åˆ°ä¸ªäººåŸºæœ¬ä¿¡æ¯
-            var_flag := '2'; --å¤±è´¥
-            var_aae013 := 'æœªè·å–åˆ°èº«ä»½è¯ä¸º'||var_aac002||'äººå‘˜çš„åŸºæœ¬ä¿¡æ¯ï¼';
+            --Î´»ñÈ¡µ½¸öÈË»ù±¾ĞÅÏ¢
+            var_flag := '2'; --Ê§°Ü
+            var_aae013 := 'Î´»ñÈ¡µ½Éí·İÖ¤Îª'||var_aac002||'ÈËÔ±µÄ»ù±¾ĞÅÏ¢£¡';
             GOTO label_next;
           WHEN TOO_MANY_ROWS THEN
-            --èº«ä»½è¯å’Œå§“åå­˜åœ¨å¤šä¸ªä¸ªäººç¼–å·
+            --Éí·İÖ¤ºÍĞÕÃû´æÔÚ¶à¸ö¸öÈË±àºÅ
             var_flag := '2';
-            var_aae013 := 'è¯¥èº«ä»½è¯å·ç å­˜åœ¨å¤šä¸ªä¸ªäººç¼–å·,èº«ä»½è¯å·ä¸º:'||var_aac002;
+            var_aae013 := '¸ÃÉí·İÖ¤ºÅÂë´æÔÚ¶à¸ö¸öÈË±àºÅ,Éí·İÖ¤ºÅÎª:'||var_aac002;
             GOTO label_next;
       end;
-      --æŸ¥è¯¢è¯¥äººå‘˜æ˜¯å¦æ­£åœ¨å‚ä¿
+      --²éÑ¯¸ÃÈËÔ±ÊÇ·ñÕıÔÚ²Î±£
       select count(*)
         INTO num_count
         from xasi2.ac02
@@ -9738,15 +9738,15 @@ END prc_p_ValidBatchContinueCheck;
          and aae140 = '03'
          and aac031 = '2';
       IF num_count = 0 THEN
-         --è¯¥äººå‘˜æœªæœ‰åŸºæœ¬åŒ»ç–—å‚ä¿ä¿¡æ¯,ä¸èƒ½è½¬å…¥è´¦æˆ·
+         --¸ÃÈËÔ±Î´ÓĞ»ù±¾Ò½ÁÆ²Î±£ĞÅÏ¢,²»ÄÜ×ªÈëÕË»§
          var_flag := '2';
-         var_aae013 := 'äººå‘˜æœªå­˜åœ¨åŸºæœ¬åŒ»ç–—å‚ä¿ä¿¡æ¯æˆ–åŸºæœ¬åŒ»ç–—ä¿é™©æœªæš‚åœç¼´è´¹!';
+         var_aae013 := 'ÈËÔ±Î´´æÔÚ»ù±¾Ò½ÁÆ²Î±£ĞÅÏ¢»ò»ù±¾Ò½ÁÆ±£ÏÕÎ´ÔİÍ£½É·Ñ!';
          GOTO label_next;
       END IF;
 
       select xasi2.seq_yae099.nextval into var_yae099 from dual;
       --prm_aac001 := var_aac001;
-      --æŸ¥è¯¢è¯¥äººå‘˜æ˜¯å¦å­˜åœ¨è´¦æˆ·ä¿¡æ¯
+      --²éÑ¯¸ÃÈËÔ±ÊÇ·ñ´æÔÚÕË»§ĞÅÏ¢
       BEGIN
         SELECT akc087
           INTO num_akc087
@@ -9756,123 +9756,123 @@ END prc_p_ValidBatchContinueCheck;
         EXCEPTION
            WHEN NO_DATA_FOUND THEN
              var_flag := '2';
-             var_aae013 := 'è¯¥äººå‘˜æœªå­˜åœ¨è´¦æˆ·ä¿¡æ¯ï¼';
+             var_aae013 := '¸ÃÈËÔ±Î´´æÔÚÕË»§ĞÅÏ¢£¡';
              GOTO label_next;
       END;
 
-      --è´¦æˆ·ä¸ºè´Ÿï¼Œåˆ™ä¸ºä¸‹è´¦å¤±è´¥
+      --ÕË»§Îª¸º£¬ÔòÎªÏÂÕËÊ§°Ü
       IF num_akc087 < 0 THEN
          var_flag := '2';
-          var_aae013 := 'è¯¥äººå‘˜æœªå­˜åœ¨è´¦æˆ·ä½™é¢ä¸ºè´Ÿ!';
+          var_aae013 := '¸ÃÈËÔ±Î´´æÔÚÕË»§Óà¶îÎª¸º!';
           GOTO label_next;
       END IF;
 
-      --å°†ä¸ªäººè´¦æˆ·ä¿¡æ¯å†™å…¥å°å­˜è¡¨,å¹¶ä¸”è®°å½•åˆ°å…±äº«è¡¨ä¸­
+      --½«¸öÈËÕË»§ĞÅÏ¢Ğ´Èë·â´æ±í,²¢ÇÒ¼ÇÂ¼µ½¹²Ïí±íÖĞ
       BEGIN
          INSERT INTO xasi2.kc04k4
-                  ( yae099,   -- ä¸šåŠ¡æµæ°´å·
-                    aac001, --ä¸ªäººç¼–å·
-                    aae001, --å¹´åº¦
-                    ykc203, --å¸æˆ·çŠ¶æ€
-                    akc081, --åŸºæœ¬åŒ»ç–—è´¦æˆ·ä¸ªäººç¼´è´¹éƒ¨åˆ†æœ¬å¹´æ”¶å…¥æ€»é¢
-                    akc082, --åŸºæœ¬åŒ»ç–—è´¦æˆ·å•ä½ç¼´è´¹åˆ’å…¥éƒ¨åˆ†æœ¬å¹´æ”¶å…¥æ€»é¢
-                    ykc061, --åŸºæœ¬åŒ»ç–—è´¦æˆ·ä¸Šå¹´ç»“è½¬é‡‘é¢
-                    ykc025, --å…¬åŠ¡å‘˜è´¦æˆ·æœ¬å¹´æ”¶å…¥æ€»é¢
-                    ykc062, --å…¬åŠ¡å‘˜è´¦æˆ·ä¸Šå¹´ç»“è½¬é‡‘é¢
-                    ykc252, --å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘æœ¬å¹´æ”¶å…¥é‡‘é¢
-                    ykc255, --å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘ä¸Šå¹´ç»“è½¬é‡‘é¢
-                    ykc026, --æœ¬å¹´ç»§æ‰¿ä¸ªäººç¼´è´¹é‡‘é¢
-                    ykc027, --æœ¬å¹´ç»§æ‰¿å•ä½åˆ’å…¥é‡‘é¢
-                    ykc028, --æœ¬å¹´ç»§æ‰¿å…¬åŠ¡å‘˜é‡‘é¢
-                    ykc244, --æœ¬å¹´ç»§æ‰¿å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘é‡‘é¢
-                    akc087, --å½“å‰ç»“ä½™é‡‘é¢
-                    yka147, --åŸºæœ¬åŒ»ç–—ä¸Šå¹´è´¦æˆ·åˆ©æ¯
-                    yka148, --åŸºæœ¬åŒ»ç–—æœ¬å¹´è´¦æˆ·åˆ©æ¯
-                    yka149, --å…¬åŠ¡å‘˜ä¸Šå¹´è´¦æˆ·åˆ©æ¯
-                    yka150, --å…¬åŠ¡å‘˜æœ¬å¹´è´¦æˆ·åˆ©æ¯
-                    ykc256, --å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘ä¸Šå¹´è´¦æˆ·åˆ©æ¯
-                    ykc253, --å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘æœ¬å¹´è´¦æˆ·åˆ©æ¯
-                    ykc074, --åŸºæœ¬åŒ»ç–—ä¸Šå¹´è´¦æˆ·æ”¯å‡ºæ€»é¢
-                    ykc075, --åŸºæœ¬åŒ»ç–—æœ¬å¹´è´¦æˆ·æ”¯å‡ºæ€»é¢
-                    ykc076, --å…¬åŠ¡å‘˜ä¸Šå¹´è´¦æˆ·æ”¯å‡ºæ€»é¢
-                    ykc077, --å…¬åŠ¡å‘˜æœ¬å¹´è´¦æˆ·æ”¯å‡ºæ€»é¢
-                    ykc257, --å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘ä¸Šå¹´æ”¯å‡ºæ€»é¢
-                    ykc254, --å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘æœ¬å¹´æ”¯å‡ºæ€»é¢
-                    ykc250, --å…¬åŠ¡å‘˜é—¨è¯Šè¡¥åŠ©å†å¹´ç»“è½¬é‡‘é¢
-                    ykc036, --æˆªæ­¢ä¸Šå¹´æœ«ç´¯è®¡åº”ç¼´è´¹æœˆæ•°
-                    akc096, --æˆªæ­¢ä¸Šå¹´æœ«ç´¯è®¡å®ç¼´è´¹æœˆæ•°
-                    ykc204, --è½¬ç§»ç´¯è®¡ç¼´è´¹å¹´é™
-                    ykc035, --åŸºæœ¬åŒ»ç–—æœ¬å¹´åº”ç¼´æœˆæ•°
-                    akc085, --åŒ»ç–—æœ¬å¹´ç¼´è´¹æœˆæ•°
-                    akc095, --è´¦æˆ·ä¿®æ”¹æ—¥æœŸ
-                    ykc031, --ä¸Šå¹´åŸºæœ¬åŒ»ç–—è´¦æˆ·è®¡æ¯ç§¯æ•°
-                    akc094, --æœ¬å¹´åŸºæœ¬åŒ»ç–—è´¦æˆ·è®¡æ¯ç§¯æ•°
-                    ykc032, --ä¸Šå¹´å…¬åŠ¡å‘˜è´¦æˆ·è®¡ç®—ç§¯æ•°
-                    ykc033, --æœ¬å¹´å…¬åŠ¡å‘˜è´¦æˆ·è®¡ç®—ç§¯æ•°
-                    ykc260, --ä¸Šå¹´å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘è®°æ¯ç§¯æ•°
-                    ykc242, --æœ¬å¹´å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘è®°æ¯ç§¯æ•°
-                    yke104) --è¡Œæ•°æ®ç‰ˆæœ¬å·
-             SELECT var_yae099,   -- ä¸šåŠ¡æµæ°´å·
-                    a.aac001,  --ä¸ªäººç¼–å·
-                    a.aae001,  --å¹´åº¦
-                    a.ykc203,  --å¸æˆ·çŠ¶æ€
-                    a.akc081, --åŸºæœ¬åŒ»ç–—è´¦æˆ·ä¸ªäººç¼´è´¹éƒ¨åˆ†æœ¬å¹´æ”¶å…¥æ€»é¢
-                    a.akc082, --åŸºæœ¬åŒ»ç–—è´¦æˆ·å•ä½ç¼´è´¹åˆ’å…¥éƒ¨åˆ†æœ¬å¹´æ”¶å…¥æ€»é¢
-                    a.ykc061, --åŸºæœ¬åŒ»ç–—è´¦æˆ·ä¸Šå¹´ç»“è½¬é‡‘é¢
-                    a.ykc025, --å…¬åŠ¡å‘˜è´¦æˆ·æœ¬å¹´æ”¶å…¥æ€»é¢
-                    a.ykc062, --å…¬åŠ¡å‘˜è´¦æˆ·ä¸Šå¹´ç»“è½¬é‡‘é¢
-                    a.ykc252, --å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘æœ¬å¹´æ”¶å…¥é‡‘é¢
-                    a.ykc255, --å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘ä¸Šå¹´ç»“è½¬é‡‘é¢
-                    a.ykc026, --æœ¬å¹´ç»§æ‰¿ä¸ªäººç¼´è´¹é‡‘é¢
-                    a.ykc027, --æœ¬å¹´ç»§æ‰¿å•ä½åˆ’å…¥é‡‘é¢
-                    a.ykc028, --æœ¬å¹´ç»§æ‰¿å…¬åŠ¡å‘˜é‡‘é¢
-                    a.ykc244, --æœ¬å¹´ç»§æ‰¿å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘é‡‘é¢
-                    a.akc087, --å½“å‰ç»“ä½™é‡‘é¢
-                    a.yka147, --åŸºæœ¬åŒ»ç–—ä¸Šå¹´è´¦æˆ·åˆ©æ¯
-                    a.yka148, --åŸºæœ¬åŒ»ç–—æœ¬å¹´è´¦æˆ·åˆ©æ¯
-                    a.yka149, --å…¬åŠ¡å‘˜ä¸Šå¹´è´¦æˆ·åˆ©æ¯
-                    a.yka150, --å…¬åŠ¡å‘˜æœ¬å¹´è´¦æˆ·åˆ©æ¯
-                    a.ykc256, --å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘ä¸Šå¹´è´¦æˆ·åˆ©æ¯
-                    a.ykc253, --å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘æœ¬å¹´è´¦æˆ·åˆ©æ¯
-                    a.ykc074, --åŸºæœ¬åŒ»ç–—ä¸Šå¹´è´¦æˆ·æ”¯å‡ºæ€»é¢
-                    a.ykc075, --åŸºæœ¬åŒ»ç–—æœ¬å¹´è´¦æˆ·æ”¯å‡ºæ€»é¢
-                    a.ykc076, --å…¬åŠ¡å‘˜ä¸Šå¹´è´¦æˆ·æ”¯å‡ºæ€»é¢
-                    a.ykc077, --å…¬åŠ¡å‘˜æœ¬å¹´è´¦æˆ·æ”¯å‡ºæ€»é¢
-                    a.ykc257, --å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘ä¸Šå¹´æ”¯å‡ºæ€»é¢
-                    a.ykc254, --å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘æœ¬å¹´æ”¯å‡ºæ€»é¢
-                    a.ykc250, --å…¬åŠ¡å‘˜é—¨è¯Šè¡¥åŠ©å†å¹´ç»“è½¬é‡‘é¢
-                    a.ykc036, --æˆªæ­¢ä¸Šå¹´æœ«ç´¯è®¡åº”ç¼´è´¹æœˆæ•°
-                    a.akc096, --æˆªæ­¢ä¸Šå¹´æœ«ç´¯è®¡å®ç¼´è´¹æœˆæ•°
-                    a.ykc204, --è½¬ç§»ç´¯è®¡ç¼´è´¹å¹´é™
-                    a.ykc035, --åŸºæœ¬åŒ»ç–—æœ¬å¹´åº”ç¼´æœˆæ•°
-                    a.akc085, --åŒ»ç–—æœ¬å¹´ç¼´è´¹æœˆæ•°
-                    a.akc095, --è´¦æˆ·ä¿®æ”¹æ—¥æœŸ
-                    a.ykc031, --ä¸Šå¹´åŸºæœ¬åŒ»ç–—è´¦æˆ·è®¡æ¯ç§¯æ•°
-                    a.akc094, --æœ¬å¹´åŸºæœ¬åŒ»ç–—è´¦æˆ·è®¡æ¯ç§¯æ•°
-                    a.ykc032, --ä¸Šå¹´å…¬åŠ¡å‘˜è´¦æˆ·è®¡ç®—ç§¯æ•°
-                    a.ykc033, --æœ¬å¹´å…¬åŠ¡å‘˜è´¦æˆ·è®¡ç®—ç§¯æ•°
-                    a.ykc260, --ä¸Šå¹´å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘è®°æ¯ç§¯æ•°
-                    a.ykc242, --æœ¬å¹´å…¬åŠ¡å‘˜æ³¨å…¥èµ„é‡‘è®°æ¯ç§¯æ•°
+                  ( yae099,   -- ÒµÎñÁ÷Ë®ºÅ
+                    aac001, --¸öÈË±àºÅ
+                    aae001, --Äê¶È
+                    ykc203, --ÕÊ»§×´Ì¬
+                    akc081, --»ù±¾Ò½ÁÆÕË»§¸öÈË½É·Ñ²¿·Ö±¾ÄêÊÕÈë×Ü¶î
+                    akc082, --»ù±¾Ò½ÁÆÕË»§µ¥Î»½É·Ñ»®Èë²¿·Ö±¾ÄêÊÕÈë×Ü¶î
+                    ykc061, --»ù±¾Ò½ÁÆÕË»§ÉÏÄê½á×ª½ğ¶î
+                    ykc025, --¹«ÎñÔ±ÕË»§±¾ÄêÊÕÈë×Ü¶î
+                    ykc062, --¹«ÎñÔ±ÕË»§ÉÏÄê½á×ª½ğ¶î
+                    ykc252, --¹«ÎñÔ±×¢Èë×Ê½ğ±¾ÄêÊÕÈë½ğ¶î
+                    ykc255, --¹«ÎñÔ±×¢Èë×Ê½ğÉÏÄê½á×ª½ğ¶î
+                    ykc026, --±¾Äê¼Ì³Ğ¸öÈË½É·Ñ½ğ¶î
+                    ykc027, --±¾Äê¼Ì³Ğµ¥Î»»®Èë½ğ¶î
+                    ykc028, --±¾Äê¼Ì³Ğ¹«ÎñÔ±½ğ¶î
+                    ykc244, --±¾Äê¼Ì³Ğ¹«ÎñÔ±×¢Èë×Ê½ğ½ğ¶î
+                    akc087, --µ±Ç°½áÓà½ğ¶î
+                    yka147, --»ù±¾Ò½ÁÆÉÏÄêÕË»§ÀûÏ¢
+                    yka148, --»ù±¾Ò½ÁÆ±¾ÄêÕË»§ÀûÏ¢
+                    yka149, --¹«ÎñÔ±ÉÏÄêÕË»§ÀûÏ¢
+                    yka150, --¹«ÎñÔ±±¾ÄêÕË»§ÀûÏ¢
+                    ykc256, --¹«ÎñÔ±×¢Èë×Ê½ğÉÏÄêÕË»§ÀûÏ¢
+                    ykc253, --¹«ÎñÔ±×¢Èë×Ê½ğ±¾ÄêÕË»§ÀûÏ¢
+                    ykc074, --»ù±¾Ò½ÁÆÉÏÄêÕË»§Ö§³ö×Ü¶î
+                    ykc075, --»ù±¾Ò½ÁÆ±¾ÄêÕË»§Ö§³ö×Ü¶î
+                    ykc076, --¹«ÎñÔ±ÉÏÄêÕË»§Ö§³ö×Ü¶î
+                    ykc077, --¹«ÎñÔ±±¾ÄêÕË»§Ö§³ö×Ü¶î
+                    ykc257, --¹«ÎñÔ±×¢Èë×Ê½ğÉÏÄêÖ§³ö×Ü¶î
+                    ykc254, --¹«ÎñÔ±×¢Èë×Ê½ğ±¾ÄêÖ§³ö×Ü¶î
+                    ykc250, --¹«ÎñÔ±ÃÅÕï²¹ÖúÀúÄê½á×ª½ğ¶î
+                    ykc036, --½ØÖ¹ÉÏÄêÄ©ÀÛ¼ÆÓ¦½É·ÑÔÂÊı
+                    akc096, --½ØÖ¹ÉÏÄêÄ©ÀÛ¼ÆÊµ½É·ÑÔÂÊı
+                    ykc204, --×ªÒÆÀÛ¼Æ½É·ÑÄêÏŞ
+                    ykc035, --»ù±¾Ò½ÁÆ±¾ÄêÓ¦½ÉÔÂÊı
+                    akc085, --Ò½ÁÆ±¾Äê½É·ÑÔÂÊı
+                    akc095, --ÕË»§ĞŞ¸ÄÈÕÆÚ
+                    ykc031, --ÉÏÄê»ù±¾Ò½ÁÆÕË»§¼ÆÏ¢»ıÊı
+                    akc094, --±¾Äê»ù±¾Ò½ÁÆÕË»§¼ÆÏ¢»ıÊı
+                    ykc032, --ÉÏÄê¹«ÎñÔ±ÕË»§¼ÆËã»ıÊı
+                    ykc033, --±¾Äê¹«ÎñÔ±ÕË»§¼ÆËã»ıÊı
+                    ykc260, --ÉÏÄê¹«ÎñÔ±×¢Èë×Ê½ğ¼ÇÏ¢»ıÊı
+                    ykc242, --±¾Äê¹«ÎñÔ±×¢Èë×Ê½ğ¼ÇÏ¢»ıÊı
+                    yke104) --ĞĞÊı¾İ°æ±¾ºÅ
+             SELECT var_yae099,   -- ÒµÎñÁ÷Ë®ºÅ
+                    a.aac001,  --¸öÈË±àºÅ
+                    a.aae001,  --Äê¶È
+                    a.ykc203,  --ÕÊ»§×´Ì¬
+                    a.akc081, --»ù±¾Ò½ÁÆÕË»§¸öÈË½É·Ñ²¿·Ö±¾ÄêÊÕÈë×Ü¶î
+                    a.akc082, --»ù±¾Ò½ÁÆÕË»§µ¥Î»½É·Ñ»®Èë²¿·Ö±¾ÄêÊÕÈë×Ü¶î
+                    a.ykc061, --»ù±¾Ò½ÁÆÕË»§ÉÏÄê½á×ª½ğ¶î
+                    a.ykc025, --¹«ÎñÔ±ÕË»§±¾ÄêÊÕÈë×Ü¶î
+                    a.ykc062, --¹«ÎñÔ±ÕË»§ÉÏÄê½á×ª½ğ¶î
+                    a.ykc252, --¹«ÎñÔ±×¢Èë×Ê½ğ±¾ÄêÊÕÈë½ğ¶î
+                    a.ykc255, --¹«ÎñÔ±×¢Èë×Ê½ğÉÏÄê½á×ª½ğ¶î
+                    a.ykc026, --±¾Äê¼Ì³Ğ¸öÈË½É·Ñ½ğ¶î
+                    a.ykc027, --±¾Äê¼Ì³Ğµ¥Î»»®Èë½ğ¶î
+                    a.ykc028, --±¾Äê¼Ì³Ğ¹«ÎñÔ±½ğ¶î
+                    a.ykc244, --±¾Äê¼Ì³Ğ¹«ÎñÔ±×¢Èë×Ê½ğ½ğ¶î
+                    a.akc087, --µ±Ç°½áÓà½ğ¶î
+                    a.yka147, --»ù±¾Ò½ÁÆÉÏÄêÕË»§ÀûÏ¢
+                    a.yka148, --»ù±¾Ò½ÁÆ±¾ÄêÕË»§ÀûÏ¢
+                    a.yka149, --¹«ÎñÔ±ÉÏÄêÕË»§ÀûÏ¢
+                    a.yka150, --¹«ÎñÔ±±¾ÄêÕË»§ÀûÏ¢
+                    a.ykc256, --¹«ÎñÔ±×¢Èë×Ê½ğÉÏÄêÕË»§ÀûÏ¢
+                    a.ykc253, --¹«ÎñÔ±×¢Èë×Ê½ğ±¾ÄêÕË»§ÀûÏ¢
+                    a.ykc074, --»ù±¾Ò½ÁÆÉÏÄêÕË»§Ö§³ö×Ü¶î
+                    a.ykc075, --»ù±¾Ò½ÁÆ±¾ÄêÕË»§Ö§³ö×Ü¶î
+                    a.ykc076, --¹«ÎñÔ±ÉÏÄêÕË»§Ö§³ö×Ü¶î
+                    a.ykc077, --¹«ÎñÔ±±¾ÄêÕË»§Ö§³ö×Ü¶î
+                    a.ykc257, --¹«ÎñÔ±×¢Èë×Ê½ğÉÏÄêÖ§³ö×Ü¶î
+                    a.ykc254, --¹«ÎñÔ±×¢Èë×Ê½ğ±¾ÄêÖ§³ö×Ü¶î
+                    a.ykc250, --¹«ÎñÔ±ÃÅÕï²¹ÖúÀúÄê½á×ª½ğ¶î
+                    a.ykc036, --½ØÖ¹ÉÏÄêÄ©ÀÛ¼ÆÓ¦½É·ÑÔÂÊı
+                    a.akc096, --½ØÖ¹ÉÏÄêÄ©ÀÛ¼ÆÊµ½É·ÑÔÂÊı
+                    a.ykc204, --×ªÒÆÀÛ¼Æ½É·ÑÄêÏŞ
+                    a.ykc035, --»ù±¾Ò½ÁÆ±¾ÄêÓ¦½ÉÔÂÊı
+                    a.akc085, --Ò½ÁÆ±¾Äê½É·ÑÔÂÊı
+                    a.akc095, --ÕË»§ĞŞ¸ÄÈÕÆÚ
+                    a.ykc031, --ÉÏÄê»ù±¾Ò½ÁÆÕË»§¼ÆÏ¢»ıÊı
+                    a.akc094, --±¾Äê»ù±¾Ò½ÁÆÕË»§¼ÆÏ¢»ıÊı
+                    a.ykc032, --ÉÏÄê¹«ÎñÔ±ÕË»§¼ÆËã»ıÊı
+                    a.ykc033, --±¾Äê¹«ÎñÔ±ÕË»§¼ÆËã»ıÊı
+                    a.ykc260, --ÉÏÄê¹«ÎñÔ±×¢Èë×Ê½ğ¼ÇÏ¢»ıÊı
+                    a.ykc242, --±¾Äê¹«ÎñÔ±×¢Èë×Ê½ğ¼ÇÏ¢»ıÊı
                     a.yke104
            FROM xasi2.kc04 a
           WHERE a.aac001 = var_aac001
             AND a.aae001 = n_aae001;
             IF SQL%rowcount = 0 THEN
                var_flag := '2';
-               var_aae013 := 'æ²¡æœ‰æŠŠkc04å¤‡ä»½åˆ°åŒ»ç–—ä¸ªäººè´¦æˆ·å°å­˜!';
+               var_aae013 := 'Ã»ÓĞ°Ñkc04±¸·İµ½Ò½ÁÆ¸öÈËÕË»§·â´æ!';
                GOTO label_next;
             END IF;
      EXCEPTION
        WHEN OTHERS THEN
           var_flag := '2';
-          var_aae013 := 'å¤‡ä»½åˆ°åŒ»ç–—ä¸ªäººè´¦æˆ·å°å­˜è¡¨é”™è¯¯!';
+          var_aae013 := '±¸·İµ½Ò½ÁÆ¸öÈËÕË»§·â´æ±í´íÎó!';
           GOTO label_next;
      END;
-      --ç»™ä¸ªäººè´¦æˆ·ä¸‹è´¦
+      --¸ø¸öÈËÕË»§ÏÂÕË
       delete from xasi2.kc04 where aac001 = var_aac001;
       IF SQL%ROWCOUNT < 1 THEN
          var_flag := '2';
-         var_aae013 := 'ä¸ªäººè´¦æˆ·ä¸‹è´¦å‡ºé”™!';
+         var_aae013 := '¸öÈËÕË»§ÏÂÕË³ö´í!';
          GOTO label_next;
       END IF;
 
@@ -9880,7 +9880,7 @@ END prc_p_ValidBatchContinueCheck;
       select xasi2.seq_aaz175.nextval
         into var_aaz175
         from dual;
-      --æ’å…¥æ—¥å¿—kc04a1
+      --²åÈëÈÕÖ¾kc04a1
       insert into xasi2.kc04a1(aaz174,
                          aaz175,
                          aac001,
@@ -9903,28 +9903,28 @@ END prc_p_ValidBatchContinueCheck;
                          var_aae013
                         );
     end loop;
-    --é‡Šæ”¾æ–‡æ¡£å¯¹è±¡
+    --ÊÍ·ÅÎÄµµ¶ÔÏó
     xmldom.freeDocument(doc);
-    --æŸ¥è¯¢å·²ä¸‹è´¦çš„ä¿¡æ¯è¿”å›æ¸¸æ ‡
-    open prm_log for select aac001,--ä¸ªäººç¼–å·
-                            aac002,--èº«ä»½è¯
-                            aac003,--å§“å
-                            akc087,--ä¸‹è´¦é‡‘é¢
-                            flag, --ä¸‹è´¦æ ‡å¿—
-                            aae013,--ä¸‹è´¦ å¤±è´¥åŸå› 
+    --²éÑ¯ÒÑÏÂÕËµÄĞÅÏ¢·µ»ØÓÎ±ê
+    open prm_log for select aac001,--¸öÈË±àºÅ
+                            aac002,--Éí·İÖ¤
+                            aac003,--ĞÕÃû
+                            akc087,--ÏÂÕË½ğ¶î
+                            flag, --ÏÂÕË±êÖ¾
+                            aae013,--ÏÂÕË Ê§°ÜÔ­Òò
                             aaz175
                        from xasi2.kc04a1
                       where aaz174 = var_aaz174;
     EXCEPTION
       WHEN OTHERS THEN
-         --è°ƒç”¨å­˜å‚¨è¿‡ç¨‹å‡ºé”™
+         --µ÷ÓÃ´æ´¢¹ı³Ì³ö´í
          prm_AppCode := '-1';
-        prm_ErrorMsg := 'è°ƒç”¨ä¸‹è´¦å­˜å‚¨è¿‡ç¨‹å‡ºé”™ï¼'||SQLERRM||'ã€‚é”™è¯¯å †æ ˆ:' || DBMS_UTILITY.FORMAT_ERROR_BACKTRACE();
+        prm_ErrorMsg := 'µ÷ÓÃÏÂÕË´æ´¢¹ı³Ì³ö´í£¡'||SQLERRM||'¡£´íÎó¶ÑÕ»:' || DBMS_UTILITY.FORMAT_ERROR_BACKTRACE();
         RETURN;
   END prc_p_accountOut;
-  --å›å†™ä¸Šè´¦æ ‡å¿—
+  --»ØĞ´ÉÏÕË±êÖ¾
 procedure prc_p_accountUpdate(prm_rows IN VARCHAR2,
-                           prm_AppCode OUT   VARCHAR2,             --é”™è¯¯ä»£ç 
+                           prm_AppCode OUT   VARCHAR2,             --´íÎó´úÂë
                            prm_ErrorMsg  OUT   VARCHAR2
                           )
   IS
@@ -9947,7 +9947,7 @@ procedure prc_p_accountUpdate(prm_rows IN VARCHAR2,
     xmlPar := xmlparser.newParser;
     xmlparser.parseClob(xmlPar,prm_rows);
     doc := xmlparser.getDocument(xmlPar);
-    --é‡Šæ”¾
+    --ÊÍ·Å
     xmlparser.freeParser(xmlPar);
     ac02List := xmldom.getElementsByTagName(doc,'row');
     len := xmldom.getLength(ac02List);
@@ -9955,14 +9955,14 @@ procedure prc_p_accountUpdate(prm_rows IN VARCHAR2,
       var_aac001 := '';
       var_aac002 := '';
       var_aac003 := '';
-      var_yae235 := '';--ä¸Šè´¦æˆåŠŸä¸º1ï¼Œä¸Šè´¦å¤±è´¥ä¸º2
+      var_yae235 := '';--ÉÏÕË³É¹¦Îª1£¬ÉÏÕËÊ§°ÜÎª2
       var_yae238 := '';
       var_aaz175 := '';
-      --è·å–ç¬¬iä¸ª
+      --»ñÈ¡µÚi¸ö
       ac02Node := xmldom.item(ac02List,i);
-      --è·å–å±æ€§
+      --»ñÈ¡ÊôĞÔ
      -- ac08ArrMap := xmldom.getAttributes(ac02Node);
-      --è·å–å­èŠ‚ç‚¹
+      --»ñÈ¡×Ó½Úµã
       chilNodes := xmldom.getChildNodes(ac02Node);
       var_aac001 := xmldom.getNodeValue(xmldom.getFirstChild(xmldom.item(chilNodes,0)));
       var_aac002 := xmldom.getNodeValue(xmldom.getFirstChild(xmldom.item(chilNodes,1)));
@@ -9981,15 +9981,15 @@ procedure prc_p_accountUpdate(prm_rows IN VARCHAR2,
     EXCEPTION
       WHEN OTHERS THEN
         prm_AppCode := '-1';
-        prm_ErrorMsg  := 'è°ƒç”¨å›å†™ä¸Šè´¦æ ‡å¿—å­˜å‚¨è¿‡ç¨‹å¤±è´¥!';
+        prm_ErrorMsg  := 'µ÷ÓÃ»ØĞ´ÉÏÕË±êÖ¾´æ´¢¹ı³ÌÊ§°Ü!';
         RETURN;
   END prc_p_accountUpdate;*/
 
 PROCEDURE prc_p_checkInfoByaac001(prm_aac001 IN VARCHAR2,
                            prm_aab001  IN VARCHAR2,
-                           prm_flag    OUT   VARCHAR2, --1æ ¡éªŒå¤±è´¥ï¼Œæ— æ³•ç»­ä¿ 2æ ¡éªŒæˆåŠŸï¼Œé«˜æ–° 3æ ¡éªŒæˆåŠŸï¼Œå¸‚å±€ 4æ ¡éªŒæˆåŠŸï¼Œåˆå¹¶æ•°æ® 5æ ¡éªŒæˆåŠŸï¼Œå•å¢å·¥ä¼¤é™©ç§  6.æœªæŸ¥åˆ° åŒ»ç–—ä¿¡æ¯
+                           prm_flag    OUT   VARCHAR2, --1Ğ£ÑéÊ§°Ü£¬ÎŞ·¨Ğø±£ 2Ğ£Ñé³É¹¦£¬¸ßĞÂ 3Ğ£Ñé³É¹¦£¬ÊĞ¾Ö 4Ğ£Ñé³É¹¦£¬ºÏ²¢Êı¾İ 5Ğ£Ñé³É¹¦£¬µ¥Ôö¹¤ÉËÏÕÖÖ  6.Î´²éµ½ Ò½ÁÆĞÅÏ¢
                            prm_msg     OUT   VARCHAR2,
-                           prm_AppCode OUT   VARCHAR2,             --é”™è¯¯ä»£ç 
+                           prm_AppCode OUT   VARCHAR2,             --´íÎó´úÂë
                            prm_ErrorMsg  OUT   VARCHAR2 )
   IS
 
@@ -10023,17 +10023,17 @@ PROCEDURE prc_p_checkInfoByaac001(prm_aac001 IN VARCHAR2,
   v_aac012  irac01.aac012%TYPE;
   woman_worker_months NUMBER;
   VAR_YAE097 NUMBER;
-  sjqf_count NUMBER; -- åˆ¤æ–­å®ç¼´æˆ–æ¬ è´¹
-  sjqf_aab001  NUMBER; -- å®ç¼´æˆ–æ¬ è´¹çš„å•ä½ç¼–å·
-  sjqf_aab004  irab01.aab004%TYPE; -- å®ç¼´æˆ–æ¬ è´¹çš„å•ä½åç§°
-  jzh_count NUMBER; -- åˆ¤æ–­å†›ä¸“æˆ·
-  yl_count NUMBER; --  å…»è€ç¼´è´¹æ ‡å¿—
+  sjqf_count NUMBER; -- ÅĞ¶ÏÊµ½É»òÇ··Ñ
+  sjqf_aab001  NUMBER; -- Êµ½É»òÇ··ÑµÄµ¥Î»±àºÅ
+  sjqf_aab004  irab01.aab004%TYPE; -- Êµ½É»òÇ··ÑµÄµ¥Î»Ãû³Æ
+  jzh_count NUMBER; -- ÅĞ¶Ï¾ü×¨»§
+  yl_count NUMBER; --  ÑøÀÏ½É·Ñ±êÖ¾
 
     cursor cur_ac01 IS SELECT *   FROM xasi2.ac01 A
       WHERE AAE120 = '0'
        AND A.AAC002 IN (var_15aac002, var_aac002Low, var_18aac002)
 
-       AND AAC003 NOT LIKE '%é‡å¤%';
+       AND AAC003 NOT LIKE '%ÖØ¸´%';
 
   BEGIN
     prm_AppCode := xasi2.pkg_comm.gn_def_OK ;
@@ -10044,11 +10044,11 @@ PROCEDURE prc_p_checkInfoByaac001(prm_aac001 IN VARCHAR2,
 
 /*    IF prm_aac001 IS NULL THEN
        prm_AppCode := '1';
-       prm_ErrorMsg  := 'ä¼ å…¥ä¸ªäººç¼–å·ä¸ºç©º!';
+       prm_ErrorMsg  := '´«Èë¸öÈË±àºÅÎª¿Õ!';
        RETURN;
     END IF;
 */    prm_flag:=2;
-      PRM_MSG := 'è¯·è¡¥å½•ç¼ºå¤±ä¿¡æ¯ï¼';
+      PRM_MSG := 'Çë²¹Â¼È±Ê§ĞÅÏ¢£¡';
 
         /*SELECT aac002
         INTO count_aac002
@@ -10063,7 +10063,7 @@ PROCEDURE prc_p_checkInfoByaac001(prm_aac001 IN VARCHAR2,
        WHERE AAC001 = PRM_AAC001;
 
 
-       --è·å–å„ç§å½¢å¼çš„è¯ä»¶å·ç 
+       --»ñÈ¡¸÷ÖÖĞÎÊ½µÄÖ¤¼şºÅÂë
     var_15aac002  := SUBSTR(var_aac002_jm, 1, 6) ||
                      SUBSTR(var_aac002_jm, 9, 9);
     var_aac002Low := LOWER(var_aac002_jm);
@@ -10076,9 +10076,9 @@ PROCEDURE prc_p_checkInfoByaac001(prm_aac001 IN VARCHAR2,
      WHERE AAE120 = '0'
        AND A.AAC002 IN (var_15aac002, var_aac002Low,var_18aac002)
 
-       AND AAC003 NOT LIKE '%é‡å¤%';
+       AND AAC003 NOT LIKE '%ÖØ¸´%';
 
-       -- wanghm modify ç»­ä¿æ•ˆéªŒå®ç¼´æˆ–æ¬ è´¹  å†›è½¬ä¸å—è¿™ä¸ªé™åˆ¶ start 20190210
+       -- wanghm modify Ğø±£Ğ§ÑéÊµ½É»òÇ··Ñ  ¾ü×ª²»ÊÜÕâ¸öÏŞÖÆ start 20190210
        IF num_count>0 THEN
 
  select max(YAE097)
@@ -10121,33 +10121,33 @@ PROCEDURE prc_p_checkInfoByaac001(prm_aac001 IN VARCHAR2,
                  AND aae002 = to_char(add_months(to_date(var_yae097,'yyyymm'),1),'yyyymm')) a , xasi2.ab01 b
                WHERE a.aab001=b.aab001;
           PRM_FLAG := '6';
-          PRM_MSG  := 'è¯¥äººå‘˜å½“æœˆåœ¨å•ä½'||sjqf_aab001||sjqf_aab004||'å·²å­˜åœ¨ç¼´è´¹è®°å½•ï¼';
+          PRM_MSG  := '¸ÃÈËÔ±µ±ÔÂÔÚµ¥Î»'||sjqf_aab001||sjqf_aab004||'ÒÑ´æÔÚ½É·Ñ¼ÇÂ¼£¡';
           GOTO LEB_OVER;
        END IF;
      END LOOP;
      END IF;
      END IF;
-   -- wanghm modify ç»­ä¿æ•ˆéªŒå®ç¼´æˆ–æ¬ è´¹  å†›è½¬ä¸å—è¿™ä¸ªé™åˆ¶ end 20190210
+   -- wanghm modify Ğø±£Ğ§ÑéÊµ½É»òÇ··Ñ  ¾ü×ª²»ÊÜÕâ¸öÏŞÖÆ end 20190210
 
     IF num_count>0 THEN
         select to_number(to_char(min(aac006),'yyyymm')),aac004,aac008   INTO nl_aac006 ,xb_aac004,zy_aac008
             from xasi2.ac01
            where aac002 IN (var_15aac002, var_aac002Low,var_18aac002)
-             AND AAC003 NOT LIKE '%é‡å¤%'
+             AND AAC003 NOT LIKE '%ÖØ¸´%'
              AND rownum = 1
              group by aac004 , aac008;
 
            select trunc(months_between(sysdate,to_date(nl_aac006,'yyyymm'))) INTO sj_months from dual;
-           
+
            --  rec_ac01
            select aac012 INTO v_aac012  from xasi2.ac01  where   aac002 IN (var_15aac002, var_aac002Low,var_18aac002)
-             AND AAC003 NOT LIKE '%é‡å¤%'    AND rownum = 1;
+             AND AAC003 NOT LIKE '%ÖØ¸´%'    AND rownum = 1;
 
       select count(1)
              into yl_count from wsjb.irac01a7_yl
             where aae123 = '2'
               and aac002  IN (var_15aac002, var_aac002Low,var_18aac002);
-                   
+
       IF  yl_count = 0 THEN
 
 
@@ -10156,48 +10156,48 @@ PROCEDURE prc_p_checkInfoByaac001(prm_aac001 IN VARCHAR2,
               select akc021  INTO  zy_akc021 from xasi2.kc01    where aac001 = prm_aac001;
 
               IF   zy_aac008 = 2 and  zy_akc021 =11 THEN
-                --  ä¸åšä¸šåŠ¡å¤„ç†
+                --  ²»×öÒµÎñ´¦Àí
                 select akc021  INTO  zy_akc021 from xasi2.kc01   where aac001 = prm_aac001;
                 ELSIF    xb_aac004 = '1' and xb_aac004 IS NOT NULL  and  sj_months >=  man_months  THEN
 
               PRM_FLAG := '1';
-              PRM_MSG  := 'æ­¤äººå‘˜å¹´çºªè¶…è¿‡éœ€è¦ç»­ä¿çš„å¹´çºªï¼';
+              PRM_MSG  := '´ËÈËÔ±Äê¼Í³¬¹ıĞèÒªĞø±£µÄÄê¼Í£¡';
             GOTO LEB_OVER;
               END  IF;
          END IF;
 
           IF xb_aac004 = '2' and xb_aac004 IS NOT NULL  and  sj_months >=  woman_months  THEN
              IF   zy_aac008 = 2 and  zy_akc021 =11 THEN
-                 --  ä¸åšä¸šåŠ¡å¤„ç†
+                 --  ²»×öÒµÎñ´¦Àí
                 select akc021  INTO  zy_akc021 from xasi2.kc01   where aac001 = prm_aac001;
                 ELSIF   xb_aac004 = '2' and xb_aac004 IS NOT NULL  and  sj_months >=  woman_months  THEN
               PRM_FLAG := '1';
-              PRM_MSG  := 'æ­¤äººå‘˜å¹´çºªè¶…è¿‡éœ€è¦ç»­ä¿çš„å¹´çºªï¼';
+              PRM_MSG  := '´ËÈËÔ±Äê¼Í³¬¹ıĞèÒªĞø±£µÄÄê¼Í£¡';
             GOTO LEB_OVER;
             END  IF;
         END IF;
-        
-        
-       /*  IF   (zy_aac008 = 2 and  zy_akc021 =11)  THEN -- é€æœˆä¸å¤„ç†
+
+
+       /*  IF   (zy_aac008 = 2 and  zy_akc021 =11)  THEN -- ÖğÔÂ²»´¦Àí
             select X INTO X from dual;
-          ELSIF    xb_aac004 = '2' and xb_aac004 IS NOT NULL    THEN  
-             --  å¤„ç†å¹²éƒ¨  55 4  å·¥äºº 50  1  é’ˆå¯¹å¥³æ€§  é€æœˆä¸å¤„ç† 20190703  
-               
+          ELSIF    xb_aac004 = '2' and xb_aac004 IS NOT NULL    THEN
+             --  ´¦Àí¸É²¿  55 4  ¹¤ÈË 50  1  Õë¶ÔÅ®ĞÔ  ÖğÔÂ²»´¦Àí 20190703
+
                  IF   sj_months > woman_worker_months  and v_aac012 = '1' THEN
                       PRM_FLAG := '1';
-                      PRM_MSG  := 'è¯¥äººå‘˜ä¸ªäººèº«ä»½ä¸ºå·¥äººï¼Œè¶…è¿‡éœ€è¦ç»­ä¿çš„å¹´çºªï¼';
+                      PRM_MSG  := '¸ÃÈËÔ±¸öÈËÉí·İÎª¹¤ÈË£¬³¬¹ıĞèÒªĞø±£µÄÄê¼Í£¡';
                        GOTO LEB_OVER;
                  ELSIF   sj_months >=  woman_months and  v_aac012 = '4'  THEN
                       PRM_FLAG := '1';
-                      PRM_MSG  := 'è¯¥äººå‘˜ä¸ªäººèº«ä»½ä¸ºå¹²éƒ¨ï¼Œè¶…è¿‡éœ€è¦ç»­ä¿çš„å¹´çºªï¼';
+                      PRM_MSG  := '¸ÃÈËÔ±¸öÈËÉí·İÎª¸É²¿£¬³¬¹ıĞèÒªĞø±£µÄÄê¼Í£¡';
                        GOTO LEB_OVER;
                  END IF;
-             
+
              END IF;
          */
-        
-        END IF;  
-        
+
+        END IF;
+
       END IF;
 
 
@@ -10206,14 +10206,14 @@ PROCEDURE prc_p_checkInfoByaac001(prm_aac001 IN VARCHAR2,
 
              IF  num_count > 1 OR  num_count = 1 THEN
 
-             --å¾ªç¯æ ¡éªŒac01
+             --Ñ­»·Ğ£Ñéac01
               FOR rec_cur_ac01 IN cur_ac01 LOOP
 
                SELECT aac001 INTO var_aac001_more   FROM xasi2.ac01 A
                WHERE AAE120 = '0'
                AND A.aac001 = rec_cur_ac01.aac001
                AND A.AAC002 IN (var_15aac002, var_aac002Low,var_18aac002)
-                AND AAC003 NOT LIKE '%é‡å¤%';
+                AND AAC003 NOT LIKE '%ÖØ¸´%';
 
 
                 SELECT COUNT(1)
@@ -10229,7 +10229,7 @@ PROCEDURE prc_p_checkInfoByaac001(prm_aac001 IN VARCHAR2,
                                 FROM XASI2.AC02K1
                                WHERE AAC001 = var_aac001_more
                                  AND AAC031 = '1');
-              PRM_MSG  := 'æ­¤èº«ä»½è¯å·ç äººå‘˜åŒ»ç–—ä¿é™©å…³ç³»ç›®å‰åœ¨ç¤¾åŒºï¼š' || VAR_AAB004 || 'å‚åŠ å±…æ°‘åŒ»ä¿ï¼Œå§“å:'  ||'ä¸ªäººç¼–å·ï¼š'||var_aac001_more|| ',å‚ä¿çŠ¶æ€:å‚ä¿ç¼´è´¹ã€‚';
+              PRM_MSG  := '´ËÉí·İÖ¤ºÅÂëÈËÔ±Ò½ÁÆ±£ÏÕ¹ØÏµÄ¿Ç°ÔÚÉçÇø£º' || VAR_AAB004 || '²Î¼Ó¾ÓÃñÒ½±££¬ĞÕÃû:'  ||'¸öÈË±àºÅ£º'||var_aac001_more|| ',²Î±£×´Ì¬:²Î±£½É·Ñ¡£';
               PRM_FLAG := '3';
                GOTO LEB_OVER;
              END IF;
@@ -10237,7 +10237,7 @@ PROCEDURE prc_p_checkInfoByaac001(prm_aac001 IN VARCHAR2,
           END IF;
 
 
-          --æ ¡éªŒç»­ä¿  20181229
+          --Ğ£ÑéĞø±£  20181229
 
 
 
@@ -10257,14 +10257,14 @@ PROCEDURE prc_p_checkInfoByaac001(prm_aac001 IN VARCHAR2,
                           FROM XASI2.AC02K1
                          WHERE AAC001 = PRM_AAC001
                            AND AAC031 = '1');
-        PRM_MSG  := 'æ­¤èº«ä»½è¯å·ç äººå‘˜åŒ»ç–—ä¿é™©å…³ç³»ç›®å‰åœ¨ç¤¾åŒºï¼š' || VAR_AAB004 || 'å‚åŠ å±…æ°‘åŒ»ä¿ï¼Œå§“å:'  ||'ä¸ªäººç¼–å·ï¼š'||var_aac001|| ',å‚ä¿çŠ¶æ€:å‚ä¿ç¼´è´¹ã€‚';
+        PRM_MSG  := '´ËÉí·İÖ¤ºÅÂëÈËÔ±Ò½ÁÆ±£ÏÕ¹ØÏµÄ¿Ç°ÔÚÉçÇø£º' || VAR_AAB004 || '²Î¼Ó¾ÓÃñÒ½±££¬ĞÕÃû:'  ||'¸öÈË±àºÅ£º'||var_aac001|| ',²Î±£×´Ì¬:²Î±£½É·Ñ¡£';
         PRM_FLAG := '3';
 
         GOTO LEB_OVER;
       END IF;
        */
 
-    -- wanghm modify æ˜¯å¦åœ¨å†›ä¸“æˆ·ä¸‹å‚ä¿ start 20190210
+    -- wanghm modify ÊÇ·ñÔÚ¾ü×¨»§ÏÂ²Î±£ start 20190210
      IF num_count>0 THEN
      FOR rec_ac01 IN cur_ac01 LOOP
        select count(1) into jzh_count
@@ -10275,12 +10275,12 @@ PROCEDURE prc_p_checkInfoByaac001(prm_aac001 IN VARCHAR2,
           and a.aac001 = rec_ac01.aac001;
       IF jzh_count > 0 THEN
           PRM_FLAG := '7';
-          --PRM_MSG  := 'è¯¥äººå‘˜åœ¨å†›ä¸“æˆ·ä¸‹å‚ä¿åŒ»ç–—é™©,å¯ä»¥å‚ä¿çš„é™©ç§ä¸ºå¤±ä¸šã€å·¥ä¼¤å’Œå…»è€ï¼';
+          --PRM_MSG  := '¸ÃÈËÔ±ÔÚ¾ü×¨»§ÏÂ²Î±£Ò½ÁÆÏÕ,¿ÉÒÔ²Î±£µÄÏÕÖÖÎªÊ§Òµ¡¢¹¤ÉËºÍÑøÀÏ£¡';
           GOTO LEB_OVER;
        END IF;
      END LOOP;
      END IF;
-   -- wanghm modify æ˜¯å¦åœ¨å†›ä¸“æˆ·ä¸‹å‚ä¿ end 20190210
+   -- wanghm modify ÊÇ·ñÔÚ¾ü×¨»§ÏÂ²Î±£ end 20190210
 
       SELECT COUNT(1)
         INTO NUM_COUNT
@@ -10299,7 +10299,7 @@ PROCEDURE prc_p_checkInfoByaac001(prm_aac001 IN VARCHAR2,
            AND AAC031 = '1';
          IF num_count1 > 0 THEN
            PRM_FLAG := '1';
-           PRM_MSG  := 'æ­¤äººå‘˜æ²¡æœ‰ç¬¦åˆç»­ä¿æ¡ä»¶çš„é™©ç§ï¼';
+           PRM_MSG  := '´ËÈËÔ±Ã»ÓĞ·ûºÏĞø±£Ìõ¼şµÄÏÕÖÖ£¡';
         GOTO LEB_OVER;
          END IF;
         SELECT DISTINCT AAB001
@@ -10313,8 +10313,8 @@ PROCEDURE prc_p_checkInfoByaac001(prm_aac001 IN VARCHAR2,
           FROM XASI2.AB01
          WHERE AAB001 = VAR_AAB001;
         PRM_FLAG := '5';
-        PRM_MSG  := 'æ­¤èº«ä»½è¯å·ç äººå‘˜ç›®å‰æ­£åœ¨å‚ä¿ï¼Œå•ä½åç§°ï¼š' || VAR_AAB004 || 'å‚ä¿ï¼Œå§“å:' ||
-                    VAR_AAC003 || ',å‚ä¿çŠ¶æ€:å‚ä¿ç¼´è´¹ï¼';
+        PRM_MSG  := '´ËÉí·İÖ¤ºÅÂëÈËÔ±Ä¿Ç°ÕıÔÚ²Î±££¬µ¥Î»Ãû³Æ£º' || VAR_AAB004 || '²Î±££¬ĞÕÃû:' ||
+                    VAR_AAC003 || ',²Î±£×´Ì¬:²Î±£½É·Ñ£¡';
         GOTO LEB_OVER;
       END IF;
     <<leb_over>>
@@ -10322,52 +10322,52 @@ PROCEDURE prc_p_checkInfoByaac001(prm_aac001 IN VARCHAR2,
     EXCEPTION
       WHEN OTHERS THEN
         prm_AppCode := '-1';
-        prm_ErrorMsg  := 'è°ƒç”¨ç»­ä¿æ ¡éªŒå­˜å‚¨è¿‡ç¨‹å¤±è´¥!'||SQLERRM||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE();
+        prm_ErrorMsg  := 'µ÷ÓÃĞø±£Ğ£Ñé´æ´¢¹ı³ÌÊ§°Ü!'||SQLERRM||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE();
         RETURN;
   END prc_p_checkInfoByaac001;
 /*****************************************************************************
-   ** è¿‡ç¨‹åç§° : FUN_GETAAB020
-   ** è¿‡ç¨‹ç¼–å· ï¼š
-   ** ä¸šåŠ¡ç¯èŠ‚ ï¼š
-   ** åŠŸèƒ½æè¿° ï¼šæ ¹æ®å·¥å•†æå–çš„ä¼ä¸šç±»å‹ä»£ç è·å–å¯¹åº”çš„å•ä½ç»æµç±»å‹
+   ** ¹ı³ÌÃû³Æ : FUN_GETAAB020
+   ** ¹ı³Ì±àºÅ £º
+   ** ÒµÎñ»·½Ú £º
+   ** ¹¦ÄÜÃèÊö £º¸ù¾İ¹¤ÉÌÌáÈ¡µÄÆóÒµÀàĞÍ´úÂë»ñÈ¡¶ÔÓ¦µÄµ¥Î»¾­¼ÃÀàĞÍ
    ******************************************************************************
-   ** å‚æ•°æè¿° ï¼šå‚æ•°æ ‡è¯†        è¾“å…¥/è¾“å‡º         ç±»å‹                 åç§°
+   ** ²ÎÊıÃèÊö £º²ÎÊı±êÊ¶        ÊäÈë/Êä³ö         ÀàĞÍ                 Ãû³Æ
    ******************************************************************************
-   **           prm_aab020       IN     irab01.aab020%TYPE  ,--ç»æµç±»å‹
+   **           prm_aab020       IN     irab01.aab020%TYPE  ,--¾­¼ÃÀàĞÍ
    ******************************************************************************
-   ** ä½œ    è€…ï¼šz         ä½œæˆæ—¥æœŸ ï¼š2017-09-08   ç‰ˆæœ¬ç¼–å· ï¼šVer 1.0.0
-   ** ä¿®    æ”¹ï¼š
+   ** ×÷    Õß£ºz         ×÷³ÉÈÕÆÚ £º2017-09-08   °æ±¾±àºÅ £ºVer 1.0.0
+   ** ĞŞ    ¸Ä£º
    *****************************************************************************/
-   /*è·å–å•ä½ç»æµç±»å‹*/
-   FUNCTION  FUN_GETAAB020 (prm_aaa100     IN     aa10a1.aaa100%TYPE,  --å­—æ®µå
-                            prm_aaa102    IN      aa10a1.aaa102%TYPE) --å­—æ®µå€¼
+   /*»ñÈ¡µ¥Î»¾­¼ÃÀàĞÍ*/
+   FUNCTION  FUN_GETAAB020 (prm_aaa100     IN     aa10a1.aaa100%TYPE,  --×Ö¶ÎÃû
+                            prm_aaa102    IN      aa10a1.aaa102%TYPE) --×Ö¶ÎÖµ
           RETURN VARCHAR2
    IS
       n_count          NUMBER;
-      v_aab020        irab01.aab020%TYPE;--å•ä½ç±»å‹
-      v_aab022        irab01.aab022%TYPE;--è¡Œä¸šä»£ç 
-      v_yab534        irab01.yab534%TYPE;--é“¶è¡Œç±»åˆ«
-      v_yae010        irab04.yae010%TYPE;--ç¼´è´¹æ–¹å¼
-      v_bab503        VARCHAR2(30);--æ”¯ä»˜é“¶è¡Œç±»åˆ«
+      v_aab020        irab01.aab020%TYPE;--µ¥Î»ÀàĞÍ
+      v_aab022        irab01.aab022%TYPE;--ĞĞÒµ´úÂë
+      v_yab534        irab01.yab534%TYPE;--ÒøĞĞÀà±ğ
+      v_yae010        irab04.yae010%TYPE;--½É·Ñ·½Ê½
+      v_bab503        VARCHAR2(30);--Ö§¸¶ÒøĞĞÀà±ğ
       s_Appcode        VARCHAR2(18);
       s_Errormsg       VARCHAR2(300);
    BEGIN
 
-      /*åˆå§‹åŒ–å˜é‡*/
+      /*³õÊ¼»¯±äÁ¿*/
       s_Appcode  := gn_def_OK;
       s_Errormsg := '';
       n_count    := 1;
-      --å•ä½ç»æµç±»å‹
+      --µ¥Î»¾­¼ÃÀàĞÍ
       IF prm_aaa100 = 'aab020'THEN
-      --å†…èµ„ï¼ˆæœ‰é™è´£ä»»å…¬å¸ï¼‰
+      --ÄÚ×Ê£¨ÓĞÏŞÔğÈÎ¹«Ë¾£©
       IF prm_aaa102 IN ('1100','1110','1123','1130','1140','1150','1151','1152','1153',
                         '2000','2100','2110','2130','2140','2151','2152','2153','5190') THEN
       v_aab020 :='150';
-      --å¤–èµ„
+      --Íâ×Ê
       ELSIF prm_aaa102 IN ('1122','5110','5111','5130','5140','5150','5600','5800','5810','6110',
                             '6150','6810','6890') THEN
       v_aab020 :='330';
-      --å…¶ä»–æœ‰é™è´£ä»»å…¬å¸
+      --ÆäËûÓĞÏŞÔğÈÎ¹«Ë¾
       ELSIF prm_aaa102 IN ('2190','1190') THEN
       v_aab020 :='159';
 
@@ -10477,13 +10477,13 @@ PROCEDURE prc_p_checkInfoByaac001(prm_aac001 IN VARCHAR2,
      -- WHEN TOO_MANY_ROWS THEN
      -- WHEN DUP_VAL_ON_INDEX THEN
      WHEN OTHERS THEN
-       /*å…³é—­æ‰“å¼€çš„æ¸¸æ ‡*/
+       /*¹Ø±Õ´ò¿ªµÄÓÎ±ê*/
        RETURN '';
    END FUN_GETAAB020;
 
 
 PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
-                                prm_yab139 IN  VARCHAR2,     --ç»åŠæœºæ„
+                                prm_yab139 IN  VARCHAR2,     --¾­°ì»ú¹¹
                                 prm_aae001 OUT NUMBER,
                                 prm_aae002 OUT NUMBER,
                                 prm_disabledBtn    OUT VARCHAR2,
@@ -10492,9 +10492,9 @@ PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
                                 prm_gxby01    OUT   VARCHAR2,
                                 prm_dxby03  OUT   VARCHAR2,
                                 prm_gxby03  OUT   VARCHAR2,
-                                prm_dxby60  OUT   VARCHAR2, --ä¸ªä½“å·¥å•† å·¥ä¼¤å¤±ä¸šä½çº¿
-                                prm_gxby60  OUT   VARCHAR2, --ä¸ªä½“å·¥å•† å·¥ä¼¤å¤±ä¸šé«˜çº¿
-                                prm_AppCode OUT   VARCHAR2,             --é”™è¯¯ä»£ç 
+                                prm_dxby60  OUT   VARCHAR2, --¸öÌå¹¤ÉÌ ¹¤ÉËÊ§ÒµµÍÏß
+                                prm_gxby60  OUT   VARCHAR2, --¸öÌå¹¤ÉÌ ¹¤ÉËÊ§Òµ¸ßÏß
+                                prm_AppCode OUT   VARCHAR2,             --´íÎó´úÂë
                                 prm_ErrorMsg  OUT   VARCHAR2
                               )
   IS
@@ -10508,7 +10508,7 @@ PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
     var_iaa006 irad51.iaa006%TYPE;
     dat_aae036 DATE;
     num_aae002 NUMBER(6);
-    var_aab019 xasi2.ab01.aab019%TYPE;     --å•ä½æ€§è´¨
+    var_aab019 xasi2.ab01.aab019%TYPE;     --µ¥Î»ĞÔÖÊ
     var_aae013 irad54.aae013%TYPE;
     num_aab156_02  xasi2.ab08.aab156%TYPE;
     num_aab156_03  xasi2.ab08.aab156%TYPE;
@@ -10524,21 +10524,21 @@ PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
     prm_ErrorMsg  := '';
     prm_dxby60 :=0;
     prm_gxby60 :=0;
-    --æ£€éªŒä¼ å…¥å‚æ•°
+    --¼ìÑé´«Èë²ÎÊı
     IF prm_aab001 IS NULL THEN
        prm_AppCode := '1';
-       prm_ErrorMsg  := 'ä¼ å…¥å•ä½ç¼–å·ä¸èƒ½ä¸ºç©º!';
+       prm_ErrorMsg  := '´«Èëµ¥Î»±àºÅ²»ÄÜÎª¿Õ!';
        RETURN;
     END IF;
-    
-    prm_disabledBtn :='printBtn1,printBtn2,printBtn3,printBtn4,printBtn5,cancelBtn';
+
+    prm_disabledBtn :='printBtn1,printBtn2,printBtn3,printBtn4,printBtn5,cancelBtn,exportBtn,importBtn';
 
     SELECT count(1)
       INTO num_count
       FROM xasi2.ab02
      WHERE aab001 = prm_aab001;
     IF num_count > 0 THEN
-       --æ£€æŸ¥æœ€å¤§åšå¸æœŸå·æ˜¯å¦æ­£å¸¸
+       --¼ì²é×î´ó×öÕÊÆÚºÅÊÇ·ñÕı³£
         SELECT MAX(yae097)
           INTO num_yae097_max
           FROM xasi2.ab02
@@ -10552,11 +10552,11 @@ PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
            and  AAB051 = '1' ;
 
          IF num_yae097_min <> num_yae097_max THEN
-            prm_msg :='å•ä½æœ€å¤§åšå¸æœŸå·ä¸ä¸€è‡´ï¼';
+            prm_msg :='µ¥Î»×î´ó×öÕÊÆÚºÅ²»Ò»ÖÂ£¡';
             GOTO leb_over;
          END IF;
 
-      --modify by whm 20190429  å–å¹´å®¡å¹´åº¦ start
+      --modify by whm 20190429  È¡ÄêÉóÄê¶È start
       SELECT MAX(aae042)
         INTO num_yae097_max
         FROM xasi2.ab02
@@ -10564,7 +10564,7 @@ PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
          AND AAB051 = '1';
          num_aae001 :=SUBSTR(num_yae097_max,0,4)+1;
 --         IF var_yae097_max < 201712 THEN
---            prm_msg := 'æœ€å¤§ç¼´è´¹æœŸå·å°äº201712!';
+--            prm_msg := '×î´ó½É·ÑÆÚºÅĞ¡ÓÚ201712!';
 --            GOTO leb_over;
 --          END IF;
      ELSE
@@ -10576,28 +10576,28 @@ PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
            AND aae140 = '01';
            num_aae001 :=SUBSTR(num_yae097_max,0,4);
 --         IF var_yae097_max < 201712 THEN
---            prm_msg := 'æœ€å¤§ç¼´è´¹æœŸå·å°äº201712!';
+--            prm_msg := '×î´ó½É·ÑÆÚºÅĞ¡ÓÚ201712!';
 --            GOTO leb_over;
 --          END IF;
      END IF;
-     --modify by whm 20190429  å–å¹´å®¡å¹´åº¦ end
-     
-     --æ ¡éªŒH12çš„æ¬ è´¹
+     --modify by whm 20190429  È¡ÄêÉóÄê¶È end
+
+     --Ğ£ÑéH12µÄÇ··Ñ
      select count(1)
       INTO num_count
        from xasi2.ab08
       where yae517  = 'H12'
         and aab001 = prm_aab001
-        and aae003 >num_aae001||01
-        and aae003 <num_aae001||12;
-        
-       if num_count > 0 then 
-        prm_msg :='å­˜åœ¨ä¸ªäººè¡¥æ”¶æ¬ è´¹, è¯·è”ç³»å’¨è¯¢ç¤¾ä¿ä¸­å¿ƒï¼';
+        and aae003 >201901
+        and aae003 <201912;
+
+       if num_count > 0 then
+        prm_msg :='´æÔÚ¸öÈË²¹²îÇ··Ñ, ÇëÁªÏµ×ÉÑ¯Éç±£ÖĞĞÄ£¡';
         prm_disabledBtn :='exportBtn,importBtn,retainBtn,applyBtn,printBtn1,printBtn2,printBtn3,printBtn4,printBtn5,viewBtn,cancelBtn';
         GOTO leb_over;
        end if;
 
-     --æ•ˆéªŒç”Ÿè‚²H38çš„æ¬ è´¹
+     --Ğ§ÑéÉúÓıH38µÄÇ··Ñ
      select count(1)
       INTO num_count
        from xasi2.ab08
@@ -10606,8 +10606,8 @@ PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
         and aab001 = prm_aab001
         and aae003 >num_aae001||01
         and aae003 <num_aae001||12;
-       IF num_count > 0 THEN     
-        -- å¤±ä¸šH01æ¬ è´¹é‡‘é¢
+       IF num_count > 0 THEN
+        -- Ê§ÒµH01Ç··Ñ½ğ¶î
         select  nvl(sum(aab156),0)
         into num_aab156_02
          from xasi2.ab08
@@ -10616,7 +10616,7 @@ PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
          and aab001 = prm_aab001
          and aae003 >num_aae001||01
          and aae003 <num_aae001||12;
-        -- åŒ»ç–—H01æ¬ è´¹é‡‘é¢
+        -- Ò½ÁÆH01Ç··Ñ½ğ¶î
         select  nvl(sum(aab156),0)
         into num_aab156_03
          from xasi2.ab08
@@ -10625,7 +10625,7 @@ PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
          and aab001 = prm_aab001
          and aae003 >num_aae001||01
          and aae003 <num_aae001||12;
-       -- å·¥ä¼¤H01æ¬ è´¹é‡‘é¢
+       -- ¹¤ÉËH01Ç··Ñ½ğ¶î
         select  nvl(sum(aab156),0)
         into num_aab156_04
          from xasi2.ab08
@@ -10634,7 +10634,7 @@ PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
          and aab001 = prm_aab001
          and aae003 >num_aae001||01
          and aae003 <num_aae001||12;
-        -- ç”Ÿè‚²H01,H38æ¬ è´¹é‡‘é¢
+        -- ÉúÓıH01,H38Ç··Ñ½ğ¶î
         select  nvl(sum(aab156),0)
         into num_aab156_05
          from xasi2.ab08
@@ -10643,41 +10643,41 @@ PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
          and aab001 = prm_aab001
          and aae003 >num_aae001||01
          and aae003 <num_aae001||12;
-         --å¾…è½¬é‡‘ä½™é¢
-          select aab240
+         --´ı×ª½ğÓà¶î
+          select nvl(aab240,0)
            into num_aab240_02
            from xasi2.ab17
           where aab001 = prm_aab001
             and aae140 = '02';
-         select aab240
+         select nvl(aab240,0)
            into num_aab240_03
            from xasi2.ab17
           where aab001 = prm_aab001
-            and aae140 = '03';            
-          select aab240
+            and aae140 = '03';
+          select nvl(aab240,0)
            into num_aab240_04
            from xasi2.ab17
           where aab001 = prm_aab001
-            and aae140 = '04';    
-         select aab240
+            and aae140 = '04';
+         select nvl(aab240,0)
            into num_aab240_05
            from xasi2.ab17
           where aab001 = prm_aab001
-            and aae140 = '03';    
-        prm_msg :='å•ä½å­˜åœ¨æ¬ è´¹: : å¤±ä¸š: '||num_aab156_02||'å…ƒ, åŒ»ç–—: '||num_aab156_03||'å…ƒ, å·¥ä¼¤: '||num_aab156_04||'å…ƒ, ç”Ÿè‚²: '||num_aab156_05||'å…ƒ; å¾…è½¬é‡‘ä½™é¢: å¤±ä¸š: '||num_aab240_02||'å…ƒ, åŒ»ç–—: '||num_aab240_03||'å…ƒ, å·¥ä¼¤: '||num_aab240_04||'å…ƒ, ç”Ÿè‚²: '||num_aab240_05
-        ||'å…ƒ, æ¬ è´¹é‡‘é¢ä¸ºå„é™©ç§çš„æ¬ è´¹å‡å»å¾…è½¬ä½™é¢ã€‚å•ä½è¯·åŠæ—¶è‡³ç¨åŠ¡éƒ¨é—¨ç¼´è´¹, å®æ”¶åˆ°è´¦åæ–¹å¯è¿›è¡Œå¹´å®¡ã€‚';
+            and aae140 = '03';
+        prm_msg :='µ¥Î»´æÔÚÇ··Ñ: : Ê§Òµ: '||num_aab156_02||'Ôª, Ò½ÁÆ: '||num_aab156_03||'Ôª, ¹¤ÉË: '||num_aab156_04||'Ôª, ÉúÓı: '||num_aab156_05||'Ôª; ´ı×ª½ğÓà¶î: Ê§Òµ: '||num_aab240_02||'Ôª, Ò½ÁÆ: '||num_aab240_03||'Ôª, ¹¤ÉË: '||num_aab240_04||'Ôª, ÉúÓı: '||num_aab240_05
+        ||'Ôª, Ç··Ñ½ğ¶îÎª¸÷ÏÕÖÖµÄÇ··Ñ¼õÈ¥´ı×ªÓà¶î¡£µ¥Î»Çë¼°Ê±ÖÁË°Îñ²¿ÃÅ½É·Ñ, ÊµÊÕµ½ÕËºó·½¿É½øĞĞÄêÉó¡£';
         prm_disabledBtn :='exportBtn,importBtn,retainBtn,applyBtn,printBtn1,printBtn2,printBtn3,printBtn4,printBtn5,viewBtn,cancelBtn';
         GOTO leb_over;
        END IF;
-     
+
        SELECT count(1)
        INTO num_count
        FROM wsjb.irad54
       WHERE aab001 = prm_aab001
         AND aae001 = num_aae001
-        AND iaa011 = 'A05-1'; --åŸºæ•°é™ä½è¶…æ ‡çš„æ ‡è®°
+        AND iaa011 = 'A05-1'; --»ùÊı½µµÍ³¬±êµÄ±ê¼Ç
      IF num_count > 0 THEN
-        prm_msg :='åŸºæ•°é™ä½è¿‡é«˜ï¼Œè¯·è¿›è¡Œå¹´å®¡ä¸šåŠ¡é¢„çº¦ï¼Œå¹¶æ‰“å°ç›¸å…³æŠ¥è¡¨ã€æºå¸¦ç›¸å…³èµ„æ–™ï¼Œåˆ°ç¤¾ä¿ä¸­å¿ƒå®¡æ ¸ï¼';
+        prm_msg :='»ùÊı½µµÍ¹ı¸ß£¬Çë½øĞĞÄêÉóÒµÎñÔ¤Ô¼£¬²¢´òÓ¡Ïà¹Ø±¨±í¡¢Ğ¯´øÏà¹Ø×ÊÁÏ£¬µ½Éç±£ÖĞĞÄÉóºË£¡';
         prm_disabledBtn :='exportBtn,importBtn,retainBtn,applyBtn,printBtn3,printBtn4,printBtn5,delBtn';
         GOTO leb_over;
      END IF;
@@ -10702,18 +10702,18 @@ PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
            AND iaa011 = 'A05';
 
         IF var_iaa002 = '1' THEN
-           --prm_msg :='å·²æäº¤å¹´å®¡ä¿¡æ¯ï¼Œè¯·æ‰“å°ç›¸å…³æŠ¥è¡¨ï¼Œåˆ°ç¤¾ä¿ä¸­å¿ƒå®¡æ ¸ï¼å¦‚å‘ç°æœ‰è¯¯ï¼Œå¯è‡ªè¡Œæ’¤é”€æäº¤ï¼Œä¿®æ”¹æ­£ç¡®åå†æ¬¡æäº¤ã€‚';
-           prm_msg :='å·²æäº¤å¹´å®¡ä¿¡æ¯ï¼Œè¯·ç­‰å¾…ç¤¾ä¿ä¸­å¿ƒå®¡æ ¸ï¼';
+           --prm_msg :='ÒÑÌá½»ÄêÉóĞÅÏ¢£¬Çë´òÓ¡Ïà¹Ø±¨±í£¬µ½Éç±£ÖĞĞÄÉóºË£¡Èç·¢ÏÖÓĞÎó£¬¿É×ÔĞĞ³·ÏúÌá½»£¬ĞŞ¸ÄÕıÈ·ºóÔÙ´ÎÌá½»¡£';
+           prm_msg :='ÒÑÌá½»ÄêÉóĞÅÏ¢£¬ÇëµÈ´ıÉç±£ÖĞĞÄÉóºË£¡';
            prm_disabledBtn :='exportBtn,importBtn,retainBtn,applyBtn,printBtn3,printBtn4,printBtn5,delBtn';
            GOTO leb_over;
         END IF;
-        
+
         IF var_iaa002 = '2' AND var_iaa006 ='0' THEN
-           prm_msg :='å¹´ç”³æŠ¥ä¿¡æ¯æ­£åœ¨å®¡æ ¸å½“ä¸­...';
+           prm_msg :='ÄêÉê±¨ĞÅÏ¢ÕıÔÚÉóºËµ±ÖĞ...';
            prm_disabledBtn :='exportBtn,importBtn,retainBtn,applyBtn,cancelBtn,printBtn3,printBtn4,delBtn,printBtn5';
            GOTO leb_over;
         END IF;
-        
+
         IF var_iaa002 = '3' AND var_iaa006 ='0' THEN
            var_aae013 :='';
            select count(1)
@@ -10721,30 +10721,30 @@ PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
              from wsjb.irad54
             where aab001 = prm_aab001
               AND aae001 = num_aae001
-              AND iaa011 = 'A05-2' --A05-2 éœ€è¦æºå¸¦èµ„æ–™çš„æ‰“å› A05-3 ä¸€èˆ¬çš„æ‰“å› A05-1 åŸºæ•°é™ä½è¶…æ ‡çš„æ ‡è®°
-              AND aab004 = '1'; -- 1æ˜¯æœ‰æ•ˆçŠ¶æ€è¯´æ˜å•ä½è¿˜æ²¡æœ‰å†æ¬¡æäº¤,å†æ¬¡æäº¤åæ”¹ä¸º2
+              AND iaa011 = 'A05-2' --A05-2 ĞèÒªĞ¯´ø×ÊÁÏµÄ´ò»Ø A05-3 Ò»°ãµÄ´ò»Ø A05-1 »ùÊı½µµÍ³¬±êµÄ±ê¼Ç
+              AND aab004 = '1'; -- 1ÊÇÓĞĞ§×´Ì¬ËµÃ÷µ¥Î»»¹Ã»ÓĞÔÙ´ÎÌá½»,ÔÙ´ÎÌá½»ºó¸ÄÎª2
            if num_count = 1 then
             select aae013
              into var_aae013
              from wsjb.irad54
             where aab001 = prm_aab001
               AND aae001 = num_aae001
-              AND iaa011 = 'A05-2' --A05-2 éœ€è¦æºå¸¦èµ„æ–™çš„æ‰“å› A05-3 ä¸€èˆ¬çš„æ‰“å› A05-1 åŸºæ•°é™ä½è¶…æ ‡çš„æ ‡è®°
-              AND aab004 = '1'; -- 1æ˜¯æœ‰æ•ˆçŠ¶æ€è¯´æ˜å•ä½è¿˜æ²¡æœ‰å†æ¬¡æäº¤,å†æ¬¡æäº¤åæ”¹ä¸º2
-           end if;   
-           prm_msg :='å¹´ç”³æŠ¥ä¿¡æ¯å®¡æ ¸æœªé€šè¿‡ï¼Œä¿®æ”¹åç»§ç»­æäº¤!  '||var_aae013;
+              AND iaa011 = 'A05-2' --A05-2 ĞèÒªĞ¯´ø×ÊÁÏµÄ´ò»Ø A05-3 Ò»°ãµÄ´ò»Ø A05-1 »ùÊı½µµÍ³¬±êµÄ±ê¼Ç
+              AND aab004 = '1'; -- 1ÊÇÓĞĞ§×´Ì¬ËµÃ÷µ¥Î»»¹Ã»ÓĞÔÙ´ÎÌá½»,ÔÙ´ÎÌá½»ºó¸ÄÎª2
+           end if;
+           prm_msg :='ÄêÉê±¨ĞÅÏ¢ÉóºËÎ´Í¨¹ı£¬ĞŞ¸Äºó¼ÌĞøÌá½»!  '||var_aae013;
            prm_disabledBtn :='printBtn3,printBtn4,printBtn5,delBtn';
         END IF;
 
         IF var_iaa002 = '2' AND var_iaa006 ='1' THEN
 
            IF dat_aae036 > SYSDATE THEN
-               prm_msg :='å¹´ç”³æŠ¥ä¿¡æ¯å®¡æ ¸å®Œæˆï¼è¯·æ‰“å°ç›¸å…³æŠ¥è¡¨ï¼ŒåŠæ—¶ç¼´è´¹ï¼';
+               prm_msg :='ÄêÉê±¨ĞÅÏ¢ÉóºËÍê³É£¡Çë´òÓ¡Ïà¹Ø±¨±í£¬¼°Ê±½É·Ñ£¡';
                prm_disabledBtn :='exportBtn,importBtn,retainBtn,applyBtn,cancelBtn,delBtn';
                GOTO leb_over;
            ELSE
                IF num_yae097_max < TO_NUMBER(TO_CHAR(num_aae001||'12')) THEN
-                  prm_msg :='å•ä½çš„åšè´¦æœŸè¿˜æœªåˆ°'||TO_CHAR(num_aae001||'12')||'ï¼Œè¯·åœ¨ç½‘æŠ¥ç³»ç»Ÿä¸Šç”³æŠ¥è‡³'||TO_CHAR(num_aae001||'12')||'æœˆåº¦!';
+                  prm_msg :='µ¥Î»µÄ×öÕËÆÚ»¹Î´µ½'||TO_CHAR(num_aae001||'12')||'£¬ÇëÔÚÍø±¨ÏµÍ³ÉÏÉê±¨ÖÁ'||TO_CHAR(num_aae001||'12')||'ÔÂ¶È!';
                   prm_disabledBtn :='queryBtn,exportBtn,importBtn,retainBtn,viewBtn,applyBtn,cancelBtn,printBtn1,printBtn2,printBtn3,printBtn4,printBtn5';
                   GOTO leb_over;
                END IF;
@@ -10752,7 +10752,7 @@ PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
            END IF;
         END IF;
     ELSE
-       --æ£€æŸ¥æ˜¯å¦æœ‰å…»è€æå‰ç»“ç®—ç”³è¯·æœªå®¡æ ¸
+       --¼ì²éÊÇ·ñÓĞÑøÀÏÌáÇ°½áËãÉêÇëÎ´ÉóºË
     SELECT count(1)
       INTO num_count
       FROM irad51a1
@@ -10760,11 +10760,11 @@ PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
         AND yae031='0';
     IF num_count > 0 THEN
 
-     prm_msg :='å•ä½æœ‰æœªåŠç»“çš„å…»è€ä¿é™©æå‰ç»“ç®—ä¸šåŠ¡ï¼Œä¸èƒ½åšå¹´å®¡æ“ä½œï¼';
+     prm_msg :='µ¥Î»ÓĞÎ´°ì½áµÄÑøÀÏ±£ÏÕÌáÇ°½áËãÒµÎñ£¬²»ÄÜ×öÄêÉó²Ù×÷£¡';
      prm_disabledBtn :='exportBtn,importBtn,retainBtn,applyBtn,cancelBtn,printBtn1,printBtn2,printBtn3,printBtn4,printBtn5,viewBtn';
      GOTO leb_over;
      END IF;
-     --æ£€æŸ¥æ˜¯å¦æœ‰æœªæäº¤çš„äººå‘˜å¢å‡
+     --¼ì²éÊÇ·ñÓĞÎ´Ìá½»µÄÈËÔ±Ôö¼õ
      SELECT count(1)
       INTO num_count
       FROM wsjb.irac01
@@ -10773,22 +10773,22 @@ PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
         AND iaa100 IS NULL;
     IF num_count > 0 THEN
 
-     prm_msg :='å•ä½æœ‰æœªæäº¤çš„äººå‘˜å¢å‡ä¿¡æ¯ï¼Œè¯·æ’¤é”€å¢å‡ä¿¡æ¯åé‡æ–°è¿›è¡Œå¹´å®¡æ“ä½œï¼';
+     prm_msg :='µ¥Î»ÓĞÎ´Ìá½»µÄÈËÔ±Ôö¼õĞÅÏ¢£¬Çë³·ÏúÔö¼õĞÅÏ¢ºóÖØĞÂ½øĞĞÄêÉó²Ù×÷£¡';
      prm_disabledBtn :='exportBtn,importBtn,retainBtn,applyBtn,cancelBtn,printBtn1,printBtn2,printBtn3,printBtn4,printBtn5,viewBtn';
      GOTO leb_over;
      END IF;
-     --æ£€æŸ¥æ˜¯å¦æœ‰æœªæäº¤çš„å…»è€æœªè½¬å…¥å¤‡æ¡ˆ
+     --¼ì²éÊÇ·ñÓĞÎ´Ìá½»µÄÑøÀÏÎ´×ªÈë±¸°¸
      SELECT count(1)
       INTO num_count
       FROM wsjb.irac01c1
       WHERE aab001 = prm_aab001
         AND yae031='0';
     IF num_count > 0 THEN
-     prm_msg :='å•ä½æœ‰æœªæäº¤çš„å…»è€æœªè½¬å…¥å¤‡æ¡ˆä¿¡æ¯ï¼Œè¯·æäº¤æˆ–æ’¤é”€åé‡æ–°è¿›è¡Œå¹´å®¡æ“ä½œï¼';
+     prm_msg :='µ¥Î»ÓĞÎ´Ìá½»µÄÑøÀÏÎ´×ªÈë±¸°¸ĞÅÏ¢£¬ÇëÌá½»»ò³·ÏúºóÖØĞÂ½øĞĞÄêÉó²Ù×÷£¡';
      prm_disabledBtn :='exportBtn,importBtn,retainBtn,applyBtn,cancelBtn,printBtn1,printBtn2,printBtn3,printBtn4,printBtn5,viewBtn';
      GOTO leb_over;
      END IF;
-     --æ£€æŸ¥å•ä½æ˜¯å¦æœ‰æœªå®¡æ ¸çš„æœˆç”³æŠ¥ä¿¡æ¯
+     --¼ì²éµ¥Î»ÊÇ·ñÓĞÎ´ÉóºËµÄÔÂÉê±¨ĞÅÏ¢
      SELECT count(1)
       INTO num_count
       FROM wsjb.irad01
@@ -10817,7 +10817,7 @@ PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
                   AND yae517 = 'H01'
                   AND aae003 = num_aae002);
        IF num_count = 0 THEN
-         prm_msg :='å•ä½æäº¤çš„æœˆç”³æŠ¥è¿˜æœªå®¡æ ¸é€šè¿‡ï¼Œè¯·é€šè¿‡åå†è¿›è¡Œå¹´å®¡æ“ä½œï¼';
+         prm_msg :='µ¥Î»Ìá½»µÄÔÂÉê±¨»¹Î´ÉóºËÍ¨¹ı£¬ÇëÍ¨¹ıºóÔÙ½øĞĞÄêÉó²Ù×÷£¡';
          prm_disabledBtn :='exportBtn,importBtn,retainBtn,applyBtn,cancelBtn,printBtn1,printBtn2,printBtn3,printBtn4,printBtn5,viewBtn';
          GOTO leb_over;
              END IF;
@@ -10842,12 +10842,12 @@ PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
            AND aae003 = num_aae002
            AND yae517 = 'H01';
        IF num_count = 0 THEN
-        prm_msg :='ä½ å•ä½å­˜åœ¨æœ‰æœªç”³æŠ¥çš„å…»è€æœªè½¬å…¥å¤‡æ¡ˆä¿¡æ¯ï¼Œè¯·æäº¤æœˆæŠ¥æˆ–æ’¤é”€å¤‡æ¡ˆä¿¡æ¯ååé‡æ–°è¿›è¡Œå¹´å®¡æ“ä½œï¼';
+        prm_msg :='Äãµ¥Î»´æÔÚÓĞÎ´Éê±¨µÄÑøÀÏÎ´×ªÈë±¸°¸ĞÅÏ¢£¬ÇëÌá½»ÔÂ±¨»ò³·Ïú±¸°¸ĞÅÏ¢ºóºóÖØĞÂ½øĞĞÄêÉó²Ù×÷£¡';
          prm_disabledBtn :='exportBtn,importBtn,retainBtn,applyBtn,cancelBtn,printBtn1,printBtn2,printBtn3,printBtn4,printBtn5,viewBtn';
          GOTO leb_over;
         END IF;
        END IF;
-     --æ£€æŸ¥æ˜¯å¦æœ‰ä¿¡æ¯å˜æ›´ä¸šåŠ¡
+     --¼ì²éÊÇ·ñÓĞĞÅÏ¢±ä¸üÒµÎñ
      SELECT count(1)
        INTO num_count
       FROM IRAD31 A, IRAD32 B
@@ -10856,15 +10856,15 @@ PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
          AND A.IAA019 = '1'
          AND A.IAA011 = 'A03';
        IF num_count >0 THEN
-        prm_msg :='å•ä½æœ‰æœªåŠç»“çš„äººå‘˜é‡è¦ä¿¡æ¯å˜æ›´ä¸šåŠ¡ï¼Œè¯·æŒ‰è¦æ±‚åˆ°æŸœå°å®¡æ ¸æˆ–æ’¤é”€åå†è¿›è¡Œå¹´å®¡æ“ä½œï¼';
+        prm_msg :='µ¥Î»ÓĞÎ´°ì½áµÄÈËÔ±ÖØÒªĞÅÏ¢±ä¸üÒµÎñ£¬Çë°´ÒªÇóµ½¹ñÌ¨ÉóºË»ò³·ÏúºóÔÙ½øĞĞÄêÉó²Ù×÷£¡';
         prm_disabledBtn :='exportBtn,importBtn,retainBtn,applyBtn,cancelBtn,printBtn1,printBtn2,printBtn3,printBtn4,printBtn5,viewBtn';
         GOTO leb_over;
         END IF;
      END IF;
 
 
-    --è·å–ç¼´è´¹ä¸Šä¸‹é™
-    --å…»è€
+    --»ñÈ¡½É·ÑÉÏÏÂÏŞ
+    --ÑøÀÏ
     SELECT MAX(aae041)
       INTO num_aae002
       FROM xasi2.AA02
@@ -10888,7 +10888,7 @@ PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
         INTO prm_gxby01
         FROM dual;
     END IF;
-    --åŒ»ç–—
+    --Ò½ÁÆ
     SELECT MAX(aae041)
       INTO num_aae002
       FROM xasi2.AA02
@@ -10901,26 +10901,26 @@ PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
     SELECT to_char(PKG_COMMON.fun_p_getcontributionbase(null,prm_aab001,20000000,'0','03','1','1',num_aae002,prm_yab139))
       INTO prm_gxby03
       FROM dual;
-   
 
-    --modify by wanghm 20190817 ä¸ªä½“å·¥å•† å¤±ä¸šå·¥ä¼¤å±±ä¸‹çº¿ 2019å¹´åå¹´å®¡ start
+
+    --modify by wanghm 20190817 ¸öÌå¹¤ÉÌ Ê§Òµ¹¤ÉËÉ½ÏÂÏß 2019ÄêºóÄêÉó start
    SELECT count(1)
      INTO num_count
      FROM xasi2.ab01
-    WHERE aab019 is not null 
+    WHERE aab019 is not null
     AND aab001 = prm_aab001;
    IF num_count <> 1 THEN
-      prm_msg  := 'å•ä½ç¼–ç :'||prm_aab001||'æ²¡æœ‰è·å–åˆ°å•ä½ç±»å‹ä¿¡æ¯'||SQLERRM;
+      prm_msg  := 'µ¥Î»±àÂë:'||prm_aab001||'Ã»ÓĞ»ñÈ¡µ½µ¥Î»ÀàĞÍĞÅÏ¢'||SQLERRM;
       prm_disabledBtn :='exportBtn,importBtn,retainBtn,applyBtn,cancelBtn,printBtn1,printBtn2,printBtn3,printBtn4,printBtn5,viewBtn';
       GOTO leb_over;
    END IF;
-  
+
    SELECT aab019
      INTO var_aab019
      FROM xasi2.ab01
-    WHERE aab019 is not null 
+    WHERE aab019 is not null
     AND aab001 = prm_aab001;
-    IF num_aae001 >= 2019 AND var_aab019 ='60' THEN 
+    IF num_aae001 >= 2019 AND var_aab019 ='60' THEN
       SELECT to_char(PKG_COMMON.fun_p_getcontributionbase(null,prm_aab001,1,'0','02','1','1',num_aae002,prm_yab139))
         INTO prm_dxby60
         FROM dual;
@@ -10928,7 +10928,7 @@ PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
         INTO prm_gxby60
         FROM dual;
     END IF;
-     --modify by wanghm 20190817 ä¸ªä½“å·¥å•† å¤±ä¸šå·¥ä¼¤ä¸Šä¸‹çº¿ 2019å¹´åå¹´å®¡ end
+     --modify by wanghm 20190817 ¸öÌå¹¤ÉÌ Ê§Òµ¹¤ÉËÉÏÏÂÏß 2019ÄêºóÄêÉó end
     <<leb_over>>
     num_count :=0;
     prm_aae001 := num_aae001;
@@ -10936,7 +10936,8 @@ PROCEDURE prc_p_checkInfoByYear(prm_aab001 IN VARCHAR2,
     EXCEPTION
       WHEN OTHERS THEN
         prm_AppCode := '-1';
-        prm_ErrorMsg  := 'è°ƒç”¨ç»­ä¿æ ¡éªŒå­˜å‚¨è¿‡ç¨‹å¤±è´¥!'||SQLERRM||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE();
+        prm_ErrorMsg  := 'µ÷ÓÃĞø±£Ğ£Ñé´æ´¢¹ı³ÌÊ§°Ü!'||SQLERRM||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE();
         RETURN;
   END prc_p_checkInfoByYear;
 END pkg_P_Validate;
+/

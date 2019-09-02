@@ -2170,7 +2170,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                        SELECT iac001
                         FROM (SELECT a.iac001, a.iaa100, a.aac001,
                                      ROW_NUMBER() OVER(PARTITION BY aac001 ORDER BY aae036 DESC) LEV
-                                FROM wsjb.irad02a1 a) t
+                                FROM wsjb.irad02a1 a where a.aab001=prm_aab001) t
                        WHERE LEV = 1
                          and t.aac001 = v_aac001
                           and iaa100 =  (select max(iaa100) from wsjb.irac01
@@ -2280,7 +2280,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                        SELECT iac001
                         FROM (SELECT a.iac001, a.iaa100, a.aac001,
                                      ROW_NUMBER() OVER(PARTITION BY aac001 ORDER BY aae036 DESC) LEV
-                                FROM wsjb.irad02a1 a) t
+                                FROM wsjb.irad02a1 a where a.aab001=prm_aab001) t
                        WHERE LEV = 1
                          and t.aac001 = v_aac001
                           and iaa100 =  (select max(iaa100) from wsjb.irac01
@@ -2416,7 +2416,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                        SELECT iac001
                         FROM (SELECT a.iac001, a.iaa100, a.aac001,
                                      ROW_NUMBER() OVER(PARTITION BY aac001 ORDER BY aae036 DESC) LEV
-                                FROM wsjb.irad02a1 a) t
+                                FROM wsjb.irad02a1 a where a.aab001=prm_aab001) t
                        WHERE LEV = 1
                          and t.aac001 = v_aac001
                           and iaa100 =  (select max(iaa100) from wsjb.irac01
@@ -2436,7 +2436,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                        SELECT iac001
                         FROM (SELECT a.iac001, a.iaa100, a.aac001,
                                      ROW_NUMBER() OVER(PARTITION BY aac001 ORDER BY aae036 DESC) LEV
-                                FROM wsjb.irad02a1 a) t
+                                FROM wsjb.irad02a1 a where a.aab001=prm_aab001) t
                        WHERE LEV = 1
                          and t.aac001 = v_aac001
                           and iaa100 =  (select max(iaa100) from wsjb.irac01
@@ -2549,7 +2549,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                        SELECT iac001
                         FROM (SELECT a.iac001, a.iaa100, a.aac001,
                                      ROW_NUMBER() OVER(PARTITION BY aac001 ORDER BY aae036 DESC) LEV
-                                FROM wsjb.irad02a1 a) t
+                                FROM wsjb.irad02a1 a where a.aab001=prm_aab001) t
                        WHERE LEV = 1
                          and t.aac001 = v_aac001
                           and iaa100 =  (select max(iaa100) from wsjb.irac01
@@ -2569,7 +2569,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                        SELECT iac001
                         FROM (SELECT a.iac001, a.iaa100, a.aac001,
                                      ROW_NUMBER() OVER(PARTITION BY aac001 ORDER BY aae036 DESC) LEV
-                                FROM wsjb.irad02a1 a) t
+                                FROM wsjb.irad02a1 a where a.aab001=prm_aab001) t
                        WHERE LEV = 1
                          and t.aac001 = v_aac001
                           and iaa100 =  (select max(iaa100) from wsjb.irac01
@@ -2672,7 +2672,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                        SELECT iac001
                         FROM (SELECT a.iac001, a.iaa100, a.aac001,
                                      ROW_NUMBER() OVER(PARTITION BY aac001 ORDER BY aae036 DESC) LEV
-                                FROM wsjb.irad02a1 a) t
+                                FROM wsjb.irad02a1 a where a.aab001=prm_aab001) t
                        WHERE LEV = 1
                          and t.aac001 = v_aac001
                           and iaa100 =  (select max(iaa100) from wsjb.irac01
@@ -2761,7 +2761,7 @@ PROCEDURE prc_p_checkYSJ(prm_aac001     IN     xasi2.ac02.aac001%TYPE,      --个
                        SELECT iac001
                         FROM (SELECT a.iac001, a.iaa100, a.aac001,
                                      ROW_NUMBER() OVER(PARTITION BY aac001 ORDER BY aae036 DESC) LEV
-                                FROM wsjb.irad02a1 a) t
+                                FROM wsjb.irad02a1 a where a.aab001=prm_aab001) t
                        WHERE LEV = 1
                          and t.aac001 = v_aac001
                           and iaa100 =  (select max(iaa100) from wsjb.irac01
