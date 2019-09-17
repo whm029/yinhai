@@ -14,12 +14,12 @@ public interface GXDataSyncConstant {
   /**
    * 正确返回值
    */
-  String NOERROR = "NOERROR";
+  String NOERROR = "0";
 
   /**
    * 错误返回值
    */
-  String ERROR = "ERROR";
+  String ERROR = "1";
 
   /**
    * 密码修改

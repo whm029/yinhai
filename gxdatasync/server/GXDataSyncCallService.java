@@ -1,9 +1,10 @@
 package com.yinhai.gxdatasync.server;
 
+import javax.jws.WebParam;
 import javax.jws.WebService;
 
 
-@WebService
+@WebService(targetNamespace = "ws.com/")
 public interface GXDataSyncCallService {
 
 	/**-------------------------------------<br>
@@ -14,5 +15,5 @@ public interface GXDataSyncCallService {
 	 * @A19
 	 * -------------------------------------<br>
 	 */
-	 String gxDataSyncWSCall(String jybh, String inXml);
+	 String gxDataSyncWSCall(@WebParam(name="jybh")String jybh, @WebParam(name="inXml")String inXml);
 }

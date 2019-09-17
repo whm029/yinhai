@@ -16,46 +16,30 @@ public class GXDataSyncCallServiceImpl extends BaseCommonServiceImpl implements 
   @Override
   public String gxDataSyncWSCall(String jybh, String inXml) {
 
-    
-    /*
-    String outStr ="<output><appcode>SUCCESS</appcode><errormsg>NOERROR</errormsg></output>";
-
-    if (GXDataSyncConstant.SERVICE_YHWS001.equals(jybh)) {
-      //outStr = save01(inStr);
-    } else if (GXDataSyncConstant.SERVICE_YHWS002.equals(jybh)) {
-      //outStr = save02(inStr);
-    } else if (ValidateUtil.isEmpty(inXml)) {
-      outStr = GXDataSyncConstant.XMLHEADER + "<output><appcode>NOSUCCESS</appcode><errormsg>传入参数为空</errormsg></output>";
-    } else {
-      outStr = GXDataSyncConstant.XMLHEADER + "<output><appcode>NOSUCCESS</appcode><errormsg>交易号不存在</errormsg></output>";
-    }
-    return outStr;
-    */
-
     StringBuffer output = new StringBuffer(GXDataSyncConstant.XMLHEADER);
     List<Map> paramList = null;
 
     //交易编号非空判断
     if(ValidateUtil.isEmpty(jybh)){
-      output.append("<output><code>NOSUCCESS</code><message>交易编号为空，请检查</message></output>");
+      output.append("<output><code>"+GXDataSyncConstant.ERROR+"</code><message>交易编号为空，请检查</message></output>");
       return output.toString();
     }
     //传入参数非空判断
     if(ValidateUtil.isEmpty(inXml)){
-      output.append("<output><code>NOSUCCESS</code><message>传入参数为空，请检查</message></output>");
+      output.append("<output><code>"+GXDataSyncConstant.ERROR+"</code><message>传入参数为空，请检查</message></output>");
       return output.toString();
     }
 
     try {
       paramList = GxDataSyncUtil.xmlToList(inXml);
     } catch (Exception e) {
-      output.append("<output><code>NOSUCCESS</code><message>xml字符串解析出错"+e.getMessage()+"</message></output>");
+      output.append("<output><code>"+GXDataSyncConstant.ERROR+"</code><message>xml字符串解析出错"+e.getMessage()+"</message></output>");
       return output.toString();
     }
 
     //再次判断解析后是否有参数
     if(ValidateUtil.isEmpty(paramList)){
-      output.append("<output><code>NOSUCCESS</code><message>传入参数为空，请检查</message></output>");
+      output.append("<output><code>"+GXDataSyncConstant.ERROR+"</code><message>传入参数为空，请检查</message></output>");
       return output.toString();
     }
 
@@ -65,18 +49,14 @@ public class GXDataSyncCallServiceImpl extends BaseCommonServiceImpl implements 
     }else if(GXDataSyncConstant.SERVICE_YHWS002.equals(jybh)){
       //output.append(service001(jybh,paramList));
     }else {
-      output.append("<output><code>NOSUCCESS</code><message>交易编号不存在，请检查</message></output>");
+      output.append("<output><code>"+GXDataSyncConstant.ERROR+"</code><message>交易编号不存在，请检查</message></output>");
     }
 
     return output.toString();
   }
 
 
-  /**
-   * 单位新参保
-   * @param inStr
-   * @return
-   *//*
+  /*
 	public String save01(String inStr){
 		String msg = "";
 		String outStr = null;
