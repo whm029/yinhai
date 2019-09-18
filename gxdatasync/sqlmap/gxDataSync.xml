@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<!-- 高新数据接口 -->
+<sqlMap namespace="gxDataSync">
+
+    <!-- 修改高新网厅密码写日志
+    <insert id="insertPwdModifyLog" parameterClass="map">
+        insert into wsjb.pwdmodifylog(
+        loginid,
+        pwdbefore,
+        pwdafter,
+        pwdinput,
+        phone,
+        aae036
+        )values(
+        #loginid#,
+        (select password from xagxwt.tauser where loginid = #loginid# ),
+        #pwdjm#,
+        #password#,
+        (select tel from xagxwt.tauser where loginid = #loginid# ),
+        sysdate
+        )
+    </insert>
+    -->
+
+    <!-- 修改高新网厅密码 -->
+    <update id="updateXagxwtUserPwd" parameterClass="map">
+        update xagxwt.tauser
+        set password = #pwdjm#,
+        pwdlastmodifydate = sysdate
+        where loginid = #loginid#
+    </update>
+</sqlMap>
