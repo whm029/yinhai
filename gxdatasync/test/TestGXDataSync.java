@@ -23,8 +23,8 @@ public class TestGXDataSync {
 		JaxWsProxyFactoryBean jaxWsProxyFactoryBean = new JaxWsProxyFactoryBean();
 		jaxWsProxyFactoryBean.setServiceClass(GXDataSyncCallService.class);
 		jaxWsProxyFactoryBean.setAddress(wSAddress);
-		GXDataSyncCallService dataService = (GXDataSyncCallService)jaxWsProxyFactoryBean.create();
-		String result = dataService.gxDataSyncWSCall("111","2222");
+		GXDataSyncCallService wService = (GXDataSyncCallService)jaxWsProxyFactoryBean.create();
+		String result = wService.gxDataSyncWSCall("111","2222");
 		System.out.println(result);
 
 
