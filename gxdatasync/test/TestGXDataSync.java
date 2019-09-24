@@ -27,7 +27,6 @@ public class TestGXDataSync {
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception {
 
-
 		String wsAddress = GXDataSyncConstant.YHWEBSERVICEADDRESS;
 		JaxWsProxyFactoryBean jaxWsProxyFactoryBean = new JaxWsProxyFactoryBean();
 
@@ -36,7 +35,7 @@ public class TestGXDataSync {
 		list.add(new HeaderInterceptor()); // 添加soap header
 		//list.add(new org.apache.cxf.interceptor.LoggingOutInterceptor()); // 添加soap消息日志打印
 		jaxWsProxyFactoryBean.setOutInterceptors(list);
-		/* 添加过滤器 end*/
+		/* 添加拦截器 end*/
 		jaxWsProxyFactoryBean.setServiceClass(GXDataSyncCallService.class);
 		jaxWsProxyFactoryBean.setAddress(wsAddress);
 
@@ -44,12 +43,11 @@ public class TestGXDataSync {
 
 		Map inMap = new HashMap<String,String>();
 		inMap.put("loginid","899999");
-		inMap.put("password","000000");
+		inMap.put("password","111111");
 
  		String inXml = GxDataSyncUtil.mapToXmlTest(inMap);
-		String output = callService.gxDataSyncWSCall(GXDataSyncConstant.SERVICE_YHWS001,inXml);
+		String output = callService.gxDataSyncWSCall("111",inXml);
 		System.out.println(output);
-
 
 	}
 
