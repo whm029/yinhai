@@ -1,0 +1,194 @@
+/* 在职人员补收 */
+  PROCEDURE prc_SupplementCharge(
+             prm_aae123  IN xasi2.tmp_sc01.aae123%TYPE,
+             prm_aac040  IN xasi2.tmp_sc01.aac040%TYPE, --申报工资
+             prm_yac004  IN xasi2.tmp_sc01.yac004%TYPE, --申报基数
+             prm_aab001  IN xasi2.ab01.aab001%TYPE, --单位助记码
+             prm_aac001  IN xasi2.ac01.aac001%TYPE, --单位助记码
+             prm_aae011  IN irac01.aae011%TYPE, --经办人
+             prm_AppCode OUT VARCHAR2, --错误代码
+             prm_ErrorMsg  OUT VARCHAR2)
+
+ IS
+  --N_COUNT           NUMBER(6);
+  VAR_MIN_AAB050    NUMBER(6); --参保时间(作为开户时间)
+  VAR_MAX_AAE002    xasi2.ac08a1.aae002%TYPE; --个人4险核费的最大费款所属期
+  VAR_SPGZ          xasi2.ac02.aac040%TYPE; --社平工资
+  VAR_YAC004_EARLY  xasi2.ac02.yac004%TYPE; --往年基数
+  VAR_AAE140        xasi2.ac02.aae140%TYPE; --险种
+  VAR_AAE001_NOW    xasi2.ab05.aae001%TYPE; --系统时间当前年度
+  --VAR_AA02_AAE041   NUMBER(6);
+   
+  CURSOR CUR_AAE140 is
+    SELECT aae140
+      FROM (SELECT DISTINCT aae140
+              FROM xasi2.ac08
+             WHERE aac001 = prm_aac001
+               AND aab001 = prm_aab001
+               AND aae143 = '01'
+            UNION
+            SELECT DISTINCT aae140
+              FROM xasi2.ac08a1
+             WHERE aac001 = prm_aac001
+               AND aab001 = prm_aab001
+               AND aae143 = '01');
+               
+  CURSOR CUR_AAE002 is          
+    SELECT yae099, aae002
+      FROM xasi2.tmp_sc01
+     WHERE yae031 = '0'
+       and aae100 = '1'
+       and aae140 = VAR_AAE140
+       and aac001 = prm_aac001
+       and aab001 = prm_aab001;
+
+
+ BEGIN
+
+  prm_AppCode  := gn_def_OK;
+  prm_ErrorMsg := '';
+
+  --系统时间当前年度
+  SELECT EXTRACT(YEAR FROM SYSDATE) INTO VAR_AAE001_NOW FROM DUAL;
+
+  --单位险种参保日期 (以最早的日期为准)
+  SELECT MIN(to_number(to_char(aab050, 'yyyymm')))
+    INTO VAR_MIN_AAB050
+    FROM xasi2.ab02
+   WHERE aab001 = prm_aab001;
+
+  FOR REC1 IN CUR_AAE140 LOOP
+    
+    VAR_AAE140 := REC1.aae140;
+    
+    --个人4险核费的最大费款所属期
+    SELECT MAX(AAE002)
+      INTO VAR_MAX_AAE002
+      FROM (SELECT aae002
+              FROM xasi2.ac08
+             WHERE aac001 = prm_aac001
+               AND aab001 = prm_aab001
+               AND aae140 = VAR_AAE140
+               AND aae143 = '01'
+            UNION
+            SELECT aae002
+              FROM xasi2.ac08a1
+             WHERE aac001 = prm_aac001
+               AND aab001 = prm_aab001
+               AND aae140 = VAR_AAE140
+               AND aae143 = '01');
+
+   /*
+   INSERT INTO xasi2.tmp_sc01
+     (yae099, aae123, aab001, aac001, aae140, aae041, aae042)
+     (SELECT to_char(XASI2.SEQ_YAE099.NEXTVAL),
+             prm_aae123,
+             prm_aab001,
+             prm_aac001,
+             rec.aae140,
+             aae041,
+             aae042
+        FROM (
+              SELECT MIN(aae002_ex) aae041, MAX(aae002_ex) aae042 --, LX - RN
+                FROM (SELECT aae002_ex,
+                              (aae002_ex - 200000) LX,
+                              row_number() OVER(ORDER BY t.aae002_ex) RN
+                         FROM (SELECT TO_CHAR(ADD_MONTHS(TO_DATE(VAR_MIN_AAB050,
+                                                                 'YYYYMM'),
+                                                         ROWNUM - 1),
+                                              'YYYYMM') aae002_ex
+                                 FROM DUAL
+                               CONNECT BY ROWNUM <=
+                                          MONTHS_BETWEEN(TO_DATE(VAR_MAX_AAE002,
+                                                                 'yyyymm'),
+                                                         TO_DATE(VAR_MIN_AAB050,
+                                                                 'yyyymm')) + 1) t
+                        WHERE aae002_ex NOT IN
+                              (SELECT aae002
+                                 FROM xasi2.ac08
+                                WHERE aac001 = prm_aac001
+                                  AND aab001 = prm_aab001
+                                  AND aae140 = REC.aae140
+                                  AND aae143 = '01'
+                               UNION
+                               SELECT aae002
+                                 FROM xasi2.ac08a1
+                                WHERE aac001 = prm_aac001
+                                  AND aab001 = prm_aab001
+                                  AND aae140 = REC.aae140
+                                  AND aae143 = '01')) n
+               GROUP BY n.LX - RN
+              ));*/
+ 
+    -- 插入可补收的月度
+    INSERT INTO xasi2.tmp_sc01
+      (aae123, aab001, aac001, aae140,aac040,yac004,yae031,aae011,aae100, yae099, aae002)
+      (SELECT prm_aae123,
+              prm_aab001,
+              prm_aac001,
+              VAR_AAE140,
+              prm_aac040,
+              prm_yac004,
+              '0',
+              prm_aae011,
+              '1',
+              to_char(XASI2.SEQ_YAE099.NEXTVAL),
+              aae002_ex
+         FROM (SELECT TO_CHAR(ADD_MONTHS(TO_DATE(VAR_MIN_AAB050, 'YYYYMM'),
+                                         ROWNUM - 1),
+                              'YYYYMM') aae002_ex
+                 FROM DUAL
+               CONNECT BY ROWNUM <=
+                          MONTHS_BETWEEN(TO_DATE(VAR_MAX_AAE002, 'yyyymm'),
+                                         TO_DATE(VAR_MIN_AAB050, 'yyyymm')) + 1) t
+        WHERE aae002_ex NOT IN (SELECT aae002
+                                  FROM xasi2.ac08
+                                 WHERE aac001 = prm_aac001
+                                   AND aab001 = prm_aab001
+                                   AND aae140 = VAR_AAE140
+                                   AND aae143 = '01'
+                                UNION
+                                SELECT aae002
+                                  FROM xasi2.ac08a1
+                                 WHERE aac001 = prm_aac001
+                                   AND aab001 = prm_aab001
+                                   AND aae140 = VAR_AAE140
+                                   AND aae143 = '01'
+                                UNION
+                                SELECT aae002
+                                  FROM xasi2.tmp_sc01
+                                 WHERE aac001 = prm_aac001
+                                   AND aab001 = prm_aab001
+                                   AND aae140 = VAR_AAE140));
+                                   
+    -- 更新往年基数为当年社平
+    FOR REC2 IN CUR_AAE002 LOOP
+        IF SUBSTR(REC2.AAE002,1,4) < VAR_AAE001_NOW THEN 
+           VAR_SPGZ := xasi2.pkg_comm.fun_GetAvgSalary(VAR_AAE140,'16',to_number(SUBSTR(REC2.AAE002,1,4)||'01'),PKG_Constant.YAB003_JBFZX);
+           VAR_YAC004_EARLY := ROUND(VAR_SPGZ/12);
+           UPDATE xasi2.tmp_sc01
+              SET yac004 = VAR_YAC004_EARLY
+            WHERE yae099 = REC2.YAE099; 
+        ELSE
+          UPDATE xasi2.tmp_sc01
+              SET yac004 = prm_yac004
+            WHERE yae099 = REC2.YAE099; 
+        END IF;  
+    END LOOP;                                                                
+  END LOOP;
+  
+  
+
+
+ EXCEPTION
+  -- WHEN NO_DATA_FOUND THEN
+  -- WHEN TOO_MANY_ROWS THEN
+  -- WHEN DUP_VAL_ON_INDEX THEN
+ WHEN OTHERS THEN
+  /*关闭打开的游标*/
+   ROLLBACK;
+   prm_AppCode  :=  gn_def_ERR;
+   prm_ErrorMsg := '数据库错误:'|| PRE_ERRCODE || SQLERRM ||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE();
+   RETURN;
+
+ END prc_SupplementCharge;
