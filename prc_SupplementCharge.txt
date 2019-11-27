@@ -1,4 +1,5 @@
- PROCEDURE prc_SupplementCharge(
+/* 在职人员补收 */
+  PROCEDURE prc_SupplementCharge(
              prm_aae123  IN irsc01.aae123%TYPE,
              prm_aab050_01 IN NUMBER, --养老开户时间
              prm_aab001  IN xasi2.ab01.aab001%TYPE, --单位助记码
@@ -9,8 +10,8 @@
 
  IS
   N_COUNT           NUMBER(6);
-  VAR_MIN_AAB050    NUMBER(6); --参保时间(作为开户时间)
-  VAR_MAX_AAE002    xasi2.ac08a1.aae002%TYPE; --个人4险核费的最大费款所属期
+  VAR_MIN_AAE002    NUMBER(6); --补收开始时间
+  VAR_MAX_AAE002    NUMBER(6); --补收截止时间
   VAR_AAE140        xasi2.ac02.aae140%TYPE; --险种
   VAR_IAZ004        VARCHAR2(30);
   
@@ -52,12 +53,17 @@
 
   --系统时间当前年度
   --SELECT EXTRACT(YEAR FROM SYSDATE) INTO VAR_AAE001_NOW FROM DUAL;
-
-  --单位险种参保日期 (以最早的日期为准)
+  
+    --补收开始时间   
+  IF prm_aae123 <> '2' THEN 
   SELECT MIN(to_number(to_char(aab101, 'yyyymm')))
-    INTO VAR_MIN_AAB050  --FIX 这里要确认一下养老的参保时间怎么取 , 特别要注意单养老单位没有ab06
-    FROM xasi2.ab06
-   WHERE aab001 = prm_aab001;
+    INTO VAR_MIN_AAE002  
+    FROM xasi2.ab06 --FIX 这里要确认一下养老的参保时间怎么取 , 特别要注意单养老单位没有ab06
+   WHERE aab001 = prm_aab001;        
+  ELSE
+    VAR_MIN_AAE002 := prm_aab050_01; --补缴养老一次性的补收开始时间按养老接口的单位成立时间来
+  END IF;
+  
 
   FOR REC1 IN CUR_AAE140 LOOP
 
@@ -89,17 +95,23 @@
       END IF;
     END IF;
  
-    -- 生产缴费时间段
+    -- 补收的截止时间
     IF VAR_AAE140 = '01' THEN 
-      --个人养老的最大费款所属期
-      SELECT MAX(AAE002)
-        INTO VAR_MAX_AAE002
-        FROM wsjb.irac08a1
-       WHERE aac001 = prm_aac001
-         AND aab001 = prm_aab001
-         AND aae143 = '01';
+       IF prm_aae123 <> '2' THEN 
+         SELECT MAX(AAE002)
+          INTO VAR_MAX_AAE002
+          FROM wsjb.irac08a1
+         WHERE aac001 = prm_aac001
+           AND aab001 = prm_aab001
+           AND aae143 = '01';
+       ELSE
+         SELECT to_char(aae035, 'yyyymm')
+           INTO VAR_MAX_AAE002  --补缴养老一次性的补收截止时间按单位网厅开户时间来
+           FROM wsjb.irad01
+          WHERE aab001 = prm_aab001
+            AND iaa011 = 'A01';
+       END IF;
     ELSE
-      --个人4险核费的最大费款所属期
       SELECT MAX(AAE002)
         INTO VAR_MAX_AAE002
         FROM (SELECT aae002
@@ -118,10 +130,6 @@
     END IF;
 
     IF VAR_AAE140 = '01' THEN  
-      
-      IF prm_aae123 = '2' THEN --补缴养老一次性的开户时间按养老接口的单位成立时间来
-        VAR_MIN_AAB050 := prm_aab050_01;
-      END IF;
       
       -- 养老插入可补收的月度
       INSERT INTO wsjb.irsc02
@@ -145,13 +153,13 @@
                 '1',
                 substr(aae002_ex,1,4),
                 aae002_ex
-           FROM (SELECT TO_CHAR(ADD_MONTHS(TO_DATE(VAR_MIN_AAB050, 'YYYYMM'),
+           FROM (SELECT TO_CHAR(ADD_MONTHS(TO_DATE(VAR_MIN_AAE002, 'YYYYMM'),
                                            ROWNUM - 1),
                                 'YYYYMM') aae002_ex
                    FROM DUAL
                  CONNECT BY ROWNUM <=
                             MONTHS_BETWEEN(TO_DATE(VAR_MAX_AAE002, 'yyyymm'),
-                                           TO_DATE(VAR_MIN_AAB050, 'yyyymm')) + 1) t
+                                           TO_DATE(VAR_MIN_AAE002, 'yyyymm')) + 1) t
           WHERE aae002_ex NOT IN
                 (SELECT aae002
                    FROM wsjb.irac08a1
@@ -192,13 +200,13 @@
                 '1',
                 substr(aae002_ex,1,4),
                 aae002_ex
-           FROM (SELECT TO_CHAR(ADD_MONTHS(TO_DATE(VAR_MIN_AAB050, 'YYYYMM'),
+           FROM (SELECT TO_CHAR(ADD_MONTHS(TO_DATE(VAR_MIN_AAE002, 'YYYYMM'),
                                            ROWNUM - 1),
                                 'YYYYMM') aae002_ex
                    FROM DUAL
                  CONNECT BY ROWNUM <=
                             MONTHS_BETWEEN(TO_DATE(VAR_MAX_AAE002, 'yyyymm'),
-                                           TO_DATE(VAR_MIN_AAB050, 'yyyymm')) + 1) t
+                                           TO_DATE(VAR_MIN_AAE002, 'yyyymm')) + 1) t
           WHERE aae002_ex NOT IN
                 (SELECT aae002
                    FROM xasi2.ac08
@@ -268,4 +276,3 @@
    prm_ErrorMsg := '数据库错误:'|| PRE_ERRCODE || SQLERRM ||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE();
    RETURN;
  END prc_SupplementCharge;
- 
