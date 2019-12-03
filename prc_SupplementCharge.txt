@@ -1,4 +1,4 @@
-/* 在职人员补收 */
+ /* 在职人员补收 */
   PROCEDURE prc_SupplementCharge(
              prm_aae123  IN irsc01.aae123%TYPE,
              prm_aac007  IN NUMBER,--参工时间
@@ -11,10 +11,11 @@
 
  IS
   N_COUNT           NUMBER(6);
-  VAR_MIN_AAE002    NUMBER(6); --补收开始时间 参工时间(按险种早于单位参保时间的用单位参保时间)
-  VAR_MAX_AAE002    NUMBER(6); --补收截止时间 按险种最后一次的核费期号
+  NUM_MIN_AAE002    NUMBER(6); --补收开始时间 参工时间(按险种早于单位参保时间的用单位参保时间)
+  NUM_MAX_AAE002    NUMBER(6); --补收截止时间 按险种最后一次的核费期号
   VAR_AAE140        xasi2.ac02.aae140%TYPE; --险种
-  VAR_IAZ004        VARCHAR2(30);
+  VAR_IAZ003        VARCHAR2(30);
+  NUM_YAE097        NUMBER(6);
   
   CURSOR CUR_AAE140 is --单位参保险种
    select aab001, aac031,
@@ -30,7 +31,8 @@
    where iab001 = prm_aab001
      and aac031 ='1';
 
-  CURSOR CUR_YAE099 is  --给生成的时间段写入IAZ004
+  
+  CURSOR CUR_IAZ003 is  --给生成的时间段写入IAZ003
    select aac001 as aac001,
           aab001 as aab001,
           min(aae002) as aae041,
@@ -46,7 +48,8 @@
               and a.aae100 = '1'
             group by aae002, a.aac001, a.aab001)
     group by RN, aac001, aab001;
- 
+   
+   
  BEGIN
 
   prm_AppCode  := gn_def_OK;
@@ -54,7 +57,42 @@
 
   --系统时间当前年度
   --SELECT EXTRACT(YEAR FROM SYSDATE) INTO VAR_AAE001_NOW FROM DUAL;
+
+  --参保时间不能大于单位最大做账期号
+  SELECT COUNT(1) INTO N_COUNT FROM xasi2.ab02 WHERE aab001 = prm_aab001;
+  IF N_COUNT > 0 THEN
+    SELECT distinct yae097
+      INTO NUM_YAE097
+      FROM xasi2.ab02
+     WHERE aab001 = prm_aab001;
+    IF prm_aac007 > NUM_YAE097 THEN
+      prm_ErrorMsg := '参保时间不能大于单位最大做账期号!';
+      GOTO leb_over;
+    END IF;
+  ELSE
+    prm_ErrorMsg := '单位未参保职工险种!';
+    GOTO leb_over;
+  END IF;
   
+  -- 删除上次生成未提交的明细
+  SELECT count(1)
+    into N_COUNT
+    FROM wsjb.irsc02
+   WHERE aac001 = prm_aac001
+     AND aab001 = prm_aab001
+     AND aae100 = '1'
+     AND aae123 = prm_aae123
+     AND yae031 = '0';
+  IF N_COUNT > 0 THEN
+    DELETE FROM wsjb.irsc02
+     WHERE aac001 = prm_aac001
+       AND aab001 = prm_aab001
+       AND aae100 = '1'
+       AND aae123 = prm_aae123
+       AND yae031 = '0';
+  END IF;
+                    
+                      
   FOR REC1 IN CUR_AAE140 LOOP
     VAR_AAE140 := REC1.aae140;
     -- 效验参保关系和参保状态
@@ -83,58 +121,55 @@
       END IF;
     END IF;
  
- 
+    
     --补收开始时间  
     IF prm_aae123 <> '2' THEN 
        IF VAR_AAE140 = '01' THEN -- 养老单位参保时间(使用开户时间)
          SELECT to_number(to_char(aae035, 'yyyymm'))
-             INTO VAR_MIN_AAE002
+             INTO NUM_MIN_AAE002
              FROM wsjb.irad01
             WHERE iaa011 = 'A01'
               AND aab001 = prm_aab001;
        ELSE                      --四险单位参保时间
          SELECT to_number(to_char(aab050, 'yyyymm'))
-           INTO VAR_MIN_AAE002
+           INTO NUM_MIN_AAE002
            FROM xasi2.ab02
           where aab001 = prm_aab001
             AND aae140 = VAR_AAE140;
        END IF;
-       IF prm_aac007 < VAR_MIN_AAE002 THEN -- 开始时间要小于单位参保时间
-            VAR_MIN_AAE002 := prm_aac007;
+       IF prm_aac007 > NUM_MIN_AAE002 THEN -- 个人参保时间要晚于单位参保时间
+            NUM_MIN_AAE002 := prm_aac007;
        END IF;
     ELSE --养老一次性(开户前) 开始时间为单位成立时间(接口)
-       VAR_MIN_AAE002 := prm_aab050_01; 
+       NUM_MIN_AAE002 := prm_aab050_01; 
     END IF;
     
     -- 补收的截止时间
     IF prm_aae123 <> '2' THEN
        IF VAR_AAE140 = '01' THEN -- 养老个人做大核费期号
-         SELECT MAX(AAE002)
-           INTO VAR_MAX_AAE002
-           FROM wsjb.irac08a1
-          WHERE aac001 = prm_aac001
-            --AND aab001 = prm_aab001
-            AND aae143 = '01';
+         SELECT MAX(AAE042)
+           INTO NUM_MAX_AAE002
+           FROM wsjb.irab08
+          WHERE aab001 = prm_aab001
+            AND yae517 ='H01';
        ELSE                      -- 四险个人最大核费期号
-         SELECT MAX(AAE002)
-           INTO VAR_MAX_AAE002
-           FROM (SELECT aae002
-                   FROM xasi2.ac08
-                  WHERE aac001 = prm_aac001
-                    --AND aab001 = prm_aab001
+         SELECT MAX(AAE042)
+           INTO NUM_MAX_AAE002
+           FROM (SELECT aae042
+                   FROM xasi2.ab08
+                  WHERE aab001 = prm_aab001
                     AND aae140 = VAR_AAE140
-                    AND aae143 = '01'
+                    AND yae517 ='H01'
                   UNION
-                 SELECT aae002
-                   FROM xasi2.ac08a1
-                  WHERE aac001 = prm_aac001
-                    --AND aab001 = prm_aab001
+                 SELECT aae042
+                   FROM xasi2.ab08a8
+                  WHERE aab001 = prm_aab001
                     AND aae140 = VAR_AAE140
-                    AND aae143 = '01');         
+                    AND yae517 ='H01');         
        END IF;  
     ELSE --养老一次性(开户前) 截止时间为单位网厅立户时间
        SELECT to_number(to_char(aae035, 'yyyymm'))
-        INTO VAR_MIN_AAE002
+        INTO NUM_MIN_AAE002
         FROM wsjb.irad01
        WHERE iaa011 = 'A01'
          AND aab001 = prm_aab001;
@@ -145,7 +180,7 @@
     -- 写补收时间期段
     IF VAR_AAE140 = '01' THEN -- 养老插入可补收的月度  
       INSERT INTO wsjb.irsc02
-        (iaz003,
+        (--iaz003,
          aae123,
          aab001,
          aac001,
@@ -155,7 +190,7 @@
          aae100,
          aae001,
          aae002)
-        (SELECT to_char(SEQ_IAZ003.NEXTVAL),
+        (SELECT --to_char(SEQ_IAZ003.NEXTVAL),
                 prm_aae123,
                 prm_aab001,
                 prm_aac001,
@@ -165,13 +200,13 @@
                 '1',
                 substr(aae002_ex,1,4),
                 aae002_ex
-           FROM (SELECT TO_CHAR(ADD_MONTHS(TO_DATE(VAR_MIN_AAE002, 'YYYYMM'),
+           FROM (SELECT TO_CHAR(ADD_MONTHS(TO_DATE(NUM_MIN_AAE002, 'YYYYMM'),
                                            ROWNUM - 1),
                                 'YYYYMM') aae002_ex
                    FROM DUAL
                  CONNECT BY ROWNUM <=
-                            MONTHS_BETWEEN(TO_DATE(VAR_MAX_AAE002, 'yyyymm'),
-                                           TO_DATE(VAR_MIN_AAE002, 'yyyymm')) + 1) t
+                            MONTHS_BETWEEN(TO_DATE(NUM_MAX_AAE002, 'yyyymm'),
+                                           TO_DATE(NUM_MIN_AAE002, 'yyyymm')) + 1) t
           WHERE aae002_ex NOT IN
                 (SELECT aae002
                    FROM wsjb.irac08a1
@@ -184,12 +219,12 @@
                    FROM wsjb.irsc02
                   WHERE aac001 = prm_aac001
                     AND aab001 = prm_aab001
-                    AND aae100 = 1
+                    AND aae100 = '1'
                     AND aae123 = prm_aae123
                     AND aae140 = VAR_AAE140));
     ELSIF prm_aae123 <> '2' THEN   -- 四险插入可补收的月度 --养老一次性(开户前)不用插四险
       INSERT INTO wsjb.irsc02
-        (iaz003,
+        (--iaz003,
          aae123,
          aab001,
          aac001,
@@ -199,7 +234,7 @@
          aae100,
          aae001,
          aae002)
-        (SELECT to_char(SEQ_IAZ003.NEXTVAL),
+        (SELECT --to_char(SEQ_IAZ003.NEXTVAL),
                 prm_aae123,
                 prm_aab001,
                 prm_aac001,
@@ -209,13 +244,13 @@
                 '1',
                 substr(aae002_ex,1,4),
                 aae002_ex
-           FROM (SELECT TO_CHAR(ADD_MONTHS(TO_DATE(VAR_MIN_AAE002, 'YYYYMM'),
+           FROM (SELECT TO_CHAR(ADD_MONTHS(TO_DATE(NUM_MIN_AAE002, 'YYYYMM'),
                                            ROWNUM - 1),
                                 'YYYYMM') aae002_ex
                    FROM DUAL
                  CONNECT BY ROWNUM <=
-                            MONTHS_BETWEEN(TO_DATE(VAR_MAX_AAE002, 'yyyymm'),
-                                           TO_DATE(VAR_MIN_AAE002, 'yyyymm')) + 1) t
+                            MONTHS_BETWEEN(TO_DATE(NUM_MAX_AAE002, 'yyyymm'),
+                                           TO_DATE(NUM_MIN_AAE002, 'yyyymm')) + 1) t
           WHERE aae002_ex NOT IN
                 (SELECT aae002
                    FROM xasi2.ac08
@@ -235,7 +270,7 @@
                    FROM wsjb.irsc02
                   WHERE aac001 = prm_aac001
                     AND aab001 = prm_aab001
-                    AND aae100 = 1
+                    AND aae100 = '1'
                     AND aae123 = prm_aae123
                     AND aae140 = VAR_AAE140));
     END IF;                                                    
@@ -243,8 +278,9 @@
   
   N_COUNT :=0;
   
-  --给没有iaz004的时间段写一个iaz004 一个连续的时间段使用同一个iaz004
-  FOR REC2 IN CUR_YAE099 LOOP
+  --给没有iaz003的时间段写一个iaz003 一个连续的时间段使用同一个iaz003
+  
+  FOR REC2 IN CUR_IAZ003 LOOP
     SELECT COUNT(1)
       INTO N_COUNT
       FROM wsjb.irsc02
@@ -256,10 +292,10 @@
        AND aae100 = '1'
        AND aae123 = prm_aae123
        AND iaz004 IS NOT NULL;
-    IF N_COUNT = 0 THEN -- 一个时间段内都没有iaz004 取一个新的iaz004 更新进去
-      SELECT TO_CHAR(SEQ_IAZ004.NEXTVAL) INTO VAR_IAZ004 FROM DUAL;
+    IF N_COUNT = 0 THEN -- 一个时间段内都没有iaz003 取一个新的iaz003 更新进去
+      SELECT TO_CHAR(SEQ_IAZ003.NEXTVAL) INTO VAR_IAZ003 FROM DUAL;
       UPDATE WSJB.IRSC02
-         SET IAZ004 = VAR_IAZ004
+         SET IAZ003 = VAR_IAZ003
        WHERE aac001 = REC2.AAC001
          AND aab001 = REC2.AAB001
          AND aae002 >= REC2.AAE041
@@ -269,7 +305,7 @@
          AND aae123 = prm_aae123;
     END IF;
   END LOOP;
-  
+
   
  <<leb_over>>
  N_COUNT :=0;
