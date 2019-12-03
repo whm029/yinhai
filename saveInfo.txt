@@ -1,0 +1,104 @@
+@SuppressWarnings("unchecked")
+	public Map saveInfo(ParamDTO dto){
+		Map map = new HashMap();
+		String str_aac001 = dto.getAsString("aac001");
+		String str_aab001 = dto.getAsString("aab001");
+		String str_aac008 = dto.getAsString("aac008");
+
+		String str_aab033 = "";
+		 String  yae010=dto.getAsString("yae010");
+		if("1".equals(yae010)){
+			str_aab033=Yhsi2Constants.AAB033_DWZJ;
+			//str_aab033=Yhsi2Constants.AAB033_DSZS;
+		}else{
+			str_aab033=Yhsi2Constants.AAB033_DSZS;
+		}
+		
+		//String str_yae517 = inputDTO.getParamAsStr("yae517");
+		String str_yae518 = getStringSequence("YAE518");
+
+		Timestamp t_aae036=getSysTimestamp();
+		List list_tmp = (List)dto.get("tmp_list");//获取界面勾选的准备补收的信息
+		if(ValidateUtil.isEmpty(list_tmp)){
+			throw new AppException("没有获取到录入的补收期间信息，请检查！");
+		}
+
+		//如果不为空
+
+		//删除临时表
+		//baseCommonDao.delete("deleteTmp_grbs01");
+		//写临时表
+		for(int i = 0;i < list_tmp.size();i++){
+			Map baseDTO = (Map)list_tmp.get(i);//baseDTO里面包含险种、开始截止期号、申报工资类型、申报工资、缴费人员类别、医疗人员类别等
+			baseDTO.put("aac001",str_aac001);
+			baseDTO.put("aab001",str_aab001);
+			baseDTO.put("aae100",Yhsi2Constants.AAE100_YX);
+			baseDTO.put("yae517",Yhsi2Constants.YAE517_CBDWGRBSHD);
+			dao.insert("collection.insertTmp_grbs01",baseDTO);
+		}
+
+		//获得单位最大做帐期号
+		map.put("aab051", Yhsi2Constants.AAB051_CBJF);
+		map.put("aab001", str_aab001);
+		List ab02List = dao.queryForList("baseComm.getAb02Domains", map);
+		String aab033 = "";
+		Integer yae097 = new Integer(0);
+		for (int i = 0; i < ab02List.size(); i++) {
+			Map ab02Domain = (Map)ab02List.get(i);
+			if(ab02Domain.get("aae140").equals(Yhsi2Constants.AAE140_JBYLBX)){
+				yae097 = Integer.valueOf(ab02Domain.get("yae097").toString());
+				aab033 = ab02Domain.get("aab033").toString();
+				break;
+			}
+		}
+		if(yae097.intValue() == 0){
+			for (int i = 0; i < ab02List.size(); i++) {
+				Map ab02Domain = (Map)ab02List.get(i);
+				if(ab02Domain.get("aae140").equals(Yhsi2Constants.AAE140_SHY)){
+					yae097 = Integer.valueOf(ab02Domain.get("yae097").toString());
+					aab033 = ab02Domain.get("aab033").toString();
+					break;
+				}
+			}
+		}
+		if(yae097.intValue() == 0){
+			for (int i = 0; i < ab02List.size(); i++) {
+				Map ab02Domain = (Map)ab02List.get(i);
+				if(ab02Domain.get("aae140").equals(Yhsi2Constants.AAE140_GS)){
+					yae097 = Integer.valueOf(ab02Domain.get("yae097").toString());
+					aab033 = ab02Domain.get("aab033").toString();
+					break;
+				}
+			}
+		}
+
+		//d做帐期号为单位最大做帐期号下一期
+		Integer aae003 = YhsiUtil.getNextMonth(yae097);
+		PrcDTO prcDTO = new PrcDTO();
+		prcDTO.put("prm_yae518",str_yae518);
+		prcDTO.put("prm_yab222",null);
+		prcDTO.put("prm_aab001",str_aab001);
+		prcDTO.put("prm_aac001",str_aac001);
+		prcDTO.put("prm_yae517",Yhsi2Constants.YAE517_CBDWGRBSHD);
+		prcDTO.put("prm_aae143",Yhsi2Constants.AAE143_BS);
+		prcDTO.put("prm_aac008",str_aac008);
+		prcDTO.put("prm_collectflag","0");
+		prcDTO.put("prm_aae003",aae003);
+		
+		prcDTO.put("prm_aab033",str_aab033);  
+		prcDTO.put("prm_Accrualflag","0");
+		prcDTO.put("prm_Latefeeflag","1");					//滞纳金标志
+		prcDTO.put("prm_yab139",dto.getUserInfo().getOrgId());
+		prcDTO.put("prm_aae011",dto.getUserInfo().getUserid());
+		prcDTO.put("prm_aae036", t_aae036);
+		prcDTO.put("prm_yab003",dto.getUserInfo().getOrgId());
+
+		dao.callPrc("collection.prc_p_Interrupt01",prcDTO);
+
+		//查询ab08
+		map.put("yae518", str_yae518);
+		map.put("aac001", str_aac001);
+		List ab08List=dao.queryForList("collection.getAb08Domains",map);
+		map.put("ab08List", ab08List);
+		return map;
+	}

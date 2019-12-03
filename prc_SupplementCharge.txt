@@ -1,5 +1,4 @@
- /* 在职人员补收 */
-  PROCEDURE prc_SupplementCharge(
+PROCEDURE prc_SupplementCharge(
              prm_aae123  IN irsc01.aae123%TYPE,
              prm_aac007  IN NUMBER,--参工时间
              prm_aab050_01 IN NUMBER, --养老参保时间/单补养老时用的养老开户时间(接口获取)
@@ -66,7 +65,7 @@
       FROM xasi2.ab02
      WHERE aab001 = prm_aab001;
     IF prm_aac007 > NUM_YAE097 THEN
-      prm_ErrorMsg := '参保时间不能大于单位最大做账期号!';
+      prm_ErrorMsg := '参保时间不能大于单位最大做账期!';
       GOTO leb_over;
     END IF;
   ELSE
