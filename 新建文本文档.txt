@@ -1,0 +1,28 @@
+select aac001,aac001,aac003,aac009,aae041,aae042,
+case when aae140_01 > 0 then '养老■' else '养老□' end ||
+case when aae140_02 > 0 then '失业■' else '失业□' end ||
+case when aae140_03 > 0 then '医疗■' else '医疗□' end ||
+case when aae140_04 > 0 then '工伤■' else '工伤□' end ||
+case when aae140_05 > 0 then '生育■' else '生育□' end || 
+case when aae140_07 > 0 then '大额■' else '大额□' end 
+ as ddd from (
+        select a.aab001,
+               a.aac001,
+               (select aac003 from xasi2.ac01 where aac001 = a.aac001) aac003,
+               (select aac009 from xasi2.ac01 where aac001 = a.aac001) aac009,
+               b.aac007,
+               b.aae041,
+               b.aae042,
+               MAX(DECODE(a.aae140, '01', yac004,'0')) as aae140_01,
+               MAX(DECODE(a.aae140, '02', yac004,'0')) as aae140_02,
+               MAX(DECODE(a.aae140, '03', yac004,'0')) as aae140_03,
+               MAX(DECODE(a.aae140, '04', yac004,'0')) as aae140_04,
+               MAX(DECODE(a.aae140, '05', yac004,'0')) as aae140_05,
+               MAX(DECODE(a.aae140, '07', yac004,'0')) as aae140_07,
+               b.iac001
+          from wsjb.irsc02 a, wsjb.irsc01 b
+         where a.iaz004 = b.iaz004
+           and b.iac001 = '100000325127121'
+           --and a.yae031 in ($yae031$)
+         group by a.aac001, a.aab001, b.aac007,b.aae041, b.aae042 , b.iac001
+         order by a.aac001)
